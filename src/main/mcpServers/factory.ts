@@ -11,6 +11,7 @@ import FileSystemServer from './filesystem'
 import MemoryServer from './memory'
 import PythonServer from './python'
 import ThinkingServer from './sequentialthinking'
+import WorkflowServer from './workflow'
 
 const logger = loggerService.withContext('MCPFactory')
 
@@ -47,6 +48,9 @@ export function createInMemoryMCPServer(
     case BuiltinMCPServerNames.didiMCP: {
       const apiKey = envs.DIDI_API_KEY
       return new DiDiMcpServer(apiKey).server
+    }
+    case BuiltinMCPServerNames.workflow: {
+      return new WorkflowServer().server
     }
     default:
       throw new Error(`Unknown in-memory MCP server: ${name}`)

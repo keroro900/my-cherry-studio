@@ -1209,6 +1209,8 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
+    "gemini-image": "[to be translated]:Image Generation (Gemini)",
+    "gemini-image-edit": "[to be translated]:Image Edit (Gemini)",
     "image-generation": "Generación de Imágenes (OpenAI)",
     "jina-rerank": "Reordenamiento Jina",
     "openai": "OpenAI",
@@ -2091,6 +2093,8 @@
       "embedding": "Incrustación",
       "free": "Gratis",
       "function_calling": "Llamada a función",
+      "image_edit": "[to be translated]:Image Edit",
+      "image_generation": "[to be translated]:Image Generation",
       "reasoning": "Razonamiento",
       "rerank": "Reclasificar",
       "select": "Tipos de modelo",
@@ -3860,7 +3864,8 @@
         "memory": "Implementación básica de memoria persistente basada en un grafo de conocimiento local. Esto permite que el modelo recuerde información relevante del usuario entre diferentes conversaciones. Es necesario configurar la variable de entorno MEMORY_FILE_PATH.",
         "no": "sin descripción",
         "python": "Ejecuta código Python en un entorno sandbox seguro. Usa Pyodide para ejecutar Python, compatible con la mayoría de las bibliotecas estándar y paquetes de cálculo científico.",
-        "sequentialthinking": "Una implementación de servidor MCP que proporciona herramientas para la resolución dinámica y reflexiva de problemas mediante un proceso de pensamiento estructurado"
+        "sequentialthinking": "Una implementación de servidor MCP que proporciona herramientas para la resolución dinámica y reflexiva de problemas mediante un proceso de pensamiento estructurado",
+        "workflow": "[to be translated]:AI Workflow Service - Provides workflow management, execution and AI service integration. Supports Qwen, Gemini, Kling, RunningHub and other AI services"
       },
       "command": "Comando",
       "config_description": "Configurar modelo de contexto del protocolo del servidor",
@@ -4588,9 +4593,52 @@
       "zoom_reset": "Restablecer zoom"
     },
     "theme": {
+      "category": {
+        "anime": "[to be translated]:Anime",
+        "custom": "[to be translated]:Custom",
+        "default": "[to be translated]:Default",
+        "nature": "[to be translated]:Nature",
+        "professional": "[to be translated]:Professional"
+      },
       "color_primary": "Color del tema",
       "dark": "Oscuro",
+      "effect": {
+        "glass": "[to be translated]:Glass Effect",
+        "gradient": "[to be translated]:Gradient Accents",
+        "rounded": "[to be translated]:Large Radius"
+      },
       "light": "Claro",
+      "preset": {
+        "default": {
+          "desc": "[to be translated]:Simple and elegant green theme",
+          "name": "[to be translated]:Cherry Default"
+        },
+        "lavender": {
+          "desc": "[to be translated]:Romantic purple with glass effect",
+          "name": "[to be translated]:Lavender Purple"
+        },
+        "mint": {
+          "desc": "[to be translated]:Fresh and natural green",
+          "name": "[to be translated]:Mint Green"
+        },
+        "neon": {
+          "desc": "[to be translated]:Dark background with neon glow",
+          "name": "[to be translated]:Neon Cyber"
+        },
+        "sakura": {
+          "desc": "[to be translated]:Soft pink, anime style",
+          "name": "[to be translated]:Sakura Pink"
+        },
+        "sky": {
+          "desc": "[to be translated]:Fresh and bright blue",
+          "name": "[to be translated]:Sky Blue"
+        }
+      },
+      "presets": {
+        "desc": "[to be translated]:Select a preset theme, or hover to preview",
+        "none": "[to be translated]:Use Custom Colors",
+        "title": "[to be translated]:Theme Presets"
+      },
       "system": "Sistema",
       "title": "Tema",
       "window": {
@@ -4784,6 +4832,44 @@
       "show": "Mostrar bandera del sistema",
       "title": "Bandera"
     },
+    "wallpaper": {
+      "blur": "[to be translated]:Blur",
+      "brightness": "[to be translated]:Brightness",
+      "builtin": {
+        "gradient": "[to be translated]:Gradient Wallpapers"
+      },
+      "displayMode": "[to be translated]:Display Mode",
+      "enable": "[to be translated]:Enable Wallpaper",
+      "excludeWorkflow": {
+        "label": "[to be translated]:Exclude Wallpaper in Workflow",
+        "tip": "[to be translated]:Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "local": {
+        "file": "[to be translated]:Local File",
+        "none": "[to be translated]:Not Selected",
+        "select": "[to be translated]:Select"
+      },
+      "mode": {
+        "center": "[to be translated]:Center",
+        "contain": "[to be translated]:Contain",
+        "cover": "[to be translated]:Cover",
+        "tile": "[to be translated]:Tile"
+      },
+      "opacity": "[to be translated]:Opacity",
+      "reset": "[to be translated]:Reset Parameters",
+      "resetToDefault": "[to be translated]:Reset to Default",
+      "source": {
+        "builtin": "[to be translated]:Built-in",
+        "label": "[to be translated]:Wallpaper Source",
+        "local": "[to be translated]:Local",
+        "none": "[to be translated]:None",
+        "url": "[to be translated]:URL"
+      },
+      "title": "[to be translated]:Wallpaper",
+      "url": {
+        "input": "[to be translated]:Image URL"
+      }
+    },
     "zoom": {
       "reset": "Restablecer",
       "title": "Escala"
@@ -4802,7 +4888,8 @@
     "paintings": "Pinturas",
     "settings": "Configuración",
     "store": "Biblioteca de asistentes",
-    "translate": "Traducir"
+    "translate": "Traducir",
+    "workflow": "[to be translated]:Workflow"
   },
   "trace": {
     "backList": "Volver a la lista",

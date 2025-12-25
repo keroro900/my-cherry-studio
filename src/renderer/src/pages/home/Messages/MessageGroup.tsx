@@ -13,7 +13,7 @@ import { classNames } from '@renderer/utils'
 import { scrollIntoView } from '@renderer/utils/dom'
 import { Popover } from 'antd'
 import type { ComponentProps } from 'react'
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import { useChatMaxWidth } from '../Chat'
@@ -115,22 +115,38 @@ const MessageGroup = ({ messages, topic, registerMessageElement }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, selectedIndex, isGrouped, messageLength])
 
-  // 添加对LOCATE_MESSAGE事件的监听
+  // 使用 ref 存储最新的 messages 和 setSelectedMessage，避免事件监听器重复注册
+  const messagesRef = useRef(messages)
+  const setSelectedMessageRef = useRef(setSelectedMessage)
+
+  useEffect(() => {
+    messagesRef.current = messages
+    setSelectedMessageRef.current = setSelectedMessage
+  }, [messages, setSelectedMessage])
+
+  // 添加对LOCATE_MESSAGE事件的监听 - 优化版本：使用 ref 避免重复订阅
   useEffect(() => {
     // 为每个消息注册一个定位事件监听器
-    const eventHandlers: { [key: string]: () => void } = {}
+    // 使用数组存储取消订阅函数
+    const unsubscribers: Array<() => void> = []
 
-    messages.forEach((message) => {
-      const eventName = EVENT_NAMES.LOCATE_MESSAGE + ':' + message.id
+    const registerHandler = (messageId: string) => {
+      const eventName = EVENT_NAMES.LOCATE_MESSAGE + ':' + messageId
+
       const handler = () => {
+        const currentMessages = messagesRef.current
+        const currentSetSelectedMessage = setSelectedMessageRef.current
+        const message = currentMessages.find((m) => m.id === messageId)
+        if (!message) return
+
         // 检查消息是否处于可见状态
-        const element = document.getElementById(`message-${message.id}`)
+        const element = document.getElementById(`message-${messageId}`)
         if (element) {
           const display = window.getComputedStyle(element).display
 
           if (display === 'none') {
             // 如果消息隐藏，先切换标签
-            setSelectedMessage(message)
+            currentSetSelectedMessage(message)
           } else {
             // 直接滚动
             scrollIntoView(element, { behavior: 'smooth', block: 'start', container: 'nearest' })
@@ -138,18 +154,21 @@ const MessageGroup = ({ messages, topic, registerMessageElement }: Props) => {
         }
       }
 
-      eventHandlers[eventName] = handler
-      EventEmitter.on(eventName, handler)
-    })
-
-    // 清理函数
-    return () => {
-      // 移除所有事件监听器
-      Object.entries(eventHandlers).forEach(([eventName, handler]) => {
-        EventEmitter.off(eventName, handler)
-      })
+      // Emittery.on 返回取消订阅函数
+      const unsubscribe = EventEmitter.on(eventName, handler)
+      unsubscribers.push(unsubscribe)
     }
-  }, [messages, setSelectedMessage])
+
+    // 注册当前所有消息的监听器
+    messages.forEach((message) => registerHandler(message.id))
+
+    // 清理函数 - 调用所有取消订阅函数
+    return () => {
+      unsubscribers.forEach((unsubscribe) => unsubscribe())
+    }
+    // 只依赖 messages 的 id 列表变化，而不是整个 messages 数组
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.map((m) => m.id).join(',')])
 
   useEffect(() => {
     messages.forEach((message) => {

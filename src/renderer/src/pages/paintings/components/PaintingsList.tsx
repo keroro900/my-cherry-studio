@@ -1,11 +1,17 @@
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+/**
+ * 绘画历史列表组件
+ *
+ * P2 优化：添加收起/展开功能，支持长时间保存历史记录
+ */
+
+import { DeleteOutlined, LeftOutlined, PlusOutlined, RightOutlined } from '@ant-design/icons'
 import { DraggableList } from '@renderer/components/DraggableList'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { usePaintings } from '@renderer/hooks/usePaintings'
 import FileManager from '@renderer/services/FileManager'
 import type { Painting, PaintingsState } from '@renderer/types'
 import { classNames } from '@renderer/utils'
-import { Popconfirm } from 'antd'
+import { Popconfirm, Tooltip } from 'antd'
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,10 +36,41 @@ const PaintingsList: FC<PaintingsListProps> = ({
 }) => {
   const { t } = useTranslation()
   const [dragging, setDragging] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const { updatePaintings } = usePaintings()
+
+  // 收起状态时显示简化的按钮栏
+  if (collapsed) {
+    return (
+      <CollapsedContainer>
+        <Tooltip title={t('paintings.expand_history', { defaultValue: '展开历史记录' })} placement="left">
+          <CollapseButton onClick={() => setCollapsed(false)}>
+            <LeftOutlined />
+          </CollapseButton>
+        </Tooltip>
+        <Tooltip title={t('paintings.button.new.image')} placement="left">
+          <CollapsedNewButton onClick={onNewPainting}>
+            <PlusOutlined />
+          </CollapsedNewButton>
+        </Tooltip>
+        {paintings.length > 0 && (
+          <CollapsedCount>{paintings.length}</CollapsedCount>
+        )}
+      </CollapsedContainer>
+    )
+  }
 
   return (
     <Container style={{ paddingBottom: dragging ? 80 : 10 }}>
+      {/* P2: 收起按钮 */}
+      <CollapseHeader>
+        <Tooltip title={t('paintings.collapse_history', { defaultValue: '收起历史记录' })} placement="left">
+          <CollapseButton onClick={() => setCollapsed(true)}>
+            <RightOutlined />
+          </CollapseButton>
+        </Tooltip>
+      </CollapseHeader>
+
       {!dragging && (
         <NewPaintingButton onClick={onNewPainting}>
           <PlusOutlined />
@@ -79,6 +116,73 @@ const Container = styled(Scrollbar)`
   border-left: 0.5px solid var(--color-border);
   height: calc(100vh - var(--navbar-height));
   overflow-x: hidden;
+`
+
+// P2: 收起状态容器
+const CollapsedContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  background-color: var(--color-background);
+  border-left: 0.5px solid var(--color-border);
+  height: calc(100vh - var(--navbar-height));
+`
+
+// P2: 收起按钮头部
+const CollapseHeader = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 4px;
+`
+
+// P2: 收起/展开按钮
+const CollapseButton = styled.div`
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--color-text-2);
+  background-color: var(--color-background-soft);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--color-background-mute);
+    color: var(--color-primary);
+  }
+`
+
+// P2: 收起状态下的新建按钮
+const CollapsedNewButton = styled.div`
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--color-text-2);
+  background-color: var(--color-background-soft);
+  border: 1px dashed var(--color-border);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--color-background-mute);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+`
+
+// P2: 收起状态下的数量显示
+const CollapsedCount = styled.div`
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 4px;
 `
 
 const CanvasWrapper = styled.div`

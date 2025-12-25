@@ -79,6 +79,24 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
   const spaceClickTimer = useRef<NodeJS.Timeout>(null)
   const newApiProvider = newApiProviders.find((p) => p.id === routeName) || newApiProviders[0]
 
+  // P0: 空 provider 防护 - 当没有配置任何 NewAPI provider 时显示引导界面
+  if (!newApiProvider) {
+    return (
+      <Container>
+        <Navbar>
+          <NavbarCenter style={{ borderRight: 'none' }}>{t('paintings.title')}</NavbarCenter>
+        </Navbar>
+        <EmptyProviderContainer>
+          <Empty description={t('paintings.no_provider_configured', { defaultValue: '未配置图像生成服务商' })}>
+            <Button type="primary" onClick={() => navigate('/settings/provider')}>
+              {t('paintings.configure_provider', { defaultValue: '配置服务商' })}
+            </Button>
+          </Empty>
+        </EmptyProviderContainer>
+      </Container>
+    )
+  }
+
   const filteredPaintings = useMemo(
     () => (newApiPaintings[mode] || []).filter((p) => p.providerId === newApiProvider.id),
     [newApiPaintings, mode, newApiProvider.id]
@@ -111,12 +129,19 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
 
   const modelOptions = useMemo(() => {
     const customModels = newApiProvider.models
-      .filter((m) => m.endpoint_type && m.endpoint_type === 'image-generation')
+      .filter(
+        (m) =>
+          m.endpoint_type &&
+          (m.endpoint_type === 'image-generation' ||
+            m.endpoint_type === 'gemini-image' ||
+            m.endpoint_type === 'gemini-image-edit')
+      )
       .map((m) => ({
         label: m.name,
         value: m.id,
         custom: !SUPPORTED_MODELS.includes(m.id),
-        group: m.group
+        group: m.group,
+        endpointType: m.endpoint_type // 保留端点类型以区分 API 调用方式
       }))
     return [...customModels]
   }, [newApiProvider.models])
@@ -218,6 +243,12 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
     return downloadedFiles.filter((file): file is FileMetadata => file !== null)
   }
 
+  // 获取当前选中模型的端点类型
+  const currentModelEndpointType = useMemo(() => {
+    const selectedOption = modelOptions.find((m) => m.value === painting.model)
+    return selectedOption?.endpointType || 'image-generation'
+  }, [modelOptions, painting.model])
+
   const onGenerate = async () => {
     await checkProviderEnabled(newApiProvider, t)
 
@@ -253,91 +284,14 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
     setIsLoading(true)
     dispatch(setGenerating(true))
 
-    let body: string | FormData = ''
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${AI.getApiKey()}`
-    }
-    const url = newApiProvider.apiHost + `/v1/images/generations`
-    const editUrl = newApiProvider.apiHost + `/v1/images/edits`
-
     try {
-      if (mode === 'openai_image_generate') {
-        const requestData = {
-          prompt,
-          model: painting.model,
-          size: painting.size === 'auto' ? undefined : painting.size,
-          background: painting.background === 'auto' ? undefined : painting.background,
-          n: painting.n,
-          quality: painting.quality === 'auto' ? undefined : painting.quality,
-          moderation: painting.moderation === 'auto' ? undefined : painting.moderation
-        }
-
-        body = JSON.stringify(requestData)
-        headers['Content-Type'] = 'application/json'
-      } else if (mode === 'openai_image_edit') {
-        // -------- Edit Mode --------
-        if (editImages.length === 0) {
-          window.toast.warning(t('paintings.image_file_required'))
-          return
-        }
-
-        const formData = new FormData()
-        formData.append('prompt', prompt)
-        formData.append('model', painting.model)
-        if (painting.background && painting.background !== 'auto') {
-          formData.append('background', painting.background)
-        }
-
-        if (painting.size && painting.size !== 'auto') {
-          formData.append('size', painting.size)
-        }
-
-        if (painting.quality && painting.quality !== 'auto') {
-          formData.append('quality', painting.quality)
-        }
-
-        if (painting.moderation && painting.moderation !== 'auto') {
-          formData.append('moderation', painting.moderation)
-        }
-
-        // append images
-        editImages.forEach((file) => {
-          formData.append('image', file)
-        })
-
-        // TODO: mask support later
-
-        body = formData
-
-        // For edit mode we do not set content-type; browser will set multipart boundary
-      }
-
-      const requestUrl = mode === 'openai_image_edit' ? editUrl : url
-      const response = await fetch(requestUrl, { method: 'POST', headers, body })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error?.message || '生成图像失败')
-      }
-
-      const data = await response.json()
-      const urls = data.data.filter((item) => item.url).map((item) => item.url)
-      const base64s = data.data.filter((item) => item.b64_json).map((item) => item.b64_json)
-
-      if (urls.length > 0) {
-        const validFiles = await downloadImages(urls)
-        await FileManager.addFiles(validFiles)
-        updatePaintingState({ files: validFiles, urls })
-      }
-
-      if (base64s?.length > 0) {
-        const validFiles = await Promise.all(
-          base64s.map(async (base64) => {
-            return await window.api.file.saveBase64Image(base64)
-          })
-        )
-        await FileManager.addFiles(validFiles)
-        updatePaintingState({ files: validFiles, urls: validFiles.map((file) => file.name) })
+      // 检查是否是 Gemini 图像生成端点
+      if (currentModelEndpointType === 'gemini-image') {
+        // -------- Gemini generateContent API --------
+        await generateWithGeminiApi(prompt, controller.signal)
+      } else {
+        // -------- OpenAI 兼容 API --------
+        await generateWithOpenAiApi(prompt, AI.getApiKey(), controller.signal)
       }
     } catch (error: unknown) {
       handleError(error)
@@ -348,7 +302,349 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
     }
   }
 
+  // Gemini generateContent API 调用
+  const generateWithGeminiApi = async (prompt: string, signal?: AbortSignal) => {
+    const apiKey = new AiProvider(newApiProvider).getApiKey()
+
+    // 构建 Gemini API URL
+    let baseUrl = newApiProvider.apiHost || 'https://generativelanguage.googleapis.com'
+    baseUrl = baseUrl.replace(/\/$/, '')
+    if (!baseUrl.includes('/v1beta')) {
+      baseUrl = `${baseUrl}/v1beta`
+    }
+    const url = `${baseUrl}/models/${painting.model}:generateContent?key=${apiKey}`
+
+    // 构建 parts 数组
+    const parts: any[] = [{ text: prompt }]
+
+    // 如果是编辑模式，添加输入图片
+    if (mode === 'openai_image_edit' && editImages.length > 0) {
+      for (const file of editImages) {
+        const base64 = await fileToBase64(file)
+        if (base64) {
+          parts.push({
+            inline_data: {
+              mime_type: file.type || 'image/jpeg',
+              data: base64
+            }
+          })
+        }
+      }
+    }
+
+    // 构建请求体
+    const payload = {
+      contents: [{ parts }],
+      generationConfig: {
+        temperature: 1.0,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+        responseModalities: ['IMAGE'],
+        imageConfig: {
+          aspectRatio: painting.size === 'auto' ? '1:1' : convertSizeToAspectRatio(painting.size),
+          imageSize: '2K'
+        }
+      },
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+      ]
+    }
+
+    logger.info('Calling Gemini generateContent API', { url: url.replace(apiKey, '***'), model: painting.model })
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: { message: response.statusText } }))
+      throw new Error(errorData.error?.message || `Gemini API 请求失败: HTTP ${response.status}`)
+    }
+
+    const result = await response.json()
+
+    // 详细日志：输出完整的 API 响应结构
+    logger.info('[NewApiPage] Gemini API Response received', {
+      hasResult: !!result,
+      hasCandidates: !!result?.candidates?.length,
+      candidateCount: result?.candidates?.length || 0,
+      responseKeys: Object.keys(result || {}),
+      rawResponse: JSON.stringify(result).substring(0, 1000)
+    })
+
+    // 提取图片
+    const imageBase64 = extractImageFromGeminiResponse(result)
+    if (!imageBase64) {
+      const textResponse = extractTextFromGeminiResponse(result)
+      if (textResponse) {
+        throw new Error(`Gemini 未返回图片，返回了文本: ${textResponse.substring(0, 100)}...`)
+      }
+      throw new Error('Gemini API 未返回图片数据')
+    }
+
+    logger.info('[NewApiPage] Image extracted successfully', {
+      imageType: imageBase64.startsWith('data:') ? 'base64' : 'url',
+      imagePreview: imageBase64.substring(0, 100)
+    })
+
+    // P1 修复：保存图片 - 统一 urls 和 files 的语义
+    // urls: 仅保存可下载的原始 URL（用于重试）
+    // files: 保存本地文件路径
+    let validFiles
+    if (imageBase64.startsWith('http://') || imageBase64.startsWith('https://')) {
+      // 如果是 URL，保存原始 URL 用于重试
+      const originalUrl = imageBase64
+      validFiles = await downloadImages([imageBase64])
+      await FileManager.addFiles(validFiles)
+      updatePaintingState({ files: validFiles, urls: [originalUrl] })
+    } else {
+      // 如果是 base64，没有可重试的 URL
+      validFiles = await Promise.all([
+        window.api.file.saveBase64Image(imageBase64.replace(/^data:image\/\w+;base64,/, ''))
+      ])
+      await FileManager.addFiles(validFiles)
+      updatePaintingState({ files: validFiles, urls: [] }) // base64 无 URL 可重试
+    }
+  }
+
+  // OpenAI 兼容 API 调用
+  const generateWithOpenAiApi = async (prompt: string, apiKey: string, signal?: AbortSignal) => {
+    let body: string | FormData = ''
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${apiKey}`
+    }
+    const url = newApiProvider.apiHost + `/v1/images/generations`
+    const editUrl = newApiProvider.apiHost + `/v1/images/edits`
+
+    if (mode === 'openai_image_generate') {
+      const requestData = {
+        prompt,
+        model: painting.model,
+        size: painting.size === 'auto' ? undefined : painting.size,
+        background: painting.background === 'auto' ? undefined : painting.background,
+        n: painting.n,
+        quality: painting.quality === 'auto' ? undefined : painting.quality,
+        moderation: painting.moderation === 'auto' ? undefined : painting.moderation
+      }
+
+      body = JSON.stringify(requestData)
+      headers['Content-Type'] = 'application/json'
+    } else if (mode === 'openai_image_edit') {
+      // -------- Edit Mode --------
+      if (editImages.length === 0) {
+        window.toast.warning(t('paintings.image_file_required'))
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('prompt', prompt)
+      if (painting.model) {
+        formData.append('model', painting.model)
+      }
+      if (painting.background && painting.background !== 'auto') {
+        formData.append('background', painting.background)
+      }
+
+      if (painting.size && painting.size !== 'auto') {
+        formData.append('size', painting.size)
+      }
+
+      if (painting.quality && painting.quality !== 'auto') {
+        formData.append('quality', painting.quality)
+      }
+
+      if (painting.moderation && painting.moderation !== 'auto') {
+        formData.append('moderation', painting.moderation)
+      }
+
+      // append images
+      editImages.forEach((file) => {
+        formData.append('image', file)
+      })
+
+      body = formData
+    }
+
+    const requestUrl = mode === 'openai_image_edit' ? editUrl : url
+    const response = await fetch(requestUrl, { method: 'POST', headers, body, signal })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error?.message || '生成图像失败')
+    }
+
+    const data = await response.json()
+    const urls = data.data.filter((item: any) => item.url).map((item: any) => item.url)
+    const base64s = data.data.filter((item: any) => item.b64_json).map((item: any) => item.b64_json)
+
+    if (urls.length > 0) {
+      const validFiles = await downloadImages(urls)
+      await FileManager.addFiles(validFiles)
+      updatePaintingState({ files: validFiles, urls })
+    }
+
+    if (base64s?.length > 0) {
+      const validFiles = await Promise.all(
+        base64s.map(async (base64: string) => {
+          return await window.api.file.saveBase64Image(base64)
+        })
+      )
+      await FileManager.addFiles(validFiles)
+      // P1 修复：base64 结果没有可重试的 URL
+      updatePaintingState({ files: validFiles, urls: [] })
+    }
+  }
+
+  // 辅助函数：将 File 转换为 base64
+  const fileToBase64 = (file: File): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result as string
+        // 提取 base64 部分（去掉 data:image/xxx;base64, 前缀）
+        const base64 = result.split(',')[1]
+        resolve(base64)
+      }
+      reader.onerror = () => resolve(null)
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // 辅助函数：将尺寸转换为宽高比
+  const convertSizeToAspectRatio = (size: string | undefined): string => {
+    if (!size) return '1:1'
+    // 常见尺寸映射
+    const sizeMap: Record<string, string> = {
+      '1024x1024': '1:1',
+      '1792x1024': '16:9',
+      '1024x1792': '9:16',
+      '1280x720': '16:9',
+      '720x1280': '9:16',
+      '1024x768': '4:3',
+      '768x1024': '3:4'
+    }
+    return sizeMap[size] || '1:1'
+  }
+
+  // 辅助函数：从 Gemini 响应中提取图片
+  // 支持多种响应格式：inlineData, fileData, image_url, url, data 数组等
+  const extractImageFromGeminiResponse = (result: any): string | null => {
+    logger.debug('[NewApiPage] Extracting image from Gemini response', {
+      hasResult: !!result,
+      resultKeys: Object.keys(result || {})
+    })
+
+    const candidates = result.candidates || []
+    if (candidates.length === 0) {
+      logger.warn('[NewApiPage] No candidates in Gemini response')
+      return null
+    }
+
+    const content = candidates[0].content || {}
+    const parts = content.parts || []
+
+    logger.debug('[NewApiPage] Response parts', {
+      partsCount: parts.length,
+      partTypes: parts.map((p: any) => Object.keys(p))
+    })
+
+    for (const part of parts) {
+      // 格式 1: inlineData 或 inline_data (base64)
+      const inlineData = part.inlineData || part.inline_data
+      if (inlineData && inlineData.data) {
+        const mimeType = inlineData.mimeType || inlineData.mime_type || 'image/jpeg'
+        logger.info('[NewApiPage] Found inline base64 image', { mimeType })
+        return `data:${mimeType};base64,${inlineData.data}`
+      }
+
+      // 格式 2: fileData 或 file_data (URL)
+      const fileData = part.fileData || part.file_data
+      if (fileData && (fileData.fileUri || fileData.file_uri || fileData.uri)) {
+        const uri = fileData.fileUri || fileData.file_uri || fileData.uri
+        logger.info('[NewApiPage] Found file URI', { uri: uri.substring(0, 100) })
+        if (uri.startsWith('http://') || uri.startsWith('https://')) {
+          return uri
+        }
+        if (uri.startsWith('gs://')) {
+          return uri.replace('gs://', 'https://storage.googleapis.com/')
+        }
+      }
+
+      // 格式 3: image_url 或 imageUrl
+      const imageUrl = part.image_url || part.imageUrl || part.url
+      if (imageUrl) {
+        const url = typeof imageUrl === 'string' ? imageUrl : imageUrl.url
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+          logger.info('[NewApiPage] Found image URL', { url: url.substring(0, 100) })
+          return url
+        }
+      }
+
+      // 格式 4: b64_json
+      if (part.b64_json) {
+        logger.info('[NewApiPage] Found b64_json image')
+        return `data:image/png;base64,${part.b64_json}`
+      }
+    }
+
+    // 检查顶层 image/images 字段
+    if (result.image || result.images) {
+      const img = result.image || (result.images && result.images[0])
+      if (img) {
+        if (typeof img === 'string') {
+          logger.info('[NewApiPage] Found top-level image')
+          if (img.startsWith('data:') || img.startsWith('http')) {
+            return img
+          }
+          return `data:image/png;base64,${img}`
+        }
+        if (img.url) return img.url
+        if (img.b64_json) return `data:image/png;base64,${img.b64_json}`
+      }
+    }
+
+    // 检查 data 数组 (OpenAI 格式)
+    if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+      const firstItem = result.data[0]
+      if (firstItem.url) {
+        logger.info('[NewApiPage] Found data array URL')
+        return firstItem.url
+      }
+      if (firstItem.b64_json) {
+        return `data:image/png;base64,${firstItem.b64_json}`
+      }
+    }
+
+    logger.warn('[NewApiPage] No image found in response')
+    return null
+  }
+
+  // 辅助函数：从 Gemini 响应中提取文本
+  const extractTextFromGeminiResponse = (result: any): string | null => {
+    const candidates = result.candidates || []
+    if (candidates.length === 0) return null
+
+    const content = candidates[0].content || {}
+    const parts = content.parts || []
+
+    const textParts = parts.filter((p: any) => p.text).map((p: any) => p.text)
+    return textParts.length > 0 ? textParts.join('\n') : null
+  }
+
+  // P1 修复：重试时检查是否有可用的 URL
   const handleRetry = async (painting: PaintingAction) => {
+    // 检查是否有可重试的 URL（base64 生成的图片没有 URL）
+    if (!painting.urls || painting.urls.length === 0) {
+      window.toast.warning(t('paintings.no_urls_for_retry', { defaultValue: '此图片由本地生成，无法重试下载' }))
+      return
+    }
+
     setIsLoading(true)
     try {
       const validFiles = await downloadImages(painting.urls)
@@ -535,7 +831,7 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
             <Empty
               style={{ marginTop: 24 }}
               description={t('paintings.no_image_generation_model', {
-                endpoint_type: t('endpoint_type.image-generation')
+                endpoint_type: `${t('endpoint_type.image-generation')} / ${t('endpoint_type.gemini-image')}`
               })}>
               <Button type="primary" onClick={handleShowAddModelPopup}>
                 {t('paintings.go_to_settings')}
@@ -831,6 +1127,14 @@ const ImageSizeImage = styled.img<{ theme: string }>`
   filter: ${({ theme }) => (theme === 'dark' ? 'invert(100%)' : 'none')};
   width: 20px;
   height: 20px;
+`
+
+const EmptyProviderContainer = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
 `
 
 export default NewApiPage

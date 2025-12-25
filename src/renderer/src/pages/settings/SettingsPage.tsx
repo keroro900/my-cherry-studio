@@ -15,6 +15,7 @@ import {
   NotebookPen,
   Package,
   PictureInPicture2,
+  Plug,
   Server,
   Settings2,
   TextCursorInput,
@@ -29,6 +30,7 @@ import AboutSettings from './AboutSettings'
 import DataSettings from './DataSettings/DataSettings'
 import DisplaySettings from './DisplaySettings/DisplaySettings'
 import DocProcessSettings from './DocProcessSettings'
+import ExternalServicesSettings from './ExternalServicesSettings'
 import GeneralSettings from './GeneralSettings'
 import MCPSettings from './MCPSettings'
 import MemorySettings from './MemorySettings'
@@ -64,6 +66,12 @@ const SettingsPage: FC = () => {
             <MenuItem className={isRoute('/settings/model')}>
               <Package size={18} />
               {t('settings.model')}
+            </MenuItem>
+          </MenuItemLink>
+          <MenuItemLink to="/settings/external-services">
+            <MenuItem className={isRoute('/settings/external-services')}>
+              <Plug size={18} />
+              外部服务
             </MenuItem>
           </MenuItemLink>
           <Divider />
@@ -159,6 +167,7 @@ const SettingsPage: FC = () => {
           <Routes>
             <Route path="provider" element={<ProviderList />} />
             <Route path="model" element={<ModelSettings />} />
+            <Route path="external-services" element={<ExternalServicesSettings />} />
             <Route path="websearch" element={<WebSearchSettings />} />
             <Route path="api-server" element={<ApiServerSettings />} />
             <Route path="docprocess" element={<DocProcessSettings />} />
@@ -190,7 +199,7 @@ const ContentContainer = styled.div`
   display: flex;
   flex: 1;
   flex-direction: row;
-  height: calc(100vh - var(--navbar-height));
+  min-height: 0;
   padding: 1px 0;
 `
 

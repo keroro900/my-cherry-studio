@@ -816,7 +816,6 @@ const DmxapiPage: FC<{ Options: string[] }> = ({ Options }) => {
                   onClearImages={clearImages}
                   onDeleteImage={handleDeleteImage}
                   onAddImage={onbeforeunload}
-                  mode={painting.generationMode}
                 />
               </>
             )}

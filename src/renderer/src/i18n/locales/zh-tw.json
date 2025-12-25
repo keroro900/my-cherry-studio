@@ -1209,6 +1209,8 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
+    "gemini-image": "[to be translated]:Image Generation (Gemini)",
+    "gemini-image-edit": "[to be translated]:Image Edit (Gemini)",
     "image-generation": "圖像生成 (OpenAI)",
     "jina-rerank": "Jina Rerank",
     "openai": "OpenAI",
@@ -2091,6 +2093,8 @@
       "embedding": "嵌入",
       "free": "免費",
       "function_calling": "工具",
+      "image_edit": "[to be translated]:Image Edit",
+      "image_generation": "[to be translated]:Image Generation",
       "reasoning": "推理",
       "rerank": "重排",
       "select": "模型類型",
@@ -3860,7 +3864,8 @@
         "memory": "基於本地知識圖譜的持久性記憶基礎實現。這使得模型能夠在不同對話間記住使用者的相關資訊。需要配置 MEMORY_FILE_PATH 環境變數。",
         "no": "無描述",
         "python": "在安全的沙盒環境中執行 Python 代碼。使用 Pyodide 運行 Python，支援大多數標準庫和科學計算套件",
-        "sequentialthinking": "一個 MCP 伺服器實現，提供了透過結構化思維過程進行動態和反思性問題解決的工具"
+        "sequentialthinking": "一個 MCP 伺服器實現，提供了透過結構化思維過程進行動態和反思性問題解決的工具",
+        "workflow": "[to be translated]:AI Workflow Service - Provides workflow management, execution and AI service integration. Supports Qwen, Gemini, Kling, RunningHub and other AI services"
       },
       "command": "指令",
       "config_description": "設定模型上下文協議伺服器",
@@ -4588,9 +4593,52 @@
       "zoom_reset": "重設縮放"
     },
     "theme": {
+      "category": {
+        "anime": "[to be translated]:Anime",
+        "custom": "[to be translated]:Custom",
+        "default": "[to be translated]:Default",
+        "nature": "[to be translated]:Nature",
+        "professional": "[to be translated]:Professional"
+      },
       "color_primary": "主題顏色",
       "dark": "深色",
+      "effect": {
+        "glass": "[to be translated]:Glass Effect",
+        "gradient": "[to be translated]:Gradient Accents",
+        "rounded": "[to be translated]:Large Radius"
+      },
       "light": "淺色",
+      "preset": {
+        "default": {
+          "desc": "[to be translated]:Simple and elegant green theme",
+          "name": "[to be translated]:Cherry Default"
+        },
+        "lavender": {
+          "desc": "[to be translated]:Romantic purple with glass effect",
+          "name": "[to be translated]:Lavender Purple"
+        },
+        "mint": {
+          "desc": "[to be translated]:Fresh and natural green",
+          "name": "[to be translated]:Mint Green"
+        },
+        "neon": {
+          "desc": "[to be translated]:Dark background with neon glow",
+          "name": "[to be translated]:Neon Cyber"
+        },
+        "sakura": {
+          "desc": "[to be translated]:Soft pink, anime style",
+          "name": "[to be translated]:Sakura Pink"
+        },
+        "sky": {
+          "desc": "[to be translated]:Fresh and bright blue",
+          "name": "[to be translated]:Sky Blue"
+        }
+      },
+      "presets": {
+        "desc": "[to be translated]:Select a preset theme, or hover to preview",
+        "none": "[to be translated]:Use Custom Colors",
+        "title": "[to be translated]:Theme Presets"
+      },
       "system": "系統",
       "title": "主題",
       "window": {
@@ -4784,6 +4832,44 @@
       "show": "顯示系统匣圖示",
       "title": "系统匣"
     },
+    "wallpaper": {
+      "blur": "[to be translated]:Blur",
+      "brightness": "[to be translated]:Brightness",
+      "builtin": {
+        "gradient": "[to be translated]:Gradient Wallpapers"
+      },
+      "displayMode": "[to be translated]:Display Mode",
+      "enable": "[to be translated]:Enable Wallpaper",
+      "excludeWorkflow": {
+        "label": "[to be translated]:Exclude Wallpaper in Workflow",
+        "tip": "[to be translated]:Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "local": {
+        "file": "[to be translated]:Local File",
+        "none": "[to be translated]:Not Selected",
+        "select": "[to be translated]:Select"
+      },
+      "mode": {
+        "center": "[to be translated]:Center",
+        "contain": "[to be translated]:Contain",
+        "cover": "[to be translated]:Cover",
+        "tile": "[to be translated]:Tile"
+      },
+      "opacity": "[to be translated]:Opacity",
+      "reset": "[to be translated]:Reset Parameters",
+      "resetToDefault": "[to be translated]:Reset to Default",
+      "source": {
+        "builtin": "[to be translated]:Built-in",
+        "label": "[to be translated]:Wallpaper Source",
+        "local": "[to be translated]:Local",
+        "none": "[to be translated]:None",
+        "url": "[to be translated]:URL"
+      },
+      "title": "[to be translated]:Wallpaper",
+      "url": {
+        "input": "[to be translated]:Image URL"
+      }
+    },
     "zoom": {
       "reset": "重置",
       "title": "縮放"
@@ -4802,7 +4888,8 @@
     "paintings": "繪畫",
     "settings": "設定",
     "store": "助手庫",
-    "translate": "翻譯"
+    "translate": "翻譯",
+    "workflow": "工作流"
   },
   "trace": {
     "backList": "返回清單",

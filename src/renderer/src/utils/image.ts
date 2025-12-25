@@ -6,6 +6,34 @@ import * as htmlToImage from 'html-to-image'
 const logger = loggerService.withContext('Utils:image')
 
 /**
+ * 图片压缩配置预设
+ */
+export const ImageCompressionPresets = {
+  /** 缩略图：用于头像、Logo 等小图标 */
+  thumbnail: {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 300,
+    useWebWorker: true
+  },
+  /** AI 视觉分析：保持高质量供模型参考 */
+  vision: {
+    maxSizeMB: 4,
+    maxWidthOrHeight: 2048,
+    useWebWorker: true,
+    initialQuality: 0.9
+  },
+  /** 聊天图片：平衡质量和大小 */
+  chat: {
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1280,
+    useWebWorker: true,
+    initialQuality: 0.85
+  }
+} as const
+
+export type ImageCompressionPreset = keyof typeof ImageCompressionPresets
+
+/**
  * 将文件转换为 Base64 编码的字符串或 ArrayBuffer。
  * @param {File} file 要转换的文件
  * @returns {Promise<string | ArrayBuffer | null>} 转换后的 Base64 编码数据，如果出错则返回 null
@@ -20,16 +48,41 @@ export const convertToBase64 = (file: File): Promise<string | ArrayBuffer | null
 }
 
 /**
- * 压缩图像文件，限制最大大小和尺寸。
+ * 压缩图像文件（缩略图场景）
+ * 用于头像、Logo 等小图标，压缩较激进。
+ * 使用 WebWorker 在后台线程处理，避免阻塞 UI。
  * @param {File} file 要压缩的图像文件
  * @returns {Promise<File>} 压缩后的图像文件
  */
 export const compressImage = async (file: File): Promise<File> => {
-  return await imageCompression(file, {
-    maxSizeMB: 1,
-    maxWidthOrHeight: 300,
-    useWebWorker: false
-  })
+  return await imageCompression(file, ImageCompressionPresets.thumbnail)
+}
+
+/**
+ * 压缩图像文件（AI 视觉分析场景）
+ * 保持较高质量，供 AI 模型清晰参考。
+ * - 最大 2048px（大多数视觉模型的最佳输入尺寸）
+ * - 最大 4MB（避免超过 API 限制）
+ * - 90% 质量（保持细节清晰）
+ *
+ * @param {File} file 要压缩的图像文件
+ * @returns {Promise<File>} 压缩后的图像文件
+ */
+export const compressImageForVision = async (file: File): Promise<File> => {
+  return await imageCompression(file, ImageCompressionPresets.vision)
+}
+
+/**
+ * 使用指定预设压缩图像
+ * @param file 要压缩的图像文件
+ * @param preset 预设名称或自定义配置
+ */
+export const compressImageWithPreset = async (
+  file: File,
+  preset: ImageCompressionPreset | Parameters<typeof imageCompression>[1]
+): Promise<File> => {
+  const options = typeof preset === 'string' ? ImageCompressionPresets[preset] : preset
+  return await imageCompression(file, options)
 }
 
 /**

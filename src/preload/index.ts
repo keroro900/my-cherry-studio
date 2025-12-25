@@ -123,7 +123,8 @@ const api = {
     getDeviceType: () => ipcRenderer.invoke(IpcChannel.System_GetDeviceType),
     getHostname: () => ipcRenderer.invoke(IpcChannel.System_GetHostname),
     getCpuName: () => ipcRenderer.invoke(IpcChannel.System_GetCpuName),
-    checkGitBash: (): Promise<boolean> => ipcRenderer.invoke(IpcChannel.System_CheckGitBash)
+    checkGitBash: (): Promise<boolean> => ipcRenderer.invoke(IpcChannel.System_CheckGitBash),
+    getPath: (name: string): Promise<string | null> => ipcRenderer.invoke(IpcChannel.System_GetPath, name)
   },
   devTools: {
     toggle: () => ipcRenderer.invoke(IpcChannel.System_ToggleDevTools)
@@ -234,7 +235,14 @@ const api = {
   },
   fs: {
     read: (pathOrUrl: string, encoding?: BufferEncoding) => ipcRenderer.invoke(IpcChannel.Fs_Read, pathOrUrl, encoding),
-    readText: (pathOrUrl: string): Promise<string> => ipcRenderer.invoke(IpcChannel.Fs_ReadText, pathOrUrl)
+    readText: (pathOrUrl: string): Promise<string> => ipcRenderer.invoke(IpcChannel.Fs_ReadText, pathOrUrl),
+    /**
+     * 读取本地文件并返回 base64 字符串
+     * 支持：Windows 路径 (C:\...)、UNC 路径 (\\Server\...)、Unix 路径 (/...)
+     * @param filePath 本地文件路径
+     * @returns base64 编码的文件内容（不含 data: 前缀）
+     */
+    readBase64: (filePath: string): Promise<string> => ipcRenderer.invoke(IpcChannel.Fs_ReadBase64, filePath)
   },
   export: {
     toWord: (markdown: string, fileName: string) => ipcRenderer.invoke(IpcChannel.Export_Word, markdown, fileName)

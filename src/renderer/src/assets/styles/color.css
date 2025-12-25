@@ -7,6 +7,9 @@
   --color-black-soft: #222222;
   --color-black-mute: #333333;
 
+  /* RGB 值用于 rgba() 函数 - 深色模式 */
+  --color-background-rgb: 24, 24, 24;
+
   --color-gray-1: #515c67;
   --color-gray-2: #414853;
   --color-gray-3: #32363f;
@@ -78,6 +81,9 @@
   --color-black: #1b1b1f;
   --color-black-soft: #262626;
   --color-black-mute: #363636;
+
+  /* RGB 值用于 rgba() 函数 - 浅色模式 */
+  --color-background-rgb: 255, 255, 255;
 
   --color-gray-1: #8e8e93;
   --color-gray-2: #aeaeb2;

@@ -152,6 +152,8 @@ const Container = styled.div`
   flex: 1;
   flex-direction: column;
   height: calc(100vh - var(--navbar-height));
+  width: 100%;
+  min-width: 0;
 `
 
 const ContentContainer = styled.div`

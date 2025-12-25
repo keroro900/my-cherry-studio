@@ -325,6 +325,13 @@ export default class ModernAiProvider {
     // 用构建好的插件数组创建executor
     const executor = createExecutor(this.config!.providerId, this.config!.options, plugins)
 
+    logger.debug('[modernCompletions] Starting streamText', {
+      providerId: this.config!.providerId,
+      modelId: this.model!.id,
+      hasOnChunk: !!config.onChunk,
+      streamOutput: config.streamOutput
+    })
+
     // 创建带有中间件的执行器
     if (config.onChunk) {
       const accumulate = this.model!.supported_text_delta !== false // true and undefined
@@ -334,6 +341,11 @@ export default class ModernAiProvider {
         ...params,
         model,
         experimental_context: { onChunk: config.onChunk }
+      })
+
+      logger.debug('[modernCompletions] streamText returned', {
+        hasFullStream: !!streamResult?.fullStream,
+        streamResultKeys: streamResult ? Object.keys(streamResult) : []
       })
 
       const finalText = await adapter.processStream(streamResult)

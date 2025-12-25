@@ -32,10 +32,13 @@ vi.mock('@renderer/components/Tags/Model', () => ({
   VisionTag: mocks.createTagComponent('vision'),
   EmbeddingTag: mocks.createTagComponent('embedding'),
   ReasoningTag: mocks.createTagComponent('reasoning'),
+  ImageEditTag: mocks.createTagComponent('image_edit'),
+  ImageGenerationTag: mocks.createTagComponent('image_generation'),
   ToolsCallingTag: mocks.createTagComponent('function_calling'),
   WebSearchTag: mocks.createTagComponent('web_search'),
   RerankerTag: mocks.createTagComponent('rerank'),
-  FreeTag: mocks.createTagComponent('free')
+  FreeTag: mocks.createTagComponent('free'),
+  VideoGenerationTag: mocks.createTagComponent('video_generation')
 }))
 
 vi.mock('antd', () => ({
@@ -47,10 +50,13 @@ function createSelection(overrides: Partial<Record<ModelTag, boolean>> = {}): Re
     vision: true,
     embedding: true,
     reasoning: true,
+    image_edit: true,
+    image_generation: true,
     function_calling: true,
     web_search: true,
     rerank: true,
-    free: true
+    free: true,
+    video_generation: true
   }
   return { ...base, ...overrides }
 }

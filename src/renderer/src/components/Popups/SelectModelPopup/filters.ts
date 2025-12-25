@@ -1,8 +1,11 @@
 import {
   isEmbeddingModel,
   isFunctionCallingModel,
+  isGenerateImageModel,
+  isImageEnhancementModel,
   isReasoningModel,
   isRerankModel,
+  isVideoGenerationModel,
   isVisionModel,
   isWebSearchModel
 } from '@renderer/config/models'
@@ -17,10 +20,13 @@ const initialTagSelection: Record<ModelTag, boolean> = {
   vision: false,
   embedding: false,
   reasoning: false,
+  image_edit: false,
+  image_generation: false,
   function_calling: false,
   web_search: false,
   rerank: false,
-  free: false
+  free: false,
+  video_generation: false
 }
 
 /**
@@ -32,10 +38,13 @@ export function useModelTagFilter() {
       vision: isVisionModel,
       embedding: isEmbeddingModel,
       reasoning: isReasoningModel,
+      image_edit: isImageEnhancementModel,
+      image_generation: isGenerateImageModel,
       function_calling: isFunctionCallingModel,
       web_search: isWebSearchModel,
       rerank: isRerankModel,
-      free: isFreeModel
+      free: isFreeModel,
+      video_generation: isVideoGenerationModel
     }),
     []
   )

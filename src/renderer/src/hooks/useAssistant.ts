@@ -29,12 +29,14 @@ import type { Assistant, AssistantSettings, Model, ThinkingOption, Topic } from 
 import { uuid } from '@renderer/utils'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { shallowEqual } from 'react-redux'
 
 import { TopicManager } from './useTopic'
 
 export function useAssistants() {
   const { t } = useTranslation()
-  const { assistants } = useAppSelector((state) => state.assistants)
+  // 使用 shallowEqual 避免其他 assistants slice 字段变化导致不必要的重渲染
+  const assistants = useAppSelector((state) => state.assistants.assistants, shallowEqual)
   const dispatch = useAppDispatch()
   const logger = loggerService.withContext('useAssistants')
 

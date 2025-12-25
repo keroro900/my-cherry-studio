@@ -7,6 +7,7 @@ import { setSidebarIcons } from '@renderer/store/settings'
 import type { SidebarIcon } from '@renderer/types'
 import { message } from 'antd'
 import {
+  Camera,
   Code,
   FileSearch,
   Folder,
@@ -15,7 +16,8 @@ import {
   MessageSquareQuote,
   NotepadText,
   Palette,
-  Sparkle
+  Sparkle,
+  Workflow
 } from 'lucide-react'
 import type { FC, ReactNode } from 'react'
 import { useCallback, useMemo } from 'react'
@@ -123,7 +125,9 @@ const SidebarIconsManager: FC<SidebarIconsManagerProps> = ({
         knowledge: <FileSearch size={16} />,
         files: <Folder size={16} />,
         notes: <NotepadText size={16} />,
-        code_tools: <Code size={16} />
+        code_tools: <Code size={16} />,
+        workflow: <Workflow size={16} />,
+        image_studio: <Camera size={16} />
       }) satisfies Record<SidebarIcon, ReactNode>,
     []
   )

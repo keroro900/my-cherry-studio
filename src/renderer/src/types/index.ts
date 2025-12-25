@@ -237,18 +237,34 @@ export type User = {
   email: string
 }
 
-export type ModelType = 'text' | 'vision' | 'embedding' | 'reasoning' | 'function_calling' | 'web_search' | 'rerank'
+export type ModelType =
+  | 'text'
+  | 'vision'
+  | 'embedding'
+  | 'reasoning'
+  | 'function_calling'
+  | 'web_search'
+  | 'rerank'
+  | 'image_generation'
+  | 'image_edit'
+  | 'video_generation'
 
 export type ModelTag = Exclude<ModelType, 'text'> | 'free'
 
 // "image-generation" is also openai endpoint, but specifically for image generation.
+// "gemini-image" is for Gemini generateContent API with responseModalities: ["IMAGE"]
+// "gemini-image-edit" is for Gemini image editing with multiple input images
+// "video-generation" is for OpenAI-compatible video generation API (/v1/video/generations)
 export const EndPointTypeSchema = z.enum([
   'openai',
   'openai-response',
   'anthropic',
   'gemini',
   'image-generation',
-  'jina-rerank'
+  'gemini-image',
+  'gemini-image-edit',
+  'jina-rerank',
+  'video-generation'
 ])
 export type EndpointType = z.infer<typeof EndPointTypeSchema>
 
@@ -412,6 +428,111 @@ export type PaintingAction = Partial<
   GeneratePainting & RemixPainting & EditPainting & ScalePainting & DmxapiPainting & TokenFluxPainting & OvmsPainting
 > &
   PaintingParams
+
+// ============================================================================
+// 统一绘画类型（新架构）
+// ============================================================================
+
+/**
+ * 统一的绘画记录类型
+ * 用于替代分散的 namespace 结构
+ */
+export interface UnifiedPainting {
+  id: string
+  // 基础信息
+  providerId: string
+  modelId: string
+  modelName?: string
+  // 生成参数
+  prompt: string
+  negativePrompt?: string
+  params: Record<string, any> // 动态参数
+  // 结果
+  urls: string[]
+  files: FileMetadata[]
+  // 状态
+  status: 'pending' | 'generating' | 'success' | 'failed'
+  error?: string
+  progress?: number
+  // 时间戳
+  createdAt: number
+  completedAt?: number
+  // 元数据
+  mode: 'generate' | 'edit' | 'remix' | 'upscale'
+  tags?: string[]
+  favorite?: boolean
+}
+
+/**
+ * 提示词历史记录
+ */
+export interface PromptHistoryItem {
+  id: string
+  prompt: string
+  negativePrompt?: string
+  modelId?: string
+  providerId?: string
+  usedAt: number
+  useCount: number
+  favorite?: boolean
+  tags?: string[]
+}
+
+/**
+ * 生成任务
+ */
+export interface GenerationTask {
+  id: string
+  params: Record<string, any>
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'
+  progress?: { current: number; total: number }
+  result?: UnifiedPainting
+  error?: string
+  createdAt: number
+  startedAt?: number
+  completedAt?: number
+}
+
+/**
+ * Art Studio 表单状态（用于热加载/状态持久化）
+ */
+export interface ArtStudioFormState {
+  providerId: string
+  modelId: string
+  mode: 'generate' | 'edit'
+  values: Record<string, any>
+}
+
+/**
+ * 统一的绘画状态（新架构）
+ */
+export interface UnifiedPaintingsState {
+  // 统一的绘画记录列表
+  paintings: UnifiedPainting[]
+  // 提示词历史
+  promptHistory: PromptHistoryItem[]
+  // 生成队列
+  generationQueue: GenerationTask[]
+  // 当前生成任务 ID
+  currentTaskId?: string
+  // 筛选和排序
+  filter: {
+    providerId?: string
+    modelId?: string
+    mode?: UnifiedPainting['mode']
+    status?: UnifiedPainting['status']
+    favoriteOnly?: boolean
+    tags?: string[]
+  }
+  sortBy: 'createdAt' | 'modelId' | 'providerId'
+  sortOrder: 'asc' | 'desc'
+  // Art Studio 表单状态（热加载）
+  artStudioForm?: ArtStudioFormState
+}
+
+// ============================================================================
+// 旧版绘画状态（保持向后兼容）
+// ============================================================================
 
 export interface PaintingsState {
   // SiliconFlow
@@ -581,6 +702,8 @@ export type SidebarIcon =
   | 'files'
   | 'code_tools'
   | 'notes'
+  | 'workflow'
+  | 'image_studio'
 
 export type ExternalToolResult = {
   mcpTools?: MCPTool[]
@@ -743,7 +866,8 @@ export const BuiltinMCPServerNames = {
   filesystem: '@cherry/filesystem',
   difyKnowledge: '@cherry/dify-knowledge',
   python: '@cherry/python',
-  didiMCP: '@cherry/didi-mcp'
+  didiMCP: '@cherry/didi-mcp',
+  workflow: '@cherry/workflow'
 } as const
 
 export type BuiltinMCPServerName = (typeof BuiltinMCPServerNames)[keyof typeof BuiltinMCPServerNames]

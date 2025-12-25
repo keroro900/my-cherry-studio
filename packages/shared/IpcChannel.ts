@@ -188,6 +188,7 @@ export enum IpcChannel {
   File_GetPdfInfo = 'file:getPdfInfo',
   Fs_Read = 'fs:read',
   Fs_ReadText = 'fs:readText',
+  Fs_ReadBase64 = 'fs:readBase64',
   File_OpenWithRelativePath = 'file:openWithRelativePath',
   File_IsTextFile = 'file:isTextFile',
   File_ListDirectory = 'file:listDirectory',
@@ -236,6 +237,7 @@ export enum IpcChannel {
   System_GetHostname = 'system:getHostname',
   System_GetCpuName = 'system:getCpuName',
   System_CheckGitBash = 'system:checkGitBash',
+  System_GetPath = 'system:getPath',
 
   // DevTools
   System_ToggleDevTools = 'system:toggleDevTools',
@@ -374,5 +376,14 @@ export enum IpcChannel {
   WebSocket_Stop = 'webSocket:stop',
   WebSocket_Status = 'webSocket:status',
   WebSocket_SendFile = 'webSocket:send-file',
-  WebSocket_GetAllCandidates = 'webSocket:get-all-candidates'
+  WebSocket_GetAllCandidates = 'webSocket:get-all-candidates',
+
+  // Workflow MCP Bridge (Main <-> Renderer)
+  Workflow_GenerateImage = 'workflow:generate-image',
+  Workflow_ExecuteNode = 'workflow:execute-node',
+  Workflow_GetWorkflowList = 'workflow:get-workflow-list',
+  Workflow_GetWorkflowById = 'workflow:get-workflow-by-id',
+  Workflow_ExecuteWorkflow = 'workflow:execute-workflow',
+  Workflow_CancelExecution = 'workflow:cancel-execution',
+  Workflow_GetExecutionStatus = 'workflow:get-execution-status'
 }

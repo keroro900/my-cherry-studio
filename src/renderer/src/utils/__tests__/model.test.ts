@@ -8,9 +8,12 @@ vi.mock('@renderer/config/models', () => ({
   isVisionModel: vi.fn().mockImplementation((m: Model) => m.id === 'vision'),
   isEmbeddingModel: vi.fn().mockImplementation((m: Model) => m.id === 'embedding'),
   isReasoningModel: vi.fn().mockImplementation((m: Model) => m.id === 'reasoning'),
+  isImageEnhancementModel: vi.fn().mockImplementation((m: Model) => m.id === 'image_edit'),
+  isGenerateImageModel: vi.fn().mockImplementation((m: Model) => m.id === 'image_generation'),
   isFunctionCallingModel: vi.fn().mockImplementation((m: Model) => m.id === 'tool'),
   isWebSearchModel: vi.fn().mockImplementation((m: Model) => m.id === 'search'),
-  isRerankModel: vi.fn().mockImplementation((m: Model) => m.id === 'rerank')
+  isRerankModel: vi.fn().mockImplementation((m: Model) => m.id === 'rerank'),
+  isVideoGenerationModel: vi.fn().mockImplementation((m: Model) => m.id === 'video_generation')
 }))
 
 describe('model', () => {
@@ -72,10 +75,13 @@ describe('model', () => {
         vision: true,
         embedding: true,
         reasoning: true,
+        image_edit: false,
+        image_generation: false,
         rerank: false,
         free: false,
         function_calling: false,
-        web_search: true
+        web_search: true,
+        video_generation: false
       }
       expect(getModelTags(models_1)).toStrictEqual(expected_1)
 
@@ -84,10 +90,13 @@ describe('model', () => {
         vision: false,
         embedding: false,
         reasoning: false,
+        image_edit: false,
+        image_generation: false,
         rerank: true,
         free: true,
         function_calling: true,
-        web_search: false
+        web_search: false,
+        video_generation: false
       }
       expect(getModelTags(models_2)).toStrictEqual(expected_2)
     })

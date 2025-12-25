@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Route, Routes, useParams } from 'react-router-dom'
 
 import AihubmixPage from './AihubmixPage'
+import ArtStudioPage from './ArtStudioPage'
 import DmxapiPage from './DmxapiPage'
 import NewApiPage from './NewApiPage'
 import OvmsPage from './OvmsPage'
@@ -51,17 +52,21 @@ const PaintingsRoutePage: FC = () => {
 
   return (
     <Routes>
-      <Route path="*" element={<NewApiPage Options={validOptions} />} />
+      {/* 默认使用新的 ArtStudioPage */}
+      <Route path="*" element={<ArtStudioPage />} />
+      <Route path="/art-studio" element={<ArtStudioPage />} />
+      {/* 保留旧版页面入口 */}
+      <Route path="/legacy" element={<NewApiPage Options={validOptions} />} />
       <Route path="/zhipu" element={<ZhipuPage Options={validOptions} />} />
       <Route path="/aihubmix" element={<AihubmixPage Options={validOptions} />} />
       <Route path="/silicon" element={<SiliconPage Options={validOptions} />} />
       <Route path="/dmxapi" element={<DmxapiPage Options={validOptions} />} />
       <Route path="/tokenflux" element={<TokenFluxPage Options={validOptions} />} />
       <Route path="/ovms" element={<OvmsPage Options={validOptions} />} />
-      <Route path="/new-api" element={<NewApiPage Options={validOptions} />} />
+      <Route path="/new-api" element={<ArtStudioPage />} />
       {/* new-api family providers are mounted dynamically below */}
       {newApiProviders.map((p) => (
-        <Route key={p.id} path={`/${p.id}`} element={<NewApiPage Options={validOptions} />} />
+        <Route key={p.id} path={`/${p.id}`} element={<ArtStudioPage />} />
       ))}
     </Routes>
   )

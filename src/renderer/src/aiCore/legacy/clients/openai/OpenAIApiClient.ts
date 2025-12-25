@@ -168,13 +168,16 @@ export class OpenAIAPIClient extends OpenAIBaseClient<
       }
 
       // providers that use enable_thinking
+      // 当 reasoningEffort 为空时，不发送 enable_thinking 参数
+      // 因为某些 API（如 Silicon Flow）不接受 enable_thinking: false
+      // 直接返回空对象，让 API 使用默认行为
       if (
         isSupportEnableThinkingProvider(this.provider) &&
         (isSupportedThinkingTokenQwenModel(model) ||
           isSupportedThinkingTokenHunyuanModel(model) ||
           (this.provider.id === SystemProviderIds.dashscope && isDeepSeekHybridInferenceModel(model)))
       ) {
-        return { enable_thinking: false }
+        return {}
       }
 
       // claude
@@ -183,18 +186,10 @@ export class OpenAIAPIClient extends OpenAIBaseClient<
       }
 
       // gemini
+      // 当 reasoningEffort 为空时，不发送任何 thinking_config 参数
+      // 因为某些 API 代理不支持 thinking_budget: 0，会报错
+      // "include_thoughts is only enabled when thinking is enabled"
       if (isSupportedThinkingTokenGeminiModel(model)) {
-        if (GEMINI_FLASH_MODEL_REGEX.test(model.id)) {
-          return {
-            extra_body: {
-              google: {
-                thinking_config: {
-                  thinking_budget: 0
-                }
-              }
-            }
-          }
-        }
         return {}
       }
 

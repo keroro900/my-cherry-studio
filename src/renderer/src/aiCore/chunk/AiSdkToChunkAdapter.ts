@@ -65,13 +65,24 @@ export class AiSdkToChunkAdapter {
    * @returns 最终的文本内容
    */
   async processStream(aiSdkResult: any): Promise<string> {
+    logger.debug('[AiSdkToChunkAdapter] processStream started', {
+      hasFullStream: !!aiSdkResult?.fullStream,
+      hasTextStream: !!aiSdkResult?.textStream,
+      resultKeys: aiSdkResult ? Object.keys(aiSdkResult) : []
+    })
+
     // 如果是流式且有 fullStream
     if (aiSdkResult.fullStream) {
       await this.readFullStream(aiSdkResult.fullStream)
     }
 
     // 使用 streamResult.text 获取最终结果
-    return await aiSdkResult.text
+    const finalText = await aiSdkResult.text
+    logger.debug('[AiSdkToChunkAdapter] processStream finished', {
+      finalTextLength: finalText?.length || 0,
+      finalTextPreview: finalText?.substring(0, 100)
+    })
+    return finalText
   }
 
   /**
@@ -97,6 +108,10 @@ export class AiSdkToChunkAdapter {
         const { done, value } = await reader.read()
 
         if (done) {
+          logger.debug('[AiSdkToChunkAdapter] Stream finished', {
+            hasTextContent: this.hasTextContent,
+            finalTextLength: final.text.length
+          })
           // Flush any remaining content from link converter buffer if web search is enabled
           if (this.enableWebSearch) {
             const remainingText = flushLinkConverterBuffer()
@@ -110,6 +125,13 @@ export class AiSdkToChunkAdapter {
           }
           break
         }
+
+        // 调试日志：记录接收到的 chunk 类型
+        logger.debug('[AiSdkToChunkAdapter] Received chunk', {
+          type: value?.type,
+          hasText: 'text' in value && !!value.text,
+          chunk: value
+        })
 
         // 转换并发送 chunk
         this.convertAndEmitChunk(value, final)

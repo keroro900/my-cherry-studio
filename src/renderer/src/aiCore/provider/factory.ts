@@ -90,6 +90,13 @@ export function getAiSdkProviderId(provider: Provider): string {
 export async function createAiSdkProvider(config: AiSdkConfig): Promise<AiSdkProvider | null> {
   let localProvider: Awaited<AiSdkProvider> | null = null
   try {
+    // 调试日志
+    logger.debug('Before transformation', {
+      providerId: config.providerId,
+      mode: config.options?.mode,
+      endpointType: config.options?.endpointType
+    })
+
     if (config.providerId === 'openai' && config.options?.mode === 'chat') {
       config.providerId = `${config.providerId}-chat`
     } else if (config.providerId === 'azure' && config.options?.mode === 'responses') {
@@ -97,6 +104,11 @@ export async function createAiSdkProvider(config: AiSdkConfig): Promise<AiSdkPro
     } else if (config.providerId === 'cherryin' && config.options?.mode === 'chat') {
       config.providerId = 'cherryin-chat'
     }
+
+    logger.debug('After transformation', {
+      providerId: config.providerId
+    })
+
     localProvider = await createProviderCore(config.providerId, config.options)
 
     logger.debug('Local provider created successfully', {

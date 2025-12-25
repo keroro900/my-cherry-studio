@@ -54,8 +54,12 @@ export function useAppInit() {
 
   useEffect(() => {
     document.getElementById('spinner')?.remove()
-    // eslint-disable-next-line no-restricted-syntax
-    console.timeEnd('init')
+
+    // 只在首次加载时结束计时器（HMR 期间不会重新设置标志）
+    if ((window as any).__INIT_TIMER_STARTED__) {
+      console.timeEnd('init')
+      ;(window as any).__INIT_TIMER_STARTED__ = false
+    }
 
     // Initialize MemoryService after app is ready
     MemoryService.getInstance()

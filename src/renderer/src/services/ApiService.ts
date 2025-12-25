@@ -552,6 +552,12 @@ export async function checkApi(provider: Provider, model: Model, timeout = 15000
     const abortId = uuid()
     const signal = readyToAbort(abortId)
     let streamError: ResponseError | undefined
+
+    // 为文本流式分支添加超时控制
+    const timeoutId = setTimeout(() => {
+      abortCompletion(abortId)
+    }, timeout)
+
     const params: StreamTextParams = {
       system: assistant.prompt,
       prompt: 'hi',
@@ -583,6 +589,8 @@ export async function checkApi(provider: Provider, model: Model, timeout = 15000
       if (!isAbortError(e) && !isAbortError(streamError)) {
         throw streamError ?? e
       }
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 }
