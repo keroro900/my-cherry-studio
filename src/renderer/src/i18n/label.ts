@@ -147,7 +147,9 @@ const titleKeyMap = {
   notes: 'title.notes',
   paintings: 'title.paintings',
   settings: 'title.settings',
-  translate: 'title.translate'
+  translate: 'title.translate',
+  workflow: 'title.workflow',
+  image_studio: 'title.image_studio'
 } as const
 
 export const getTitleLabel = (key: string): string => {
@@ -185,7 +187,9 @@ const sidebarIconKeyMap = {
   knowledge: 'knowledge.title',
   files: 'files.title',
   code_tools: 'code.title',
-  notes: 'notes.title'
+  notes: 'notes.title',
+  workflow: 'title.workflow',
+  image_studio: 'title.image_studio'
 } as const
 
 export const getSidebarIconLabel = (key: string): string => {
@@ -332,7 +336,8 @@ const builtInMcpDescriptionKeyMap: Record<BuiltinMCPServerName, string> = {
   [BuiltinMCPServerNames.python]: 'settings.mcp.builtinServersDescriptions.python',
   [BuiltinMCPServerNames.didiMCP]: 'settings.mcp.builtinServersDescriptions.didi_mcp',
   [BuiltinMCPServerNames.browser]: 'settings.mcp.builtinServersDescriptions.browser',
-  [BuiltinMCPServerNames.nowledgeMem]: 'settings.mcp.builtinServersDescriptions.nowledge_mem'
+  [BuiltinMCPServerNames.nowledgeMem]: 'settings.mcp.builtinServersDescriptions.nowledge_mem',
+  [BuiltinMCPServerNames.workflow]: 'settings.mcp.builtinServersDescriptions.workflow'
 } as const
 
 export const getBuiltInMcpServerDescriptionLabel = (key: string): string => {

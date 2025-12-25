@@ -1,12 +1,13 @@
 import { CodeBlockView, HtmlArtifactsCard } from '@renderer/components/CodeBlockView'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
-import store from '@renderer/store'
+import type { RootState } from '@renderer/store'
 import { messageBlocksSelectors } from '@renderer/store/messageBlock'
 import { MessageBlockStatus } from '@renderer/types/newMessage'
 import { getCodeBlockId, isOpenFenceBlock } from '@renderer/utils/markdown'
 import type { Node } from 'mdast'
 import React, { memo, useCallback, useMemo } from 'react'
+import { useSelector } from 'react-redux'
 
 interface Props {
   children: string
@@ -25,8 +26,8 @@ const CodeBlock: React.FC<Props> = ({ children, className, node, blockId }) => {
   // 代码块 id
   const id = useMemo(() => getCodeBlockId(node?.position?.start), [node?.position?.start])
 
-  // 消息块
-  const msgBlock = messageBlocksSelectors.selectById(store.getState(), blockId)
+  // 消息块 - 使用 useSelector 替代 store.getState() 以获得正确的 React 渲染优化
+  const msgBlock = useSelector((state: RootState) => messageBlocksSelectors.selectById(state, blockId))
   const isStreaming = useMemo(() => msgBlock?.status === MessageBlockStatus.STREAMING, [msgBlock?.status])
 
   const handleSave = useCallback(

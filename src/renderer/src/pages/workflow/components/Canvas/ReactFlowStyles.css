@@ -1,0 +1,426 @@
+/**
+ * ReactFlow 画布和连线样式优化
+ * 参考官方示例：https://reactflow.dev/examples/nodes/custom-node
+ */
+
+/* ========== 工作流主题 CSS 变量 ========== */
+/* 作用域限定在 .workflow-root 内，避免污染全局样式 */
+/* 注意：这些变量会被 WorkflowThemeProvider 动态覆盖 */
+.workflow-root {
+  /* 默认主题颜色 (Professional) */
+  --workflow-theme-primary: #1890ff;
+  --workflow-theme-secondary: #722ed1;
+  --workflow-theme-success: #52c41a;
+  --workflow-theme-warning: #faad14;
+  --workflow-theme-error: #ff4d4f;
+  --workflow-theme-info: #13c2c2;
+
+  /* 节点样式 */
+  --workflow-node-border-radius: 8px;
+  --workflow-node-border-width: 2px;
+  --workflow-node-padding: 12px 16px;
+  --workflow-node-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* Handle 样式 */
+  --workflow-handle-size: 12px;
+  --workflow-handle-border-width: 2px;
+}
+
+/* ========== ReactFlow 全局样式 ========== */
+/* 限定在 .workflow-root 作用域内 */
+.workflow-root .react-flow {
+  /* 主题色 - 使用工作流主题变量 */
+  --xy-theme-edge-hover: var(--workflow-theme-primary, #1890ff);
+  --xy-theme-selected: var(--workflow-theme-primary, #1890ff);
+
+  /* 边的颜色 - 使用工作流主题变量 */
+  --xy-edge-stroke-default: var(--workflow-theme-primary, #1890ff);
+  --xy-edge-stroke-width-default: 4px;
+  --xy-edge-stroke-selected: var(--workflow-theme-success, #52c41a);
+  --xy-edge-stroke-hover: var(--workflow-theme-error, #ff4d4f);
+
+  /* 节点样式 */
+  --xy-node-border-default: 2px solid var(--ant-color-border);
+  --xy-node-border-radius-default: var(--workflow-node-border-radius, 8px);
+  --xy-node-boxshadow-default: var(--workflow-node-shadow, 0 2px 8px rgba(0, 0, 0, 0.08));
+
+  /* Handle 样式 */
+  --xy-handle-background-color-default: var(--ant-color-bg-container);
+  --xy-handle-border-color-default: var(--ant-color-text-secondary);
+}
+
+/* 全局强制所有 SVG path 可见 - 限定作用域 */
+.workflow-root .react-flow svg path {
+  stroke-opacity: 1;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========== Handle 样式优化 v4.0 ========== */
+/* 限定在 .workflow-root 作用域内 */
+/* 新设计：内嵌式菱形端口，更小更精致 */
+
+/* 基础 Handle 样式 - 由 DynamicHandles 组件控制 */
+.workflow-root .react-flow__handle {
+  /* 让组件样式完全控制 */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Handle 连接时的样式 - 增强发光效果 */
+.workflow-root .react-flow__handle.connecting,
+.workflow-root .react-flow__handle.connectingfrom,
+.workflow-root .react-flow__handle.connectingto {
+  transform: rotate(45deg) scale(1.3);
+  box-shadow: 0 0 12px var(--handle-color, rgba(24, 144, 255, 0.6));
+}
+
+/* Handle 可连接状态 */
+.workflow-root .react-flow__handle.connectable {
+  cursor: crosshair;
+}
+
+/* Handle 不可连接状态 */
+.workflow-root .react-flow__handle.not-connectable {
+  cursor: not-allowed;
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+/* ========== 实时连线预览样式 v4.0 ========== */
+/* 限定在 .workflow-root 作用域内 */
+/* 兼容的 Handle - 绿色发光效果（适配菱形设计） */
+.workflow-root .react-flow__handle.handle-compatible {
+  border-color: #4ade80;
+  background: #4ade80;
+  box-shadow:
+    0 0 12px rgba(74, 222, 128, 0.8),
+    0 0 24px rgba(74, 222, 128, 0.4);
+  transform: rotate(45deg) scale(1.4);
+  animation: pulse-compatible-diamond 1.2s ease-in-out infinite;
+  z-index: 100;
+}
+
+/* 不兼容的 Handle - 灰色淡出 */
+.workflow-root .react-flow__handle.handle-incompatible {
+  opacity: 0.2;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+  transform: rotate(45deg) scale(0.8);
+}
+
+/* 兼容 Handle 脉冲动画 - 菱形版本 */
+@keyframes pulse-compatible-diamond {
+  0%,
+  100% {
+    box-shadow:
+      0 0 12px rgba(74, 222, 128, 0.8),
+      0 0 24px rgba(74, 222, 128, 0.4);
+    transform: rotate(45deg) scale(1.4);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(74, 222, 128, 1),
+      0 0 32px rgba(74, 222, 128, 0.6);
+    transform: rotate(45deg) scale(1.5);
+  }
+}
+
+/* ========== 🍒 Cherry Studio Edge 简约样式 ========== */
+/* 限定在 .workflow-root 作用域内，使用工作流主题变量 */
+
+/* 默认边 - 使用工作流主题色，增加可见性 */
+.workflow-root .react-flow__edge-path {
+  stroke: var(--workflow-theme-primary, var(--color-primary, #1890ff));
+  stroke-width: 3px;
+  transition: all 0.2s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Edge hover 效果 - 更明显 */
+.workflow-root .react-flow__edge.selectable:hover .react-flow__edge-path {
+  stroke: var(--workflow-theme-primary, var(--color-primary, #1890ff));
+  stroke-width: 4px;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--workflow-theme-primary, #1890ff));
+}
+
+/* Edge 选中状态 - 高亮 */
+.workflow-root .react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--workflow-theme-success, #52c41a);
+  stroke-width: 4px;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px var(--workflow-theme-success, #52c41a));
+}
+
+/* Edge 动画效果 - 数据流动 */
+.workflow-root .react-flow__edge.animated path {
+  stroke-dasharray: 6 4;
+  animation: edge-flow 0.6s linear infinite;
+}
+
+@keyframes edge-flow {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Edge 标签样式 - Cherry 风格 */
+.workflow-root .react-flow__edge-text {
+  fill: var(--color-text);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.workflow-root .react-flow__edge-textbg {
+  fill: var(--color-background);
+  rx: 6px;
+  ry: 6px;
+  stroke: var(--color-border);
+  stroke-width: 1px;
+}
+
+/* 箭头标记 - 使用工作流主题色 */
+.workflow-root .react-flow__edge .react-flow__arrowhead {
+  fill: var(--workflow-theme-primary, var(--color-primary, #1890ff));
+}
+
+.workflow-root .react-flow__edge.selectable:hover .react-flow__arrowhead {
+  fill: var(--workflow-theme-primary, var(--color-primary, #1890ff));
+}
+
+.workflow-root .react-flow__edge.selected .react-flow__arrowhead {
+  fill: var(--workflow-theme-primary, var(--color-primary, #1890ff));
+}
+
+/* ========== 连接线样式 (正在拖动时) ========== */
+.workflow-root .react-flow__connection-path {
+  stroke: #faad14 !important; /* 橙色，拖动时非常醒目 */
+  stroke-width: 4px !important;
+  stroke-dasharray: 8 4 !important;
+  animation: connection-flow 0.4s linear infinite !important;
+  filter: drop-shadow(0 0 8px rgba(250, 173, 20, 0.8)) !important;
+}
+
+/* 连接线容器 - 确保可见 */
+.workflow-root .react-flow__connection {
+  z-index: 1000;
+}
+
+@keyframes connection-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+/* ========== 边重连样式 (拖动已有连线时) ========== */
+/* 正在被重连的边 - 高亮显示 */
+.workflow-root .react-flow__edge.updating .react-flow__edge-path {
+  stroke: var(--workflow-theme-warning, #faad14) !important;
+  stroke-width: 4px;
+  stroke-dasharray: 8 4;
+  animation: connection-flow 0.5s linear infinite;
+  filter: drop-shadow(0 2px 8px rgba(250, 173, 20, 0.8));
+}
+
+/* 边端点悬停提示 - 当鼠标靠近边的端点时显示可拖动提示 */
+/* React Flow v12 使用 reconnectRadius 来检测悬停 */
+.workflow-root .react-flow__edge:hover {
+  cursor: pointer;
+}
+
+/* 边可选中时的悬停效果 - 更明显 */
+.workflow-root .react-flow__edge.selectable {
+  cursor: pointer;
+}
+
+.workflow-root .react-flow__edge.selectable:hover .react-flow__edge-path {
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* 边选中状态 - 更明显的高亮 */
+.workflow-root .react-flow__edge.selected .react-flow__edge-path {
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 8px var(--workflow-theme-primary, #1890ff));
+}
+
+/* ========== 节点样式优化 ========== */
+/* 限定在 .workflow-root 作用域内 */
+.workflow-root .react-flow__node {
+  cursor: grab;
+  transition: box-shadow 0.3s;
+  /* 确保节点容器正确传递尺寸给子元素 */
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.workflow-root .react-flow__node:active {
+  cursor: grabbing;
+}
+
+/* 节点选中状态 - 由自定义组件处理，这里不添加额外样式 */
+.workflow-root .react-flow__node.selected {
+  /* 选中框由自定义节点组件内部处理 */
+  box-shadow: none;
+}
+
+/* 节点拖动状态 */
+.workflow-root .react-flow__node.dragging {
+  opacity: 0.8;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ========== 背景样式 ========== */
+/* 限定在 .workflow-root 作用域内 */
+.workflow-root .react-flow__background {
+  background-color: transparent;
+}
+
+/* 背景点样式 */
+.workflow-root .react-flow__background-pattern.dots {
+  fill: var(--ant-color-border);
+  opacity: 0.4;
+}
+
+/* 双层背景效果 - 大网格 */
+.workflow-root .react-flow__background-pattern.lines {
+  stroke: var(--ant-color-border);
+  stroke-opacity: 0.15;
+}
+
+/* ========== 控制按钮样式 ========== */
+.workflow-root .react-flow__controls {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ant-color-bg-container);
+}
+
+.workflow-root .react-flow__controls-button {
+  background: var(--ant-color-bg-container);
+  border-bottom: 1px solid var(--ant-color-border);
+  color: var(--ant-color-text);
+  transition: background 0.2s;
+}
+
+.workflow-root .react-flow__controls-button:hover {
+  background: var(--ant-color-bg-elevated);
+}
+
+.workflow-root .react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+/* ========== MiniMap 样式 ========== */
+.workflow-root .react-flow__minimap {
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.workflow-root .react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.1);
+}
+
+.workflow-root .react-flow__minimap-node {
+  fill: var(--ant-color-border);
+  stroke: none;
+}
+
+/* ========== 选择框样式 ========== */
+.workflow-root .react-flow__selection {
+  background: rgba(24, 144, 255, 0.1);
+  border: 1px dashed var(--workflow-theme-primary, #1890ff);
+}
+
+/* ========== 深色主题适配 ========== */
+/* 限定在 .workflow-root 作用域内 */
+/* 使用 Ant Design 暗色 token，不使用固定值 */
+[data-theme='dark'] .workflow-root .react-flow {
+  --xy-edge-stroke-default: var(--ant-color-text-quaternary); /* 使用 Ant 文本四级色 */
+  --xy-node-border-default: 2px solid var(--ant-color-border);
+}
+
+[data-theme='dark'] .workflow-root .react-flow__edge-path {
+  stroke: var(--ant-color-text-quaternary); /* 使用 Ant 文本四级色 */
+  filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.1)); /* 深色主题白色阴影 */
+}
+
+[data-theme='dark'] .workflow-root .react-flow__background-pattern.dots {
+  fill: var(--ant-color-border);
+}
+
+[data-theme='dark'] .workflow-root .react-flow__controls {
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border);
+}
+
+[data-theme='dark'] .workflow-root .react-flow__controls-button {
+  background: var(--ant-color-bg-container);
+  border-bottom: 1px solid var(--ant-color-border);
+  color: var(--ant-color-text);
+}
+
+[data-theme='dark'] .workflow-root .react-flow__controls-button:hover {
+  background: var(--ant-color-bg-elevated);
+}
+
+[data-theme='dark'] .workflow-root .react-flow__minimap {
+  background: var(--ant-color-bg-container);
+  border-color: var(--ant-color-border);
+}
+
+/* ========== 连接指示器 ========== */
+/* 限定在 .workflow-root 作用域内 */
+.workflow-root .react-flow__handle.connectionindicator {
+  pointer-events: all;
+}
+
+.workflow-root .react-flow__handle.connectionindicator:hover {
+  border-color: var(--xy-theme-edge-hover);
+  background-color: var(--ant-color-bg-container);
+  transform: scale(1.3);
+}
+
+/* ========== 自定义连接线类型 ========== */
+.workflow-root .react-flow__edge.updating .react-flow__edge-path {
+  stroke: var(--ant-color-text-tertiary);
+  stroke-dasharray: 5;
+  animation: dash 0.5s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* ========== 性能优化 ========== */
+.workflow-root .react-flow__renderer {
+  /* 使用 GPU 加速 */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* ========== 阻止拖拽冲突 ========== */
+.workflow-root .nodrag {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* ========== 画布交互提示 ========== */
+.workflow-root .react-flow__pane {
+  cursor: grab;
+}
+
+.workflow-root .react-flow__pane:active {
+  cursor: grabbing;
+}

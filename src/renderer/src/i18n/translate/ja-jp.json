@@ -1283,6 +1283,8 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
+    "gemini-image": "[to be translated]:Image Generation (Gemini)",
+    "gemini-image-edit": "[to be translated]:Image Edit (Gemini)",
     "image-generation": "画像生成 (OpenAI)",
     "jina-rerank": "Jina Rerank",
     "openai": "OpenAI",
@@ -2165,6 +2167,8 @@
       "embedding": "埋め込み",
       "free": "無料",
       "function_calling": "ツール",
+      "image_edit": "[to be translated]:Image Edit",
+      "image_generation": "[to be translated]:Image Generation",
       "reasoning": "推論",
       "rerank": "再順序付け",
       "select": "モデルタイプ",
@@ -3963,7 +3967,8 @@
         "no": "説明なし",
         "nowledge_mem": "Nowledge Mem アプリをローカルで実行する必要があります。AI チャット、ツール、ノート、エージェント、ファイルをコンピューター上のプライベートメモリに保存します。https://mem.nowledge.co/ からダウンロードしてください",
         "python": "安全なサンドボックス環境でPythonコードを実行します。Pyodideを使用してPythonを実行し、ほとんどの標準ライブラリと科学計算パッケージをサポートしています。",
-        "sequentialthinking": "構造化された思考プロセスを通じて動的かつ反省的な問題解決を行うためのツールを提供するMCPサーバーの実装"
+        "sequentialthinking": "構造化された思考プロセスを通じて動的かつ反省的な問題解決を行うためのツールを提供するMCPサーバーの実装",
+        "workflow": "[to be translated]:AI Workflow Service - Provides workflow management, execution and AI service integration. Supports Qwen, Gemini, Kling, RunningHub and other AI services"
       },
       "command": "コマンド",
       "config_description": "モデルコンテキストプロトコルサーバーの設定",
@@ -4699,9 +4704,52 @@
       "zoom_reset": "ズームをリセット"
     },
     "theme": {
+      "category": {
+        "anime": "[to be translated]:Anime",
+        "custom": "[to be translated]:Custom",
+        "default": "[to be translated]:Default",
+        "nature": "[to be translated]:Nature",
+        "professional": "[to be translated]:Professional"
+      },
       "color_primary": "テーマ色",
       "dark": "ダーク",
+      "effect": {
+        "glass": "[to be translated]:Glass Effect",
+        "gradient": "[to be translated]:Gradient Accents",
+        "rounded": "[to be translated]:Large Radius"
+      },
       "light": "ライト",
+      "preset": {
+        "default": {
+          "desc": "[to be translated]:Simple and elegant green theme",
+          "name": "[to be translated]:Cherry Default"
+        },
+        "lavender": {
+          "desc": "[to be translated]:Romantic purple with glass effect",
+          "name": "[to be translated]:Lavender Purple"
+        },
+        "mint": {
+          "desc": "[to be translated]:Fresh and natural green",
+          "name": "[to be translated]:Mint Green"
+        },
+        "neon": {
+          "desc": "[to be translated]:Dark background with neon glow",
+          "name": "[to be translated]:Neon Cyber"
+        },
+        "sakura": {
+          "desc": "[to be translated]:Soft pink, anime style",
+          "name": "[to be translated]:Sakura Pink"
+        },
+        "sky": {
+          "desc": "[to be translated]:Fresh and bright blue",
+          "name": "[to be translated]:Sky Blue"
+        }
+      },
+      "presets": {
+        "desc": "[to be translated]:Select a preset theme, or hover to preview",
+        "none": "[to be translated]:Use Custom Colors",
+        "title": "[to be translated]:Theme Presets"
+      },
       "system": "システム",
       "title": "テーマ",
       "window": {
@@ -4910,6 +4958,44 @@
       "show": "トレイアイコンを表示",
       "title": "トレイ"
     },
+    "wallpaper": {
+      "blur": "[to be translated]:Blur",
+      "brightness": "[to be translated]:Brightness",
+      "builtin": {
+        "gradient": "[to be translated]:Gradient Wallpapers"
+      },
+      "displayMode": "[to be translated]:Display Mode",
+      "enable": "[to be translated]:Enable Wallpaper",
+      "excludeWorkflow": {
+        "label": "[to be translated]:Exclude Wallpaper in Workflow",
+        "tip": "[to be translated]:Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "local": {
+        "file": "[to be translated]:Local File",
+        "none": "[to be translated]:Not Selected",
+        "select": "[to be translated]:Select"
+      },
+      "mode": {
+        "center": "[to be translated]:Center",
+        "contain": "[to be translated]:Contain",
+        "cover": "[to be translated]:Cover",
+        "tile": "[to be translated]:Tile"
+      },
+      "opacity": "[to be translated]:Opacity",
+      "reset": "[to be translated]:Reset Parameters",
+      "resetToDefault": "[to be translated]:Reset to Default",
+      "source": {
+        "builtin": "[to be translated]:Built-in",
+        "label": "[to be translated]:Wallpaper Source",
+        "local": "[to be translated]:Local",
+        "none": "[to be translated]:None",
+        "url": "[to be translated]:URL"
+      },
+      "title": "[to be translated]:Wallpaper",
+      "url": {
+        "input": "[to be translated]:Image URL"
+      }
+    },
     "zoom": {
       "reset": "リセット",
       "title": "ページズーム"
@@ -4928,7 +5014,8 @@
     "paintings": "ペインティング",
     "settings": "設定",
     "store": "アシスタントライブラリ",
-    "translate": "翻訳"
+    "translate": "翻訳",
+    "workflow": "[to be translated]:Workflow"
   },
   "trace": {
     "backList": "リストに戻る",

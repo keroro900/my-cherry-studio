@@ -32,7 +32,7 @@ import { updateCodeBlock } from '@renderer/utils/markdown'
 import { getMainTextContent } from '@renderer/utils/messageUtils/find'
 import { isTextLikeBlock } from '@renderer/utils/messageUtils/is'
 import { last } from 'lodash'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import styled from 'styled-components'
@@ -393,4 +393,4 @@ const LoaderContainer = styled.div`
   pointer-events: none;
 `
 
-export default Messages
+export default memo(Messages)

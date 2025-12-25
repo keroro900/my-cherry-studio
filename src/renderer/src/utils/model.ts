@@ -1,8 +1,11 @@
 import {
   isEmbeddingModel,
   isFunctionCallingModel,
+  isGenerateImageModel,
+  isImageEnhancementModel,
   isReasoningModel,
   isRerankModel,
+  isVideoGenerationModel,
   isVisionModel,
   isWebSearchModel
 } from '@renderer/config/models'
@@ -19,10 +22,13 @@ export const getModelTags = (models: Model[]): Record<ModelTag, boolean> => {
     vision: false,
     embedding: false,
     reasoning: false,
+    image_edit: false,
+    image_generation: false,
     function_calling: false,
     web_search: false,
     rerank: false,
-    free: false
+    free: false,
+    video_generation: false
   }
   const total = objectKeys(result).length
   let satisfied = 0
@@ -43,6 +49,14 @@ export const getModelTags = (models: Model[]): Record<ModelTag, boolean> => {
       satisfied += 1
       result.reasoning = true
     }
+    if (!result.image_edit && isImageEnhancementModel(model)) {
+      satisfied += 1
+      result.image_edit = true
+    }
+    if (!result.image_generation && isGenerateImageModel(model)) {
+      satisfied += 1
+      result.image_generation = true
+    }
     if (!result.function_calling && isFunctionCallingModel(model)) {
       satisfied += 1
       result.function_calling = true
@@ -58,6 +72,10 @@ export const getModelTags = (models: Model[]): Record<ModelTag, boolean> => {
     if (!result.free && isFreeModel(model)) {
       satisfied += 1
       result.free = true
+    }
+    if (!result.video_generation && isVideoGenerationModel(model)) {
+      satisfied += 1
+      result.video_generation = true
     }
   }
 

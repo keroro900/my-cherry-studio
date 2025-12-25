@@ -2,7 +2,7 @@ import App from '@renderer/components/MinApp/MinApp'
 import { useMinapps } from '@renderer/hooks/useMinapps'
 import { useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
-import { Code, FileSearch, Folder, Languages, LayoutGrid, NotepadText, Palette, Sparkle } from 'lucide-react'
+import { Camera, Code, FileSearch, Folder, GitBranch, Languages, LayoutGrid, NotepadText, Palette, Sparkle } from 'lucide-react'
 import type { FC } from 'react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -64,6 +64,18 @@ const LaunchpadPage: FC = () => {
       text: t('title.notes'),
       path: '/notes',
       bgColor: 'linear-gradient(135deg, #F97316, #FB923C)' // 笔记：橙色，代表活力和清晰思路
+    },
+    {
+      icon: <GitBranch size={32} className="icon" />,
+      text: t('title.workflow'),
+      path: '/workflow',
+      bgColor: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' // 工作流：深紫色渐变，代表自动化和流程
+    },
+    {
+      icon: <Camera size={32} className="icon" />,
+      text: t('title.image_studio'),
+      path: '/image-studio',
+      bgColor: 'linear-gradient(135deg, #F472B6, #EC4899)' // 图片工坊：粉色渐变，代表创意和图像
     }
   ]
 
@@ -83,7 +95,7 @@ const LaunchpadPage: FC = () => {
   }, [openedKeepAliveMinapps, pinned])
 
   return (
-    <Container>
+    <Container id="launchpad-page">
       <Content>
         <Section>
           <SectionTitle>{t('launchpad.apps')}</SectionTitle>

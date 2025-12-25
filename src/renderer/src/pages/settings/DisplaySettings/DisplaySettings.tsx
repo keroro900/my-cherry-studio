@@ -27,6 +27,8 @@ import styled from 'styled-components'
 
 import { SettingContainer, SettingDivider, SettingGroup, SettingRow, SettingRowTitle, SettingTitle } from '..'
 import SidebarIconsManager from './SidebarIconsManager'
+import ThemePresetSelector from './ThemePresetSelector'
+import WallpaperSettingsComponent from './WallpaperSettings'
 
 const ColorCircleWrapper = styled.div`
   width: 24px;
@@ -260,6 +262,22 @@ const DisplaySettings: FC = () => {
             </SettingRow>
           </>
         )}
+      </SettingGroup>
+      {/* 主题预设 */}
+      <SettingGroup theme={theme}>
+        <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
+          {t('settings.theme.presets.title', '主题预设')} <TextBadge text="New" />
+        </SettingTitle>
+        <SettingDivider />
+        <ThemePresetSelector />
+      </SettingGroup>
+      {/* 壁纸设置 */}
+      <SettingGroup theme={theme}>
+        <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
+          {t('settings.wallpaper.title', '壁纸')} <TextBadge text="New" />
+        </SettingTitle>
+        <SettingDivider />
+        <WallpaperSettingsComponent />
       </SettingGroup>
       <SettingGroup theme={theme}>
         <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>

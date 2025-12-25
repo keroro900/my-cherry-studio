@@ -1,0 +1,26 @@
+.cherry-form-modal .ant-modal-content {
+  border-radius: var(--list-item-border-radius);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-mute);
+}
+.cherry-form-modal .ant-modal-header {
+  border-bottom-color: var(--color-border-mute);
+  background: var(--color-bg);
+}
+.cherry-form-modal .ant-modal-title {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.cherry-form-modal .ant-modal-close {
+  color: var(--color-text-2);
+}
+.cherry-form-modal .ant-modal-body {
+  padding: 16px;
+}
+@media (max-width: 768px) {
+  .cherry-form-modal .ant-modal {
+    width: 96% !important;
+    max-width: 96% !important;
+  }
+}

@@ -57,7 +57,7 @@ class TabsService {
       if (NavigationService.navigate) {
         NavigationService.navigate(lastTab.path)
       } else {
-        logger.warn('Navigation service not ready, will navigate on next render')
+        logger.debug('Navigation service not ready, will navigate on next render')
         setTimeout(() => {
           if (NavigationService.navigate) {
             NavigationService.navigate(lastTab.path)

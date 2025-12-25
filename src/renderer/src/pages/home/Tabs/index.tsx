@@ -9,7 +9,7 @@ import type { Assistant, Topic } from '@renderer/types'
 import type { Tab } from '@renderer/types/chat'
 import { classNames, uuid } from '@renderer/utils'
 import type { FC } from 'react'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -108,11 +108,25 @@ const HomeTabs: FC<Props> = ({
       className={classNames('home-tabs', { right: position === 'right' && topicPosition === 'right' })}>
       {position === 'left' && topicPosition === 'left' && (
         <CustomTabs>
-          <TabItem active={tab === 'assistants'} onClick={() => setTab('assistants')}>
+          <TabItem $active={tab === 'assistants'} onClick={() => setTab('assistants')}>
             {t('assistants.abbr')}
           </TabItem>
-          <TabItem active={tab === 'topic'} onClick={() => setTab('topic')}>
+          <TabItem $active={tab === 'topic'} onClick={() => setTab('topic')}>
             {t('common.topics')}
+          </TabItem>
+          <TabItem $active={tab === 'settings'} onClick={() => setTab('settings')}>
+            {t('settings.title')}
+          </TabItem>
+        </CustomTabs>
+      )}
+
+      {position === 'right' && topicPosition === 'right' && (
+        <CustomTabs>
+          <TabItem $active={tab === 'topic'} onClick={() => setTab('topic')}>
+            {t('common.topics')}
+          </TabItem>
+          <TabItem $active={tab === 'settings'} onClick={() => setTab('settings')}>
+            {t('settings.title')}
           </TabItem>
         </CustomTabs>
       )}
@@ -185,14 +199,14 @@ const CustomTabs = styled.div`
   }
 `
 
-const TabItem = styled.button<{ active: boolean }>`
+const TabItem = styled.button<{ $active: boolean }>`
   flex: 1;
   height: 30px;
   border: none;
   background: transparent;
-  color: ${(props) => (props.active ? 'var(--color-text)' : 'var(--color-text-secondary)')};
+  color: ${(props) => (props.$active ? 'var(--color-text)' : 'var(--color-text-secondary)')};
   font-size: 13px;
-  font-weight: ${(props) => (props.active ? '600' : '400')};
+  font-weight: ${(props) => (props.$active ? '600' : '400')};
   cursor: pointer;
   border-radius: 8px;
   margin: 0 2px;
@@ -215,7 +229,7 @@ const TabItem = styled.button<{ active: boolean }>`
     bottom: -8px;
     left: 50%;
     transform: translateX(-50%);
-    width: ${(props) => (props.active ? '30px' : '0')};
+    width: ${(props) => (props.$active ? '30px' : '0')};
     height: 3px;
     background: var(--color-primary);
     border-radius: 1px;
@@ -223,9 +237,9 @@ const TabItem = styled.button<{ active: boolean }>`
   }
 
   &:hover::after {
-    width: ${(props) => (props.active ? '30px' : '16px')};
-    background: ${(props) => (props.active ? 'var(--color-primary)' : 'var(--color-primary-soft)')};
+    width: ${(props) => (props.$active ? '30px' : '16px')};
+    background: ${(props) => (props.$active ? 'var(--color-primary)' : 'var(--color-primary-soft)')};
   }
 `
 
-export default HomeTabs
+export default memo(HomeTabs)

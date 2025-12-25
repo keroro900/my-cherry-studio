@@ -1,0 +1,338 @@
+/**
+ * 主题预设 CSS 变量
+ * Theme Preset CSS Variables
+ *
+ * 这些变量由 useThemePreset hook 动态设置
+ * These variables are dynamically set by useThemePreset hook
+ */
+
+:root {
+  /* ==================== 主题预设变量 ==================== */
+
+  /* 主色调 */
+  --theme-color-primary: var(--color-primary);
+  --theme-color-primary-hover: var(--color-primary-soft);
+  --theme-color-primary-active: var(--color-primary);
+  --theme-color-primary-bg: var(--color-primary-mute);
+
+  /* 背景层级 */
+  --theme-bg-base: var(--color-background);
+  --theme-bg-container: var(--color-background);
+  --theme-bg-elevated: var(--color-background-soft);
+  --theme-bg-layout: var(--color-background-mute);
+  --theme-bg-spotlight: var(--color-hover);
+
+  /* 文字层级 */
+  --theme-text-primary: var(--color-text);
+  --theme-text-secondary: var(--color-text-secondary);
+  --theme-text-tertiary: var(--color-text-2);
+  --theme-text-quaternary: var(--color-text-3);
+
+  /* 边框 */
+  --theme-border: var(--color-border);
+  --theme-border-secondary: var(--color-border-soft);
+
+  /* 状态色 */
+  --theme-color-success: var(--color-status-success);
+  --theme-color-warning: var(--color-status-warning, #faad14);
+  --theme-color-error: var(--color-error);
+  --theme-color-info: var(--color-link);
+
+  /* ==================== 效果变量 ==================== */
+
+  /* 圆角 */
+  --theme-border-radius-sm: 4px;
+  --theme-border-radius-md: 8px;
+  --theme-border-radius-lg: 12px;
+  --theme-border-radius-xl: 16px;
+  --theme-border-radius-round: 9999px;
+
+  /* 阴影 */
+  --theme-shadow-none: none;
+  --theme-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --theme-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --theme-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+  --theme-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.2);
+
+  /* 玻璃效果 */
+  --theme-glass-bg: rgba(255, 255, 255, 0.7);
+  --theme-glass-blur: 10px;
+  --theme-glass-border: rgba(255, 255, 255, 0.2);
+
+  /* ==================== 壁纸变量 ==================== */
+
+  --wallpaper-url: none;
+  --wallpaper-size: cover;
+  --wallpaper-position: center;
+  --wallpaper-repeat: no-repeat;
+  --wallpaper-blur: 0px;
+  --wallpaper-brightness: 100%;
+  --wallpaper-opacity: 1;
+}
+
+/* 深色模式玻璃效果 */
+[theme-mode='dark'] {
+  --theme-glass-bg: rgba(30, 30, 30, 0.7);
+  --theme-glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== 壁纸功能 ==================== */
+
+/*
+ * 壁纸功能设计说明：
+ * 1. 使用 React 组件 <GlobalWallpaper /> 渲染壁纸层
+ * 2. 壁纸层位于最底层（z-index: -1），不影响主题系统
+ * 3. 主题系统控制组件配色，壁纸只负责背景图
+ * 4. 两者叠加共存，互不干扰
+ */
+
+/* 壁纸启用时，让 body 和 html 背景透明，露出壁纸层 */
+body.wallpaper-enabled,
+html:has(body.wallpaper-enabled) {
+  background-color: transparent !important;
+}
+
+/* 壁纸启用时，#root 需要透明背景并在壁纸层之上 */
+/* 重要：必须保留 flex 布局属性，否则左侧导航栏模式会布局异常 */
+body.wallpaper-enabled #root {
+  background-color: transparent;
+  position: relative;
+  z-index: 1;
+  /* 确保 flex 布局不被破坏 */
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+/* ==================== 左侧导航栏布局修复 ==================== */
+/* 确保左侧导航栏模式下布局正确 */
+body[navbar-position='left'] #root {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* 注意：左侧导航栏模式下的 .ant-app 布局规则在 ant.css 中定义 */
+
+/*
+ * 壁纸启用时，覆盖背景色变量为半透明值
+ * 这样所有使用这些变量的组件都会自动获得半透明效果
+ * --wallpaper-bg-opacity 由 GlobalStyleProvider 根据用户设置的壁纸透明度动态计算
+ */
+body.wallpaper-enabled {
+  /* Cherry 自定义变量 - 使用动态透明度 */
+  --color-background: rgba(var(--color-background-rgb), var(--wallpaper-bg-opacity, 0.75));
+  --color-background-soft: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) - 0.1));
+  --color-background-mute: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) - 0.2));
+  --navbar-background: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) - 0.05));
+  --modal-background: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) + 0.15));
+
+  /* Ant Design 变量覆盖 - 使用动态透明度 */
+  --ant-color-bg-container: rgba(var(--color-background-rgb), var(--wallpaper-bg-opacity, 0.75));
+  --ant-color-bg-elevated: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) + 0.05));
+  --ant-color-bg-layout: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) - 0.1));
+  --ant-color-bg-spotlight: rgba(var(--color-background-rgb), calc(var(--wallpaper-bg-opacity, 0.75) - 0.25));
+}
+
+/* 壁纸启用时，为主要容器添加毛玻璃效果 */
+body.wallpaper-enabled #chat,
+body.wallpaper-enabled .workflow-root,
+body.wallpaper-enabled .workflow-node-panel,
+body.wallpaper-enabled .workflow-config-panel,
+body.wallpaper-enabled .home-tabs,
+body.wallpaper-enabled #app-sidebar,
+body.wallpaper-enabled #launchpad-page {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 壁纸启用时，主要页面使用透明背景 */
+body.wallpaper-enabled #home-page,
+body.wallpaper-enabled #content-container,
+body.wallpaper-enabled #launchpad-page {
+  background-color: transparent;
+}
+
+/* 工作流模块排除壁纸效果 - 保持不透明背景 */
+body.wallpaper-exclude-workflow .workflow-root {
+  background: var(--color-background-mute) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ==================== 主题效果类 ==================== */
+
+/* 玻璃效果 */
+.theme-glass {
+  background: var(--theme-glass-bg) !important;
+  backdrop-filter: blur(var(--theme-glass-blur));
+  -webkit-backdrop-filter: blur(var(--theme-glass-blur));
+  border: 1px solid var(--theme-glass-border);
+}
+
+/* 渐变强调 */
+.theme-gradient-accent {
+  background: linear-gradient(135deg, var(--theme-color-primary) 0%, var(--theme-color-primary-hover) 100%);
+}
+
+/* 圆角预设类 */
+.theme-radius-sm {
+  border-radius: var(--theme-border-radius-sm);
+}
+
+.theme-radius-md {
+  border-radius: var(--theme-border-radius-md);
+}
+
+.theme-radius-lg {
+  border-radius: var(--theme-border-radius-lg);
+}
+
+.theme-radius-xl {
+  border-radius: var(--theme-border-radius-xl);
+}
+
+.theme-radius-round {
+  border-radius: var(--theme-border-radius-round);
+}
+
+/* 阴影预设类 */
+.theme-shadow-sm {
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.theme-shadow-md {
+  box-shadow: var(--theme-shadow-md);
+}
+
+.theme-shadow-lg {
+  box-shadow: var(--theme-shadow-lg);
+}
+
+.theme-shadow-xl {
+  box-shadow: var(--theme-shadow-xl);
+}
+
+/* ==================== 主题预设全局效果 ==================== */
+
+/* 玻璃效果启用时 - 全局应用 */
+body.theme-glass-enabled {
+  --theme-glass-bg-light: rgba(255, 255, 255, 0.75);
+  --theme-glass-bg-dark: rgba(30, 30, 30, 0.75);
+}
+
+body.theme-glass-enabled[theme-mode='light'] {
+  --color-background: rgba(255, 255, 255, 0.85);
+  --color-background-soft: rgba(255, 255, 255, 0.7);
+  --modal-background: rgba(255, 255, 255, 0.9);
+  --navbar-background: rgba(244, 244, 244, 0.85);
+}
+
+body.theme-glass-enabled[theme-mode='dark'] {
+  --color-background: rgba(24, 24, 24, 0.85);
+  --color-background-soft: rgba(34, 34, 34, 0.7);
+  --modal-background: rgba(17, 17, 17, 0.9);
+  --navbar-background: rgba(31, 31, 31, 0.85);
+}
+
+/* 玻璃效果应用到主要容器 */
+body.theme-glass-enabled .ant-modal-content,
+body.theme-glass-enabled .ant-dropdown-menu,
+body.theme-glass-enabled .ant-popover-inner,
+body.theme-glass-enabled .ant-select-dropdown {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 渐变强调启用时 - 全局应用 */
+body.theme-gradient-enabled .ant-btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-soft) 100%) !important;
+  border: none !important;
+}
+
+body.theme-gradient-enabled .ant-btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-primary-soft) 0%, var(--color-primary) 100%) !important;
+}
+
+body.theme-gradient-enabled .ant-switch-checked {
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-soft) 100%) !important;
+}
+
+body.theme-gradient-enabled .ant-segmented-item-selected {
+  background: linear-gradient(135deg, var(--color-primary-mute) 0%, transparent 100%) !important;
+}
+
+/* 主题预设激活时的通用增强 */
+body.theme-preset-active {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+body.theme-preset-active * {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* ==================== 二次元风格增强 ==================== */
+
+/* 可爱的悬停效果 */
+.anime-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.anime-hover:hover {
+  transform: scale(1.02);
+}
+
+/* 弹跳动画 */
+@keyframes anime-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.anime-bounce {
+  animation: anime-bounce 0.5s ease-in-out;
+}
+
+/* 发光效果 */
+.anime-glow {
+  box-shadow: 0 0 20px var(--theme-color-primary-bg);
+}
+
+/* 渐变边框 */
+.anime-gradient-border {
+  position: relative;
+  background: var(--theme-bg-container);
+  border-radius: var(--theme-border-radius-lg);
+}
+
+.anime-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--theme-border-radius-lg) + 2px);
+  background: linear-gradient(
+    135deg,
+    var(--theme-color-primary) 0%,
+    var(--theme-color-primary-hover) 50%,
+    var(--theme-color-primary) 100%
+  );
+  z-index: -1;
+}
+
+/* 柔和阴影 */
+.anime-soft-shadow {
+  box-shadow:
+    0 4px 20px rgba(var(--theme-color-primary), 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}

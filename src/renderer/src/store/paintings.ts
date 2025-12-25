@@ -54,11 +54,18 @@ const paintingsSlice = createSlice({
     ) => {
       const { namespace = 'paintings', painting } = action.payload
 
+      // 确保 namespace 存在
+      if (!state[namespace]) {
+        state[namespace] = []
+      }
+
       const existingIndex = state[namespace].findIndex((c) => c.id === painting.id)
       if (existingIndex !== -1) {
         state[namespace] = state[namespace].map((c) => (c.id === painting.id ? painting : c))
       } else {
-        logger.error(`Painting with id ${painting.id} not found in ${namespace}`)
+        // 如果找不到，自动添加到列表（可能是跨窗口同步导致的）
+        logger.warn(`Painting with id ${painting.id} not found in ${namespace}, adding it`)
+        state[namespace].unshift(painting)
       }
     },
     updatePaintings: (

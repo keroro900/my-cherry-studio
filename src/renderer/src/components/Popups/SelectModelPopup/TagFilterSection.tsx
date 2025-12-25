@@ -2,9 +2,12 @@ import { loggerService } from '@logger'
 import {
   EmbeddingTag,
   FreeTag,
+  ImageEditTag,
+  ImageGenerationTag,
   ReasoningTag,
   RerankerTag,
   ToolsCallingTag,
+  VideoGenerationTag,
   VisionTag,
   WebSearchTag
 } from '@renderer/components/Tags/Model'
@@ -38,6 +41,9 @@ const TagFilterSection: React.FC<TagFilterSectionProps> = ({ availableTags, tagS
       vision: VisionTag,
       embedding: EmbeddingTag,
       reasoning: ReasoningTag,
+      image_edit: ImageEditTag,
+      image_generation: ImageGenerationTag,
+      video_generation: VideoGenerationTag,
       function_calling: ToolsCallingTag,
       web_search: WebSearchTag,
       rerank: RerankerTag,

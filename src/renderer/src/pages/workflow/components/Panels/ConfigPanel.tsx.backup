@@ -1,0 +1,491 @@
+/**
+ * 配置面板组件
+ * 显示选中节点的配置选项
+ */
+
+import { useAppDispatch,useAppSelector } from '@renderer/store'
+import { removeNode,updateNode } from '@renderer/store/workflow'
+import { memo, useCallback } from 'react'
+
+import { NODE_REGISTRY, type NodeDefinition,WorkflowNodeType } from '../../types'
+
+// 类别颜色映射
+const CATEGORY_COLORS: Record<NodeDefinition['category'], string> = {
+  input: '#52c41a',
+  ai: '#1890ff',
+  image: '#722ed1',
+  video: '#eb2f96',
+  flow: '#faad14',
+  output: '#13c2c2'
+}
+
+function getCategoryColor(category: NodeDefinition['category']): string {
+  return CATEGORY_COLORS[category] || '#666'
+}
+import type { Provider } from '@renderer/types'
+
+const panelStyle: React.CSSProperties = {
+  width: '300px',
+  height: '100%',
+  backgroundColor: 'var(--ant-color-bg-container)',
+  borderLeft: '1px solid var(--ant-color-border)',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden'
+}
+
+const headerStyle: React.CSSProperties = {
+  padding: '16px',
+  borderBottom: '1px solid var(--ant-color-border)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px'
+}
+
+const contentStyle: React.CSSProperties = {
+  flex: 1,
+  overflow: 'auto',
+  padding: '16px'
+}
+
+const sectionStyle: React.CSSProperties = {
+  marginBottom: '20px'
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '8px',
+  fontSize: '13px',
+  fontWeight: 500,
+  color: 'var(--ant-color-text)'
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '8px 12px',
+  borderRadius: '6px',
+  border: '1px solid var(--ant-color-border)',
+  backgroundColor: 'var(--ant-color-bg-elevated)',
+  color: 'var(--ant-color-text)',
+  fontSize: '13px',
+  outline: 'none'
+}
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  cursor: 'pointer'
+}
+
+const textareaStyle: React.CSSProperties = {
+  ...inputStyle,
+  minHeight: '80px',
+  resize: 'vertical',
+  fontFamily: 'inherit'
+}
+
+const buttonStyle: React.CSSProperties = {
+  padding: '8px 16px',
+  borderRadius: '6px',
+  border: 'none',
+  cursor: 'pointer',
+  fontSize: '13px',
+  fontWeight: 500,
+  transition: 'all 0.2s'
+}
+
+/**
+ * 配置面板
+ */
+function ConfigPanel() {
+  const dispatch = useAppDispatch()
+  const { selectedNodeId, nodes } = useAppSelector((state) => state.workflow)
+  const llmProviders = useAppSelector((state) => state.llm?.providers ?? []) as Provider[]
+
+  const selectedNode = nodes.find((n) => n.id === selectedNodeId)
+  const nodeDef = selectedNode && selectedNode.data.nodeType
+    ? NODE_REGISTRY[selectedNode.data.nodeType as WorkflowNodeType]
+    : null
+
+  const handleUpdateConfig = useCallback(
+    (key: string, value: any) => {
+      if (!selectedNodeId) return
+      dispatch(
+        updateNode({
+          id: selectedNodeId,
+          data: {
+            config: {
+              ...selectedNode?.data.config,
+              [key]: value
+            }
+          }
+        })
+      )
+    },
+    [dispatch, selectedNodeId, selectedNode?.data.config]
+  )
+
+  const handleUpdateLabel = useCallback(
+    (label: string) => {
+      if (!selectedNodeId) return
+      dispatch(updateNode({ id: selectedNodeId, data: { label } }))
+    },
+    [dispatch, selectedNodeId]
+  )
+
+  const handleUpdateModel = useCallback(
+    (providerId: string, modelId: string) => {
+      if (!selectedNodeId) return
+      dispatch(updateNode({ id: selectedNodeId, data: { providerId, modelId } }))
+    },
+    [dispatch, selectedNodeId]
+  )
+
+  const handleDeleteNode = useCallback(() => {
+    if (!selectedNodeId) return
+    dispatch(removeNode(selectedNodeId))
+  }, [dispatch, selectedNodeId])
+
+  // 未选中节点时显示提示
+  if (!selectedNode || !nodeDef) {
+    return (
+      <div style={panelStyle}>
+        <div style={headerStyle}>
+          <span style={{ fontSize: '16px' }}>⚙️</span>
+          <span style={{ fontWeight: 600, fontSize: '14px' }}>节点配置</span>
+        </div>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '32px',
+            color: 'var(--ant-color-text-tertiary)'
+          }}
+        >
+          <span style={{ fontSize: '48px', marginBottom: '16px' }}>🎯</span>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ marginBottom: '8px' }}>点击选中节点</div>
+            <div style={{ fontSize: '12px' }}>查看和编辑节点配置</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const categoryColor = getCategoryColor(nodeDef.category)
+  const nodeType = selectedNode.data.nodeType || selectedNode.data.type || ''
+  const isAINode = nodeDef.category === 'ai'
+  const isImageNode = nodeDef.category === 'image'
+  const isVideoNode = nodeDef.category === 'video'
+  const hasBackendType = !!nodeDef.backendType
+
+  return (
+    <div style={panelStyle}>
+      {/* 头部 */}
+      <div style={headerStyle}>
+        <span
+          style={{
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: `${categoryColor}20`,
+            borderRadius: '8px',
+            fontSize: '18px'
+          }}
+        >
+          {nodeDef.icon}
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: '14px',
+              color: 'var(--ant-color-text)',
+              marginBottom: '2px'
+            }}
+          >
+            {selectedNode.data.label}
+          </div>
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--ant-color-text-tertiary)'
+            }}
+          >
+            {nodeDef.description}
+          </div>
+        </div>
+      </div>
+
+      {/* 内容区 */}
+      <div style={contentStyle}>
+        {/* 基本信息 */}
+        <div style={sectionStyle}>
+          <label style={labelStyle}>节点名称</label>
+          <input
+            type="text"
+            value={selectedNode.data.label}
+            onChange={(e) => handleUpdateLabel(e.target.value)}
+            style={inputStyle}
+          />
+        </div>
+
+        {/* AI 节点：模型选择 */}
+        {isAINode && (
+          <div style={sectionStyle}>
+            <label style={labelStyle}>AI 模型</label>
+            <select
+              value={selectedNode.data.providerId || ''}
+              onChange={(e) => {
+                const providerId = e.target.value
+                const provider = llmProviders.find((p) => p.id === providerId)
+                if (provider?.models?.[0]) {
+                  handleUpdateModel(providerId, provider.models[0].id)
+                }
+              }}
+              style={{ ...selectStyle, marginBottom: '8px' }}
+            >
+              <option value="">选择 Provider</option>
+              {llmProviders.map((provider) => (
+                <option key={provider.id} value={provider.id}>
+                  {provider.name || provider.id}
+                </option>
+              ))}
+            </select>
+
+            {selectedNode.data.providerId && (
+              <select
+                value={selectedNode.data.modelId || ''}
+                onChange={(e) => handleUpdateModel(selectedNode.data.providerId!, e.target.value)}
+                style={selectStyle}
+              >
+                <option value="">选择 Model</option>
+                {llmProviders
+                  .find((p) => p.id === selectedNode.data.providerId)
+                  ?.models?.map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.name || model.id}
+                    </option>
+                  ))}
+              </select>
+            )}
+          </div>
+        )}
+
+        {/* AI 节点：提示词 */}
+        {(isAINode || nodeType === WorkflowNodeType.VISION_PROMPT) && (
+          <>
+            <div style={sectionStyle}>
+              <label style={labelStyle}>系统提示词</label>
+              <textarea
+                value={selectedNode.data.config?.systemPrompt || ''}
+                onChange={(e) => handleUpdateConfig('systemPrompt', e.target.value)}
+                placeholder="设置 AI 的角色和行为..."
+                style={textareaStyle}
+              />
+            </div>
+
+            <div style={sectionStyle}>
+              <label style={labelStyle}>用户提示词</label>
+              <textarea
+                value={selectedNode.data.config?.prompt || ''}
+                onChange={(e) => handleUpdateConfig('prompt', e.target.value)}
+                placeholder="输入具体的指令..."
+                style={textareaStyle}
+              />
+            </div>
+
+            <div style={sectionStyle}>
+              <label style={labelStyle}>Temperature</label>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                value={selectedNode.data.config?.temperature ?? 0.7}
+                onChange={(e) => handleUpdateConfig('temperature', parseFloat(e.target.value))}
+                style={{ width: '100%' }}
+              />
+              <div style={{ fontSize: '12px', color: 'var(--ant-color-text-tertiary)' }}>
+                当前值: {selectedNode.data.config?.temperature ?? 0.7}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* 图像处理节点配置 */}
+        {isImageNode && (
+          <>
+            {(nodeType === WorkflowNodeType.GEMINI_EDIT || nodeType === WorkflowNodeType.GEMINI_EDIT_CUSTOM) && (
+              <div style={sectionStyle}>
+                <label style={labelStyle}>编辑模式</label>
+                <select
+                  value={selectedNode.data.config?.mode || 'preset'}
+                  onChange={(e) => handleUpdateConfig('mode', e.target.value)}
+                  style={selectStyle}
+                >
+                  <option value="preset">预设模式</option>
+                  <option value="custom">自定义模式</option>
+                  <option value="single">单图编辑</option>
+                  <option value="multi">多图编辑</option>
+                </select>
+              </div>
+            )}
+
+            {nodeType === WorkflowNodeType.RUNNINGHUB_APP && (
+              <>
+                <div style={sectionStyle}>
+                  <label style={labelStyle}>应用 ID</label>
+                  <input
+                    type="text"
+                    value={selectedNode.data.config?.appId || ''}
+                    onChange={(e) => handleUpdateConfig('appId', e.target.value)}
+                    placeholder="RunningHub 应用 ID"
+                    style={inputStyle}
+                  />
+                </div>
+                <div style={sectionStyle}>
+                  <label style={labelStyle}>节点 ID</label>
+                  <input
+                    type="text"
+                    value={selectedNode.data.config?.nodeId || ''}
+                    onChange={(e) => handleUpdateConfig('nodeId', e.target.value)}
+                    placeholder="目标节点 ID"
+                    style={inputStyle}
+                  />
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {/* 视频节点配置 */}
+        {isVideoNode && (
+          <>
+            <div style={sectionStyle}>
+              <label style={labelStyle}>视频时长 (秒)</label>
+              <select
+                value={selectedNode.data.config?.duration || 5}
+                onChange={(e) => handleUpdateConfig('duration', parseInt(e.target.value))}
+                style={selectStyle}
+              >
+                <option value={5}>5 秒</option>
+                <option value={10}>10 秒</option>
+              </select>
+            </div>
+            <div style={sectionStyle}>
+              <label style={labelStyle}>宽高比</label>
+              <select
+                value={selectedNode.data.config?.aspectRatio || '16:9'}
+                onChange={(e) => handleUpdateConfig('aspectRatio', e.target.value)}
+                style={selectStyle}
+              >
+                <option value="16:9">16:9 (横屏)</option>
+                <option value="9:16">9:16 (竖屏)</option>
+                <option value="1:1">1:1 (方形)</option>
+              </select>
+            </div>
+          </>
+        )}
+
+        {/* 输出节点配置 */}
+        {nodeType === WorkflowNodeType.OUTPUT && (
+          <div style={sectionStyle}>
+            <label style={labelStyle}>输出路径</label>
+            <input
+              type="text"
+              value={selectedNode.data.config?.outputPath || ''}
+              onChange={(e) => handleUpdateConfig('outputPath', e.target.value)}
+              placeholder="文件保存路径..."
+              style={inputStyle}
+            />
+          </div>
+        )}
+
+        {/* 高级配置 */}
+        {hasBackendType && (
+          <details style={{ marginTop: '20px' }}>
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: 'var(--ant-color-text-secondary)',
+                marginBottom: '12px'
+              }}
+            >
+              高级配置
+            </summary>
+            <div style={{ paddingLeft: '8px' }}>
+              <div style={sectionStyle}>
+                <label style={labelStyle}>重试次数</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  value={selectedNode.data.retry || 0}
+                  onChange={(e) =>
+                    dispatch(
+                      updateNode({
+                        id: selectedNodeId!,
+                        data: { retry: parseInt(e.target.value) || 0 }
+                      })
+                    )
+                  }
+                  style={inputStyle}
+                />
+              </div>
+              <div style={sectionStyle}>
+                <label style={labelStyle}>超时时间 (秒)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={selectedNode.data.timeout || ''}
+                  onChange={(e) =>
+                    dispatch(
+                      updateNode({
+                        id: selectedNodeId!,
+                        data: { timeout: parseInt(e.target.value) || undefined }
+                      })
+                    )
+                  }
+                  placeholder="无限制"
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+          </details>
+        )}
+      </div>
+
+      {/* 底部操作 */}
+      <div
+        style={{
+          padding: '16px',
+          borderTop: '1px solid var(--ant-color-border)',
+          display: 'flex',
+          gap: '8px'
+        }}
+      >
+        <button
+          onClick={handleDeleteNode}
+          style={{
+            ...buttonStyle,
+            flex: 1,
+            backgroundColor: 'transparent',
+            border: '1px solid #ff4d4f',
+            color: '#ff4d4f'
+          }}
+        >
+          🗑️ 删除节点
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default memo(ConfigPanel)

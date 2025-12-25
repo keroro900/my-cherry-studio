@@ -1,3 +1,4 @@
+import { EditorSelection } from '@codemirror/state'
 import { useCodeStyle } from '@renderer/context/CodeStyleProvider'
 import { useSettings } from '@renderer/hooks/useSettings'
 import type { BasicSetupOptions, Extension } from '@uiw/react-codemirror'
@@ -14,6 +15,7 @@ const External = Annotation.define<boolean>()
 export interface CodeEditorHandles {
   save?: () => void
   scrollToLine?: (lineNumber: number, options?: { highlight?: boolean }) => void
+  insertText?: (text: string) => void
 }
 
 export interface CodeEditorProps {
@@ -185,9 +187,29 @@ const CodeEditor = ({
 
   const scrollToLine = useScrollToLine(editorViewRef)
 
+  const insertText = useCallback((text: string) => {
+    const view = editorViewRef.current
+    if (!view) return
+
+    const { state } = view
+    const changes = state.changeByRange((range) => ({
+      changes: [{ from: range.from, insert: text }],
+      range: EditorSelection.cursor(range.from + text.length)
+    }))
+
+    view.dispatch(
+      state.update(changes, {
+        scrollIntoView: true,
+        annotations: [External.of(true)]
+      })
+    )
+    view.focus()
+  }, [])
+
   useImperativeHandle(ref, () => ({
     save: handleSave,
-    scrollToLine
+    scrollToLine,
+    insertText
   }))
 
   return (

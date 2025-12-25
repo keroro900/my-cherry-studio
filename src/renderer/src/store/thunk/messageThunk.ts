@@ -261,7 +261,12 @@ const createSSEReadableStream = (
           const parsed = JSON.parse(dataPayload) as TextStreamPart<Record<string, any>>
           controller.enqueue(parsed)
         } catch (error) {
-          logger.warn('Failed to parse agent SSE chunk', { dataPayload })
+          // 记录详细的解析错误信息，包含错误上下文
+          logger.warn('Failed to parse agent SSE chunk', {
+            dataPayload: dataPayload.substring(0, 500),
+            error: error instanceof Error ? error.message : String(error)
+          })
+          // 注意：这里选择继续处理而不是中断流，因为单个 chunk 解析失败不应影响整体流
         }
         return false
       }
@@ -273,17 +278,45 @@ const createSSEReadableStream = (
             if (done) break
             buffer += decoder.decode(value, { stream: true })
 
-            let separatorIndex = buffer.indexOf('\n\n')
-            while (separatorIndex !== -1) {
+            // 处理 SSE 分隔符：支持 \n\n 和 \r\n\r\n
+            let separatorIndex: number
+            let separatorLength: number
+
+            const processEvents = () => {
+              // 查找两种分隔符，使用最先出现的那个
+              const lfIndex = buffer.indexOf('\n\n')
+              const crlfIndex = buffer.indexOf('\r\n\r\n')
+
+              if (lfIndex === -1 && crlfIndex === -1) {
+                return false // 没有找到分隔符
+              }
+
+              // 选择最先出现的分隔符
+              if (lfIndex !== -1 && (crlfIndex === -1 || lfIndex < crlfIndex)) {
+                separatorIndex = lfIndex
+                separatorLength = 2 // \n\n
+              } else {
+                separatorIndex = crlfIndex
+                separatorLength = 4 // \r\n\r\n
+              }
+
               const rawEvent = buffer.slice(0, separatorIndex).trim()
-              buffer = buffer.slice(separatorIndex + 2)
+              buffer = buffer.slice(separatorIndex + separatorLength)
               if (rawEvent) {
                 const shouldStop = emitEvent(rawEvent)
                 if (shouldStop) {
-                  return
+                  return true // 需要停止
                 }
               }
-              separatorIndex = buffer.indexOf('\n\n')
+              return null // 继续处理
+            }
+
+            let result = processEvents()
+            while (result === null) {
+              result = processEvents()
+            }
+            if (result === true) {
+              return
             }
           }
 

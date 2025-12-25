@@ -1283,6 +1283,8 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
+    "gemini-image": "[to be translated]:Image Generation (Gemini)",
+    "gemini-image-edit": "[to be translated]:Image Edit (Gemini)",
     "image-generation": "Génération d'images (OpenAI)",
     "jina-rerank": "Reclassement Jina",
     "openai": "OpenAI",
@@ -2165,6 +2167,8 @@
       "embedding": "Incorporation",
       "free": "Gratuit",
       "function_calling": "Appel de fonction",
+      "image_edit": "[to be translated]:Image Edit",
+      "image_generation": "[to be translated]:Image Generation",
       "reasoning": "Raisonnement",
       "rerank": "Reclasser",
       "select": "Types de modèle",
@@ -3963,7 +3967,8 @@
         "no": "sans description",
         "nowledge_mem": "Nécessite l’application Nowledge Mem exécutée localement. Conserve les discussions IA, outils, notes, agents et fichiers dans une mémoire privée sur votre ordinateur. Téléchargez depuis https://mem.nowledge.co/",
         "python": "Exécutez du code Python dans un environnement bac à sable sécurisé. Utilisez Pyodide pour exécuter Python, prenant en charge la plupart des bibliothèques standard et des packages de calcul scientifique.",
-        "sequentialthinking": "Un serveur MCP qui fournit des outils permettant une résolution dynamique et réflexive des problèmes à travers un processus de pensée structuré"
+        "sequentialthinking": "Un serveur MCP qui fournit des outils permettant une résolution dynamique et réflexive des problèmes à travers un processus de pensée structuré",
+        "workflow": "[to be translated]:AI Workflow Service - Provides workflow management, execution and AI service integration. Supports Qwen, Gemini, Kling, RunningHub and other AI services"
       },
       "command": "Commande",
       "config_description": "Configurer le modèle du protocole de contexte du serveur",
@@ -4699,9 +4704,52 @@
       "zoom_reset": "Réinitialiser le zoom"
     },
     "theme": {
+      "category": {
+        "anime": "[to be translated]:Anime",
+        "custom": "[to be translated]:Custom",
+        "default": "[to be translated]:Default",
+        "nature": "[to be translated]:Nature",
+        "professional": "[to be translated]:Professional"
+      },
       "color_primary": "Couleur principale",
       "dark": "Sombre",
+      "effect": {
+        "glass": "[to be translated]:Glass Effect",
+        "gradient": "[to be translated]:Gradient Accents",
+        "rounded": "[to be translated]:Large Radius"
+      },
       "light": "Clair",
+      "preset": {
+        "default": {
+          "desc": "[to be translated]:Simple and elegant green theme",
+          "name": "[to be translated]:Cherry Default"
+        },
+        "lavender": {
+          "desc": "[to be translated]:Romantic purple with glass effect",
+          "name": "[to be translated]:Lavender Purple"
+        },
+        "mint": {
+          "desc": "[to be translated]:Fresh and natural green",
+          "name": "[to be translated]:Mint Green"
+        },
+        "neon": {
+          "desc": "[to be translated]:Dark background with neon glow",
+          "name": "[to be translated]:Neon Cyber"
+        },
+        "sakura": {
+          "desc": "[to be translated]:Soft pink, anime style",
+          "name": "[to be translated]:Sakura Pink"
+        },
+        "sky": {
+          "desc": "[to be translated]:Fresh and bright blue",
+          "name": "[to be translated]:Sky Blue"
+        }
+      },
+      "presets": {
+        "desc": "[to be translated]:Select a preset theme, or hover to preview",
+        "none": "[to be translated]:Use Custom Colors",
+        "title": "[to be translated]:Theme Presets"
+      },
       "system": "Système",
       "title": "Thème",
       "window": {
@@ -4910,6 +4958,44 @@
       "show": "Afficher l'icône dans la barre d'état système",
       "title": "Barre d'état système"
     },
+    "wallpaper": {
+      "blur": "[to be translated]:Blur",
+      "brightness": "[to be translated]:Brightness",
+      "builtin": {
+        "gradient": "[to be translated]:Gradient Wallpapers"
+      },
+      "displayMode": "[to be translated]:Display Mode",
+      "enable": "[to be translated]:Enable Wallpaper",
+      "excludeWorkflow": {
+        "label": "[to be translated]:Exclude Wallpaper in Workflow",
+        "tip": "[to be translated]:Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "local": {
+        "file": "[to be translated]:Local File",
+        "none": "[to be translated]:Not Selected",
+        "select": "[to be translated]:Select"
+      },
+      "mode": {
+        "center": "[to be translated]:Center",
+        "contain": "[to be translated]:Contain",
+        "cover": "[to be translated]:Cover",
+        "tile": "[to be translated]:Tile"
+      },
+      "opacity": "[to be translated]:Opacity",
+      "reset": "[to be translated]:Reset Parameters",
+      "resetToDefault": "[to be translated]:Reset to Default",
+      "source": {
+        "builtin": "[to be translated]:Built-in",
+        "label": "[to be translated]:Wallpaper Source",
+        "local": "[to be translated]:Local",
+        "none": "[to be translated]:None",
+        "url": "[to be translated]:URL"
+      },
+      "title": "[to be translated]:Wallpaper",
+      "url": {
+        "input": "[to be translated]:Image URL"
+      }
+    },
     "zoom": {
       "reset": "Réinitialiser",
       "title": "Zoom"
@@ -4928,7 +5014,8 @@
     "paintings": "Peintures",
     "settings": "Paramètres",
     "store": "Bibliothèque d'assistants",
-    "translate": "Traduire"
+    "translate": "Traduire",
+    "workflow": "[to be translated]:Workflow"
   },
   "trace": {
     "backList": "Retour à la liste",

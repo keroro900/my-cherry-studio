@@ -501,6 +501,14 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   ipcMain.handle(IpcChannel.System_GetDeviceType, () => (isMac ? 'mac' : isWin ? 'windows' : 'linux'))
   ipcMain.handle(IpcChannel.System_GetHostname, () => require('os').hostname())
   ipcMain.handle(IpcChannel.System_GetCpuName, () => require('os').cpus()[0].model)
+  ipcMain.handle(IpcChannel.System_GetPath, async (_, name: string) => {
+    try {
+      return app.getPath(name as Parameters<typeof app.getPath>[0])
+    } catch (error) {
+      logger.error('Failed to get system path', { name, error })
+      return null
+    }
+  })
   ipcMain.handle(IpcChannel.System_CheckGitBash, () => {
     if (!isWin) {
       return true // Non-Windows systems don't need Git Bash
@@ -656,6 +664,22 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   // fs
   ipcMain.handle(IpcChannel.Fs_Read, FileService.readFile.bind(FileService))
   ipcMain.handle(IpcChannel.Fs_ReadText, FileService.readTextFileWithAutoEncoding.bind(FileService))
+  ipcMain.handle(IpcChannel.Fs_ReadBase64, async (_, filePath: string) => {
+    try {
+      // 使用异步 access 检查文件是否存在且可读
+      try {
+        await fs.promises.access(filePath, fs.constants.R_OK)
+      } catch {
+        throw new Error(`File not found or not readable: ${filePath}`)
+      }
+      // 使用异步 readFile 避免阻塞主进程
+      const buffer = await fs.promises.readFile(filePath)
+      return buffer.toString('base64')
+    } catch (error) {
+      logger.error('Failed to read file as base64', { filePath, error })
+      throw error
+    }
+  })
 
   // export
   ipcMain.handle(IpcChannel.Export_Word, exportService.exportToWord.bind(exportService))

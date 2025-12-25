@@ -1283,10 +1283,13 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
+    "gemini-image": "Image Generation (Gemini)",
+    "gemini-image-edit": "Image Edit (Gemini)",
     "image-generation": "Image Generation (OpenAI)",
     "jina-rerank": "Jina Rerank",
     "openai": "OpenAI",
-    "openai-response": "OpenAI-Response"
+    "openai-response": "OpenAI-Response",
+    "video-generation": "Video Generation"
   },
   "error": {
     "availableProviders": "Available Providers",
@@ -1462,6 +1465,167 @@
     "generating": "Generating",
     "preview": "Preview",
     "split": "Split"
+  },
+  "image_studio": {
+    "modules": {
+      "ecom": "E-commerce",
+      "model": "Model Fitting",
+      "pattern": "Pattern Design"
+    },
+    "select_provider": "Select Provider",
+    "select_model": "Select Model",
+    "sidebar": {
+      "title": "Configuration",
+      "generate": "Generate",
+      "generating": "Generating..."
+    },
+    "canvas": {
+      "empty": "Select an image from the gallery or generate a new one",
+      "loading": "Loading..."
+    },
+    "gallery": {
+      "title": "Gallery",
+      "version_history": "Version History",
+      "task_queue": "Task Queue",
+      "empty_versions": "No versions yet",
+      "empty_tasks": "No tasks in queue"
+    },
+    "task": {
+      "status": {
+        "queued": "Queued",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "type": {
+        "generate": "Generate",
+        "regenerate": "Regenerate",
+        "local_edit": "Local Edit"
+      },
+      "actions": {
+        "pause": "Pause",
+        "resume": "Resume",
+        "cancel": "Cancel",
+        "retry": "Retry"
+      }
+    },
+    "version": {
+      "current": "Current Version",
+      "rollback": "Rollback to this version",
+      "compare": "Compare versions"
+    },
+    "ecom": {
+      "title": "E-commerce Image",
+      "upload": {
+        "label": "Upload Product Image",
+        "hint": "Drag and drop or click to upload",
+        "formats": "Supports JPG, PNG, WebP"
+      },
+      "layout": {
+        "label": "Layout Mode",
+        "main": "Main Image",
+        "back": "Back Image",
+        "detail": "Detail Image",
+        "all": "All Images"
+      },
+      "style": {
+        "label": "Style Preset",
+        "simple": "Simple Clean",
+        "luxury": "Luxury",
+        "natural": "Natural",
+        "tech": "Tech",
+        "custom": "Custom"
+      },
+      "background": {
+        "label": "Background Style",
+        "white": "Pure White",
+        "gradient": "Gradient",
+        "scene": "Scene",
+        "transparent": "Transparent"
+      },
+      "output": {
+        "label": "Output Settings",
+        "size": "Output Size",
+        "format": "Output Format",
+        "quality": "Quality"
+      },
+      "prompt": {
+        "label": "Additional Prompt",
+        "placeholder": "Enter additional generation prompt..."
+      }
+    },
+    "model_fitting": {
+      "title": "Model Fitting",
+      "clothes": {
+        "label": "Upload Clothes",
+        "hint": "Upload the clothes image to fit",
+        "formats": "Supports JPG, PNG, WebP"
+      },
+      "model": {
+        "label": "Model Type",
+        "male": "Male",
+        "female": "Female",
+        "child": "Child"
+      },
+      "age": {
+        "label": "Age Range",
+        "young": "18-25",
+        "middle": "26-35",
+        "mature": "36-50"
+      },
+      "scene": {
+        "label": "Scene",
+        "studio": "Studio",
+        "outdoor": "Outdoor",
+        "indoor": "Indoor",
+        "street": "Street"
+      },
+      "pose": {
+        "label": "Pose",
+        "standing": "Standing",
+        "walking": "Walking",
+        "sitting": "Sitting",
+        "dynamic": "Dynamic"
+      }
+    },
+    "pattern": {
+      "title": "Pattern Design",
+      "mode": {
+        "label": "Generation Mode",
+        "modeA": "Mode A - Reference-based",
+        "modeB": "Mode B - Description-based",
+        "modeC": "Mode C - Mixed"
+      },
+      "reference": {
+        "label": "Reference Image",
+        "hint": "Upload reference image (optional)"
+      },
+      "output_type": {
+        "label": "Output Type",
+        "seamless": "Seamless Pattern",
+        "tshirt": "T-shirt Print",
+        "poster": "Poster"
+      },
+      "density": {
+        "label": "Pattern Density",
+        "sparse": "Sparse",
+        "medium": "Medium",
+        "dense": "Dense"
+      },
+      "color_tone": {
+        "label": "Color Tone",
+        "warm": "Warm",
+        "cool": "Cool",
+        "neutral": "Neutral",
+        "vibrant": "Vibrant"
+      },
+      "style_preset": {
+        "label": "Style Preset",
+        "select": "Select style...",
+        "count": "{{count}} presets available"
+      }
+    }
   },
   "import": {
     "chatgpt": {
@@ -2165,10 +2329,13 @@
       "embedding": "Embedding",
       "free": "Free",
       "function_calling": "Tool",
+      "image_edit": "Image Edit",
+      "image_generation": "Image Generation",
       "reasoning": "Reasoning",
       "rerank": "Reranker",
       "select": "Model Types",
       "text": "Text",
+      "video_generation": "Video Generation",
       "vision": "Vision",
       "websearch": "WebSearch"
     }
@@ -3963,7 +4130,8 @@
         "no": "No description",
         "nowledge_mem": "Requires Nowledge Mem app running locally. Keeps AI chats, tools, notes, agents, and files in private memory on your computer. Download from https://mem.nowledge.co/",
         "python": "Execute Python code in a secure sandbox environment. Run Python with Pyodide, supporting most standard libraries and scientific computing packages",
-        "sequentialthinking": "A MCP server implementation that provides tools for dynamic and reflective problem solving through structured thinking processes"
+        "sequentialthinking": "A MCP server implementation that provides tools for dynamic and reflective problem solving through structured thinking processes",
+        "workflow": "AI Workflow Service - Provides workflow management, execution and AI service integration. Supports Qwen, Gemini, Kling, RunningHub and other AI services"
       },
       "command": "Command",
       "config_description": "Configure Model Context Protocol servers",
@@ -4699,9 +4867,52 @@
       "zoom_reset": "Reset Zoom"
     },
     "theme": {
+      "category": {
+        "anime": "Anime",
+        "custom": "Custom",
+        "default": "Default",
+        "nature": "Nature",
+        "professional": "Professional"
+      },
       "color_primary": "Primary Color",
       "dark": "Dark",
+      "effect": {
+        "glass": "Glass Effect",
+        "gradient": "Gradient Accents",
+        "rounded": "Large Radius"
+      },
       "light": "Light",
+      "preset": {
+        "default": {
+          "desc": "Simple and elegant green theme",
+          "name": "Cherry Default"
+        },
+        "lavender": {
+          "desc": "Romantic purple with glass effect",
+          "name": "Lavender Purple"
+        },
+        "mint": {
+          "desc": "Fresh and natural green",
+          "name": "Mint Green"
+        },
+        "neon": {
+          "desc": "Dark background with neon glow",
+          "name": "Neon Cyber"
+        },
+        "sakura": {
+          "desc": "Soft pink, anime style",
+          "name": "Sakura Pink"
+        },
+        "sky": {
+          "desc": "Fresh and bright blue",
+          "name": "Sky Blue"
+        }
+      },
+      "presets": {
+        "desc": "Select a preset theme, or hover to preview",
+        "none": "Use Custom Colors",
+        "title": "Theme Presets"
+      },
       "system": "System",
       "title": "Theme",
       "window": {
@@ -4910,6 +5121,44 @@
       "show": "Show Tray Icon",
       "title": "Tray"
     },
+    "wallpaper": {
+      "blur": "Blur",
+      "brightness": "Brightness",
+      "builtin": {
+        "gradient": "Gradient Wallpapers"
+      },
+      "displayMode": "Display Mode",
+      "enable": "Enable Wallpaper",
+      "excludeWorkflow": {
+        "label": "Exclude Wallpaper in Workflow",
+        "tip": "Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "local": {
+        "file": "Local File",
+        "none": "Not Selected",
+        "select": "Select"
+      },
+      "mode": {
+        "center": "Center",
+        "contain": "Contain",
+        "cover": "Cover",
+        "tile": "Tile"
+      },
+      "opacity": "Opacity",
+      "reset": "Reset Parameters",
+      "resetToDefault": "Reset to Default",
+      "source": {
+        "builtin": "Built-in",
+        "label": "Wallpaper Source",
+        "local": "Local",
+        "none": "None",
+        "url": "URL"
+      },
+      "title": "Wallpaper",
+      "url": {
+        "input": "Image URL"
+      }
+    },
     "zoom": {
       "reset": "Reset",
       "title": "Page Zoom"
@@ -4920,6 +5169,7 @@
     "code": "Code",
     "files": "Files",
     "home": "Home",
+    "image_studio": "Image Studio",
     "knowledge": "Knowledge Base",
     "launchpad": "Launchpad",
     "mcp-servers": "MCP Servers",
@@ -4928,7 +5178,8 @@
     "paintings": "Paintings",
     "settings": "Settings",
     "store": "Assistant Library",
-    "translate": "Translate"
+    "translate": "Translate",
+    "workflow": "Workflow"
   },
   "trace": {
     "backList": "Back To List",

@@ -152,6 +152,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* 壁纸启用时覆盖背景色 */
+  body.wallpaper-enabled {
+    background-color: transparent !important;
+    background-image: none !important;
+  }
 }
 
 :root {

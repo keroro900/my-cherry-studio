@@ -22,9 +22,11 @@ import {
 } from '@renderer/store/settings'
 import type { SidebarIcon, ThemeMode, TranslateLanguageCode } from '@renderer/types'
 import type { UpgradeChannel } from '@shared/config/constant'
+import { shallowEqual } from 'react-redux'
 
 export function useSettings() {
-  const settings = useAppSelector((state) => state.settings)
+  // 使用 shallowEqual 避免 settings 对象中未变化的字段导致不必要的重渲染
+  const settings = useAppSelector((state) => state.settings, shallowEqual)
   const dispatch = useAppDispatch()
 
   return {

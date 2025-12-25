@@ -21,6 +21,9 @@ import type {
   OpenAIReasoningSummary,
   OpenAIVerbosity
 } from '@renderer/types/aiCoreTypes'
+import type { ThemePreset } from '@renderer/types/theme'
+import type { WallpaperSettings } from '@renderer/types/wallpaper'
+import { DEFAULT_WALLPAPER_SETTINGS } from '@renderer/types/wallpaper'
 import { uuid } from '@renderer/utils'
 import { API_SERVER_DEFAULTS, UpgradeChannel } from '@shared/config/constant'
 
@@ -227,6 +230,13 @@ export interface SettingsState {
   // API Server
   apiServer: ApiServerConfig
   showMessageOutline: boolean
+  // Theme Presets
+  activeThemePresetId: string | null
+  customThemePresets: ThemePreset[]
+  // Wallpaper
+  wallpaper: WallpaperSettings
+  // Workflow Theme
+  workflowThemeId: string
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -425,7 +435,14 @@ export const initialState: SettingsState = {
     port: API_SERVER_DEFAULTS.PORT,
     apiKey: `cs-sk-${uuid()}`
   },
-  showMessageOutline: false
+  showMessageOutline: false,
+  // Theme Presets
+  activeThemePresetId: null,
+  customThemePresets: [],
+  // Wallpaper
+  wallpaper: DEFAULT_WALLPAPER_SETTINGS,
+  // Workflow Theme
+  workflowThemeId: 'cherry-default'
 }
 
 const settingsSlice = createSlice({
@@ -869,6 +886,30 @@ const settingsSlice = createSlice({
     },
     setShowMessageOutline: (state, action: PayloadAction<boolean>) => {
       state.showMessageOutline = action.payload
+    },
+    // Theme Presets
+    setActiveThemePreset: (state, action: PayloadAction<string | null>) => {
+      state.activeThemePresetId = action.payload
+    },
+    addCustomThemePreset: (state, action: PayloadAction<ThemePreset>) => {
+      state.customThemePresets.push(action.payload)
+    },
+    updateCustomThemePreset: (state, action: PayloadAction<ThemePreset>) => {
+      const index = state.customThemePresets.findIndex((t) => t.id === action.payload.id)
+      if (index !== -1) {
+        state.customThemePresets[index] = action.payload
+      }
+    },
+    removeCustomThemePreset: (state, action: PayloadAction<string>) => {
+      state.customThemePresets = state.customThemePresets.filter((t) => t.id !== action.payload)
+    },
+    // Wallpaper
+    setWallpaper: (state, action: PayloadAction<Partial<WallpaperSettings>>) => {
+      state.wallpaper = { ...state.wallpaper, ...action.payload }
+    },
+    // Workflow Theme
+    setWorkflowThemeId: (state, action: PayloadAction<string>) => {
+      state.workflowThemeId = action.payload
     }
   }
 })
@@ -1001,7 +1042,16 @@ export const {
   // API Server actions
   setApiServerEnabled,
   setApiServerPort,
-  setApiServerApiKey
+  setApiServerApiKey,
+  // Theme Presets
+  setActiveThemePreset,
+  addCustomThemePreset,
+  updateCustomThemePreset,
+  removeCustomThemePreset,
+  // Wallpaper
+  setWallpaper,
+  // Workflow Theme
+  setWorkflowThemeId
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

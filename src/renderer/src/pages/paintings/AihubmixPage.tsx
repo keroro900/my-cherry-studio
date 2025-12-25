@@ -233,7 +233,8 @@ const AihubmixPage: FC<{ Options: string[] }> = ({ Options }) => {
           const response = await fetch(geminiUrl, {
             method: 'POST',
             headers: geminiHeaders,
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
           })
 
           if (!response.ok) {
@@ -334,7 +335,8 @@ const AihubmixPage: FC<{ Options: string[] }> = ({ Options }) => {
             const response = await fetch(`${aihubmixProvider.apiHost}/ideogram/v1/ideogram-v3/generate`, {
               method: 'POST',
               headers: apiHeaders,
-              body
+              body,
+              signal: controller.signal
             })
 
             if (!response.ok) {
@@ -462,7 +464,8 @@ const AihubmixPage: FC<{ Options: string[] }> = ({ Options }) => {
           const response = await fetch(`${aihubmixProvider.apiHost}/ideogram/v1/ideogram-v3/remix`, {
             method: 'POST',
             headers: { 'Api-Key': aihubmixProvider.apiKey },
-            body
+            body,
+            signal: controller.signal
           })
 
           if (!response.ok) {
@@ -533,7 +536,7 @@ const AihubmixPage: FC<{ Options: string[] }> = ({ Options }) => {
       // 只针对非V3模型使用通用接口
       if (!painting.model?.includes('V_3') || mode === 'aihubmix_image_upscale') {
         // 直接调用自定义接口
-        const response = await fetch(url, { method: 'POST', headers, body })
+        const response = await fetch(url, { method: 'POST', headers, body, signal: controller.signal })
 
         if (!response.ok) {
           const errorData = await response.json()

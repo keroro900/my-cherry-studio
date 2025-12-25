@@ -308,6 +308,21 @@ export class GeminiAPIClient extends BaseApiClient<
           } satisfies Part['inlineData']
         })
       }
+      // 处理 imageBlock.url - 工作流节点创建的 ImageMessageBlock 使用 url 属性
+      // 这与 OpenAIApiClient 的处理逻辑一致
+      if (imageBlock.url && imageBlock.url.startsWith('data:')) {
+        const matches = imageBlock.url.match(/^data:(.+);base64,(.*)$/)
+        if (matches && matches.length === 3) {
+          const mimeType = matches[1]
+          const base64Data = matches[2]
+          parts.push({
+            inlineData: {
+              data: base64Data,
+              mimeType: mimeType
+            } satisfies Part['inlineData']
+          })
+        }
+      }
     }
 
     const fileBlocks = findFileBlocks(message)
@@ -462,9 +477,15 @@ export class GeminiAPIClient extends BaseApiClient<
     return {}
   }
 
+  /**
+   * 获取图片生成参数
+   *
+   * @note Gemini 3 Pro Image 支持 system_instruction 参数
+   * 移除了 systemInstruction: undefined 的覆盖，让图片生成也能使用系统提示词
+   */
   private getGenerateImageParameter(): Partial<GenerateContentConfig> {
     return {
-      systemInstruction: undefined,
+      // 不再强制覆盖 systemInstruction，允许使用上层设置的系统提示词
       responseModalities: [Modality.TEXT, Modality.IMAGE]
     }
   }

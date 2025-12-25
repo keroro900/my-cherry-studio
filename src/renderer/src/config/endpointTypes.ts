@@ -6,5 +6,8 @@ export const endpointTypeOptions: { label: string; value: EndpointType }[] = [
   { value: 'anthropic', label: 'endpoint_type.anthropic' },
   { value: 'gemini', label: 'endpoint_type.gemini' },
   { value: 'image-generation', label: 'endpoint_type.image-generation' },
+  { value: 'gemini-image', label: 'endpoint_type.gemini-image' },
+  { value: 'gemini-image-edit', label: 'endpoint_type.gemini-image-edit' },
+  { value: 'video-generation', label: 'endpoint_type.video-generation' },
   { value: 'jina-rerank', label: 'endpoint_type.jina-rerank' }
 ]

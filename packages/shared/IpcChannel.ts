@@ -192,6 +192,7 @@ export enum IpcChannel {
   File_GetPdfInfo = 'file:getPdfInfo',
   Fs_Read = 'fs:read',
   Fs_ReadText = 'fs:readText',
+  Fs_ReadBase64 = 'fs:readBase64',
   File_OpenWithRelativePath = 'file:openWithRelativePath',
   File_IsTextFile = 'file:isTextFile',
   File_ListDirectory = 'file:listDirectory',
@@ -248,6 +249,7 @@ export enum IpcChannel {
   System_GetGitBashPath = 'system:getGitBashPath',
   System_GetGitBashPathInfo = 'system:getGitBashPathInfo',
   System_SetGitBashPath = 'system:setGitBashPath',
+  System_GetPath = 'system:getPath',
 
   // DevTools
   System_ToggleDevTools = 'system:toggleDevTools',
@@ -393,5 +395,14 @@ export enum IpcChannel {
   LocalTransfer_Disconnect = 'local-transfer:disconnect',
   LocalTransfer_ClientEvent = 'local-transfer:client-event',
   LocalTransfer_SendFile = 'local-transfer:send-file',
-  LocalTransfer_CancelTransfer = 'local-transfer:cancel-transfer'
+  LocalTransfer_CancelTransfer = 'local-transfer:cancel-transfer',
+
+  // Workflow MCP Bridge (Main <-> Renderer)
+  Workflow_GenerateImage = 'workflow:generate-image',
+  Workflow_ExecuteNode = 'workflow:execute-node',
+  Workflow_GetWorkflowList = 'workflow:get-workflow-list',
+  Workflow_GetWorkflowById = 'workflow:get-workflow-by-id',
+  Workflow_ExecuteWorkflow = 'workflow:execute-workflow',
+  Workflow_CancelExecution = 'workflow:cancel-execution',
+  Workflow_GetExecutionStatus = 'workflow:get-execution-status'
 }

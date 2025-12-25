@@ -70,19 +70,33 @@ function executeRipgrep(args: string[]): Promise<{ exitCode: number; output: str
     }
 
     const { spawn } = require('child_process')
+    // 设置环境变量强制 ripgrep 使用 UTF-8 编码输出
+    // Windows 上需要设置 PYTHONUTF8 和 chcp 65001 相关的环境变量
+    const env = {
+      ...process.env,
+      LANG: 'en_US.UTF-8',
+      LC_ALL: 'en_US.UTF-8',
+      PYTHONUTF8: '1'
+    }
+    // ripgrep 的 --encoding 参数用于指定搜索内容的编码，不影响文件名输出
+    // 但我们可以确保 spawn 使用 UTF-8 编码
     const child = spawn(ripgrepBinaryPath, ['--no-config', '--ignore-case', ...args], {
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env,
+      // Windows 上使用 shell 模式并设置 UTF-8 代码页
+      ...(process.platform === 'win32' ? { shell: true, windowsHide: true } : {})
     })
 
     let output = ''
     let errorOutput = ''
 
+    // 使用 UTF-8 编码解码输出，确保中文路径正确显示
     child.stdout.on('data', (data: Buffer) => {
-      output += data.toString()
+      output += data.toString('utf8')
     })
 
     child.stderr.on('data', (data: Buffer) => {
-      errorOutput += data.toString()
+      errorOutput += data.toString('utf8')
     })
 
     child.on('close', (code: number) => {
@@ -889,12 +903,74 @@ class FileStorage {
       throw new Error(`Path is not a directory: ${resolvedPath}`)
     }
 
+    // 对于简单的目录列表（无搜索模式、非递归），使用 Node.js 原生 fs.readdir
+    // 这样可以正确处理中文路径，避免 ripgrep 在 Windows 上的编码问题
+    const isSimpleList =
+      (!mergedOptions.searchPattern || mergedOptions.searchPattern === '.') && !mergedOptions.recursive
+    if (isSimpleList) {
+      return await this.listDirectoryNative(resolvedPath, mergedOptions)
+    }
+
     // Use ripgrep for file listing with relevance-based sorting
     if (!getRipgrepBinaryPath()) {
-      throw new Error('Ripgrep binary not available')
+      // 如果 ripgrep 不可用，降级到原生方法
+      logger.warn('Ripgrep binary not available, falling back to native fs.readdir')
+      return await this.listDirectoryNative(resolvedPath, mergedOptions)
     }
 
     return await this.listDirectoryWithRipgrep(resolvedPath, mergedOptions)
+  }
+
+  /**
+   * 使用 Node.js 原生 fs.readdir 列出目录内容
+   * 正确处理中文路径，避免编码问题
+   */
+  private async listDirectoryNative(resolvedPath: string, options: Required<DirectoryListOptions>): Promise<string[]> {
+    const files: string[] = []
+    const directories: string[] = []
+
+    try {
+      const entries = await fs.promises.readdir(resolvedPath, { withFileTypes: true })
+
+      for (const entry of entries) {
+        // 跳过隐藏文件/目录
+        if (!options.includeHidden && entry.name.startsWith('.')) {
+          continue
+        }
+
+        const fullPath = path.join(resolvedPath, entry.name).replace(/\\/g, '/')
+
+        if (entry.isDirectory() && options.includeDirectories) {
+          directories.push(fullPath)
+        } else if (entry.isFile() && options.includeFiles) {
+          // 如果有搜索模式，进行过滤
+          if (options.searchPattern && options.searchPattern !== '.') {
+            if (!entry.name.toLowerCase().includes(options.searchPattern.toLowerCase())) {
+              continue
+            }
+          }
+          files.push(fullPath)
+        }
+      }
+
+      // 排序：目录在前，文件在后，各自按名称排序
+      const sortedDirectories = directories.sort((a, b) => {
+        const aName = path.basename(a)
+        const bName = path.basename(b)
+        return aName.localeCompare(bName, 'zh-CN', { numeric: true })
+      })
+
+      const sortedFiles = files.sort((a, b) => {
+        const aName = path.basename(a)
+        const bName = path.basename(b)
+        return aName.localeCompare(bName, 'zh-CN', { numeric: true })
+      })
+
+      return [...sortedDirectories, ...sortedFiles].slice(0, options.maxEntries)
+    } catch (error) {
+      logger.error(`[listDirectoryNative] Failed to read directory: ${resolvedPath}`, error as Error)
+      throw error
+    }
   }
 
   /**

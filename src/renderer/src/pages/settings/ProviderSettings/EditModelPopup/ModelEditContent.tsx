@@ -377,7 +377,7 @@ const ModelEditContent: FC<ModelEditContentProps & ModalProps> = ({ provider, mo
                     })
                   }
                 }}
-                dropdownMatchSelectWidth={false}
+                popupMatchSelectWidth={false}
               />
             </Form.Item>
 

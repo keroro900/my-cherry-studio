@@ -1,0 +1,346 @@
+/**
+ * ReactFlow 节点动画样式
+ * 用于节点状态指示和视觉反馈
+ */
+
+/* 旋转动画 - 用于运行中状态 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 脉冲动画 - 用于运行中的状态指示点 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Hover 效果 - Handle 放大 */
+.react-flow__handle:hover {
+  transform: scale(1.3) !important;
+}
+
+/* 节点选中时的动画 */
+.react-flow__node.selected {
+  animation: node-select 0.3s ease-out;
+}
+
+@keyframes node-select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 连接线动画 */
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dash 0.5s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* 节点添加动画 */
+@keyframes node-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 错误抖动动画 */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* 成功完成动画 */
+@keyframes success-bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ==================== 增强动画 ==================== */
+
+/* 二次元风格弹跳入场 */
+@keyframes anime-bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(0.9);
+  }
+  80% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 柔和浮动动画 - 选中节点 */
+@keyframes soft-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* 闪烁星星效果 */
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* 微光扫过效果 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 呼吸发光效果 */
+@keyframes breathing-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--glow-color, rgba(24, 144, 255, 0.3));
+  }
+  50% {
+    box-shadow: 0 0 20px var(--glow-color, rgba(24, 144, 255, 0.6));
+  }
+}
+
+/* 霓虹闪烁效果 */
+@keyframes neon-flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 10px currentColor;
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.8;
+    text-shadow: none;
+  }
+}
+
+/* 波纹扩散效果 */
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* 心跳效果 */
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* 渐入上浮效果 */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 渐入缩放效果 */
+@keyframes fade-in-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 边框流动效果 */
+@keyframes border-flow {
+  0% {
+    border-color: var(--flow-color-1, #1890ff);
+  }
+  33% {
+    border-color: var(--flow-color-2, #722ed1);
+  }
+  66% {
+    border-color: var(--flow-color-3, #eb2f96);
+  }
+  100% {
+    border-color: var(--flow-color-1, #1890ff);
+  }
+}
+
+/* 旋转发光效果 */
+@keyframes rotate-glow {
+  0% {
+    box-shadow: 0 0 10px 2px rgba(24, 144, 255, 0.5);
+    transform: rotate(0deg);
+  }
+  100% {
+    box-shadow: 0 0 10px 2px rgba(24, 144, 255, 0.5);
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== 状态动画应用 ==================== */
+
+/* 运行中节点 - 呼吸发光 */
+.react-flow__node[data-status='running'] {
+  animation: breathing-glow 2s ease-in-out infinite;
+  --glow-color: rgba(24, 144, 255, 0.4);
+}
+
+/* 成功节点 - 弹跳 */
+.react-flow__node[data-status='success'] {
+  animation: success-bounce 0.4s ease-out;
+}
+
+/* 错误节点 - 抖动 */
+.react-flow__node[data-status='error'] {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* 新添加节点 - 弹跳入场 */
+.react-flow__node.newly-added {
+  animation: anime-bounce-in 0.5s ease-out;
+}
+
+/* ==================== Handle 动画 ==================== */
+
+/* Handle 悬停发光 */
+.react-flow__handle {
+  transition: all 0.2s ease;
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.3) !important;
+  filter: brightness(1.2);
+}
+
+/* 连接中的 Handle 脉冲 */
+.react-flow__handle.connecting {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* ==================== Edge 动画 ==================== */
+
+/* 数据流动动画 */
+@keyframes data-flow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 活跃边 - 流动效果 */
+.react-flow__edge.active path {
+  stroke-dasharray: 8 4;
+  animation: data-flow 1s linear infinite;
+}
+
+/* 选中边 - 发光效果 */
+.react-flow__edge.selected path {
+  filter: drop-shadow(0 0 4px currentColor);
+}

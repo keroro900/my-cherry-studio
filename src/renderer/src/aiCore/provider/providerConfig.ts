@@ -1,4 +1,5 @@
 import { formatPrivateKey, hasProviderConfig, ProviderConfigFactory } from '@cherrystudio/ai-core/provider'
+import { loggerService } from '@logger'
 import { isOpenAIChatCompletionOnlyModel } from '@renderer/config/models'
 import {
   getAwsBedrockAccessKeyId,
@@ -40,6 +41,8 @@ import { aihubmixProviderCreator, newApiResolverCreator, vertexAnthropicProvider
 import { azureAnthropicProviderCreator } from './config/azure-anthropic'
 import { COPILOT_DEFAULT_HEADERS } from './constants'
 import { getAiSdkProviderId } from './factory'
+
+const logger = loggerService.withContext('ProviderConfig')
 
 /**
  * 处理特殊provider的转换逻辑
@@ -262,6 +265,14 @@ export function providerToAiSdkConfig(actualProvider: Provider, model: Model): A
       extraOptions.anthropicBaseURL = cherryinProvider.anthropicApiHost + '/v1'
       extraOptions.geminiBaseURL = cherryinProvider.apiHost + '/v1beta/models'
     }
+    // 调试日志
+    logger.debug('cherryin config', {
+      modelId: model.id,
+      endpointType: model.endpoint_type,
+      extraOptionsEndpointType: extraOptions.endpointType,
+      mode: extraOptions.mode,
+      providerType: actualProvider.type
+    })
   }
 
   if (hasProviderConfig(aiSdkProviderId) && aiSdkProviderId !== 'openai-compatible') {

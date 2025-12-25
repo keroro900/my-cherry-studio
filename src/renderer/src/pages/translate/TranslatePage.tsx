@@ -860,6 +860,9 @@ const TranslatePage: FC = () => {
 
 const Container = styled.div`
   flex: 1;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
 `
 
 const ContentContainer = styled.div<{ $historyDrawerVisible: boolean }>`

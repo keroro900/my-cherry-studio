@@ -1,0 +1,258 @@
+/**
+ * 工作流配置面板主题适配样式
+ * 确保所有表单元素跟随 Cherry Studio 主题
+ * 作用域限定在 .workflow-root 内，避免污染全局样式
+ */
+
+/* ============================================
+ * 统一表单样式变量
+ * 所有配置表单应使用这些变量以保持一致性
+ * ============================================ */
+.workflow-root {
+  /* 文本颜色 */
+  --form-text-color: var(--color-text);
+  --form-text-secondary: var(--color-text-2);
+  --form-text-tertiary: var(--color-text-3);
+
+  /* 背景颜色 */
+  --form-bg: var(--color-bg);
+  --form-bg-soft: var(--color-bg-soft);
+  --form-bg-elevated: var(--color-bg-soft);
+
+  /* 边框颜色 */
+  --form-border: var(--color-border-mute);
+  --form-border-active: var(--ant-color-primary);
+
+  /* 主色调 */
+  --form-primary: var(--ant-color-primary);
+  --form-primary-bg: var(--ant-color-primary-bg);
+  --form-primary-hover: var(--ant-color-primary-hover);
+
+  /* 字体大小 */
+  --form-font-label: 13px;
+  --form-font-description: 12px;
+  --form-font-small: 11px;
+  --form-font-tiny: 10px;
+
+  /* 间距 */
+  --form-gap-section: 24px;
+  --form-gap-row: 16px;
+  --form-gap-element: 8px;
+  --form-padding-card: 16px;
+
+  /* 圆角 */
+  --form-radius-large: 8px;
+  --form-radius-medium: 6px;
+  --form-radius-small: 4px;
+}
+
+/* Select 下拉框 - 基础样式 - 限定作用域 */
+.workflow-root select {
+  color-scheme: light dark;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Select 下拉框选项 - 浅色主题 */
+.workflow-root select option {
+  background-color: var(--ant-color-bg-elevated);
+  color: var(--ant-color-text);
+  padding: 8px 12px;
+}
+
+/* Select 下拉框 - 深色主题强制样式 */
+/* 使用 Ant Design 暗色 token，不使用固定值 */
+@media (prefers-color-scheme: dark) {
+  .workflow-root select {
+    background-color: var(--ant-color-bg-container);
+    color: var(--ant-color-text);
+    border-color: var(--ant-color-border);
+  }
+
+  .workflow-root select option {
+    background-color: var(--ant-color-bg-container);
+    color: var(--ant-color-text);
+  }
+
+  .workflow-root select option:hover {
+    background-color: var(--ant-color-bg-elevated);
+  }
+}
+
+/* 深色主题下的特殊处理 - 使用 data-theme 属性 */
+/* 使用 Ant Design 暗色 token，不使用固定值 */
+[data-theme='dark'] .workflow-root select {
+  background-color: var(--ant-color-bg-container);
+  color: var(--ant-color-text);
+  border-color: var(--ant-color-border);
+}
+
+[data-theme='dark'] .workflow-root select option {
+  background-color: var(--ant-color-bg-container);
+  color: var(--ant-color-text);
+}
+
+[data-theme='dark'] .workflow-root select option:hover {
+  background-color: var(--ant-color-bg-elevated);
+}
+
+/* 选中的选项 */
+.workflow-root select option:checked {
+  background: linear-gradient(0deg, var(--ant-color-primary) 0%, var(--ant-color-primary) 100%);
+  color: white;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .workflow-root select option:checked {
+  background: linear-gradient(0deg, var(--ant-color-primary) 0%, var(--ant-color-primary) 100%);
+  color: white;
+}
+
+/* 输入框和文本域 - 深色主题 */
+/* 使用 Ant Design 暗色 token，不使用固定值 */
+[data-theme='dark'] .workflow-root input,
+[data-theme='dark'] .workflow-root textarea {
+  background-color: var(--ant-color-bg-container);
+  color: var(--ant-color-text);
+  border-color: var(--ant-color-border);
+}
+
+/* 输入框和文本域焦点状态 */
+.workflow-root input:focus,
+.workflow-root textarea:focus,
+.workflow-root select:focus {
+  border-color: var(--ant-color-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ant-color-primary-bg);
+}
+
+/* Range 滑块样式 - 适配主题 */
+.workflow-root input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.workflow-root input[type='range']::-webkit-slider-track {
+  background: var(--ant-color-border);
+  height: 4px;
+  border-radius: 2px;
+}
+
+.workflow-root input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ant-color-primary);
+  cursor: pointer;
+  margin-top: -5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.workflow-root input[type='range']::-webkit-slider-thumb:hover {
+  background: var(--ant-color-primary-hover);
+  transform: scale(1.2);
+}
+
+.workflow-root input[type='range']::-moz-range-track {
+  background: var(--ant-color-border);
+  height: 4px;
+  border-radius: 2px;
+}
+
+.workflow-root input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ant-color-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.workflow-root input[type='range']::-moz-range-thumb:hover {
+  background: var(--ant-color-primary-hover);
+  transform: scale(1.2);
+}
+
+/* Checkbox 样式优化 */
+.workflow-root input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--ant-color-primary);
+}
+
+/* 滚动条样式 - 适配主题 - 限定作用域 */
+.workflow-root ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.workflow-root ::-webkit-scrollbar-track {
+  background: var(--ant-color-bg-container);
+}
+
+.workflow-root ::-webkit-scrollbar-thumb {
+  background: var(--ant-color-border);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.workflow-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--ant-color-text-tertiary);
+}
+
+/* 深色主题滚动条 */
+/* 使用 Ant Design 暗色 token，不使用固定值 */
+[data-theme='dark'] .workflow-root ::-webkit-scrollbar-track {
+  background: var(--ant-color-bg-container);
+}
+
+[data-theme='dark'] .workflow-root ::-webkit-scrollbar-thumb {
+  background: var(--ant-color-border);
+}
+
+[data-theme='dark'] .workflow-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--ant-color-text-quaternary);
+}
+
+/* 提示文本颜色 */
+.workflow-root ::placeholder {
+  color: var(--ant-color-text-placeholder);
+  opacity: 1;
+}
+
+/* 禁用状态 */
+.workflow-root input:disabled,
+.workflow-root textarea:disabled,
+.workflow-root select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+ * PromptEditorModal 代码编辑器背景色覆盖
+ * 强制 CodeMirror 使用透明背景，避免黑边
+ * ============================================ */
+.prompt-editor-container .cm-editor {
+  background-color: transparent !important;
+}
+
+.prompt-editor-container .cm-gutters {
+  background-color: transparent !important;
+  border-right: 1px solid var(--color-border-mute, rgba(255, 255, 255, 0.1));
+}
+
+.prompt-editor-container .cm-activeLineGutter {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.prompt-editor-container .cm-activeLine {
+  background-color: rgba(255, 255, 255, 0.03);
+}

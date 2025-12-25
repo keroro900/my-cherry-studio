@@ -193,6 +193,16 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
     provider: 'Nowledge',
     installSource: 'builtin',
     isTrusted: true
+  },
+  {
+    id: nanoid(),
+    name: BuiltinMCPServerNames.workflow,
+    description: 'AI 工作流服务 - 管理和执行工作流、调用 AI 服务',
+    type: 'inMemory',
+    isActive: true,
+    provider: 'CherryAI',
+    installSource: 'builtin',
+    isTrusted: true
   }
 ] as const
 

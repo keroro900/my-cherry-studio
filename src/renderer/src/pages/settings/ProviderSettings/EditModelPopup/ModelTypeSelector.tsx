@@ -167,6 +167,11 @@ const ModelTypeSelector: FC<ModelTypeSelectorProps> = ({
               label: t('models.type.function_calling'),
               value: 'function_calling',
               disabled: isDisabled
+            },
+            {
+              label: t('models.type.video_generation'),
+              value: 'video_generation',
+              disabled: isDisabled
             }
           ]}
         />
