@@ -420,6 +420,9 @@
     },
     "delete": {
       "content": "Eliminar el asistente borrará todos los temas y archivos asociados. ¿Está seguro de que desea continuar?",
+      "error": {
+        "remain_one": "No se puede eliminar el último asistente"
+      },
       "title": "Eliminar Asistente"
     },
     "edit": {
@@ -3166,6 +3169,7 @@
         "label": "Datos de la aplicación",
         "migration_title": "Migración de datos",
         "new_path": "Nueva ruta",
+        "open": "Directorio abierto",
         "original_path": "Ruta original",
         "path_change_failed": "Error al cambiar el directorio de datos",
         "path_changed_without_copy": "La ruta se ha cambiado correctamente",
@@ -4853,7 +4857,7 @@
         "content_limit_tooltip": "Limita la longitud del contenido en los resultados de búsqueda; el contenido que exceda el límite será truncado",
         "default_provider": "Proveedor Predeterminado",
         "free": "Gratis",
-        "is_default": "[to be translated]:Default",
+        "is_default": "Por defecto",
         "local_provider": {
           "hint": "Inicia sesión en el sitio web para obtener mejores resultados de búsqueda y personalizar tu configuración de búsqueda.",
           "open_settings": "Abrir configuración de {{provider}}",
@@ -4870,7 +4874,7 @@
         "search_provider": "Proveedor de búsqueda",
         "search_provider_placeholder": "Seleccione un proveedor de búsqueda",
         "search_with_time": "Buscar con fecha",
-        "set_as_default": "[to be translated]:Set as Default",
+        "set_as_default": "Establecer como predeterminado",
         "subscribe": "Suscripción a lista negra",
         "subscribe_add": "Añadir suscripción",
         "subscribe_add_failed": "Error al agregar la fuente de suscripción",

@@ -20,6 +20,7 @@ import type { BaseTool, MCPTool } from './tool'
 export * from './agent'
 export * from './apiModels'
 export * from './apiServer'
+export * from './assistant'
 export * from './knowledge'
 export * from './mcp'
 export * from './notification'
@@ -28,33 +29,75 @@ export * from './plugin'
 export * from './provider'
 
 export type Assistant = {
+  // ==================== 基础标识 ====================
   id: string
   name: string
-  prompt: string
-  knowledge_bases?: KnowledgeBase[]
-  topics: Topic[]
-  type: string
+  /** 显示名称 */
+  displayName?: string
+  /** 头像/图标 (emoji) */
   emoji?: string
   description?: string
+  type: string
+  tags?: string[]
+  category?: string
+
+  // ==================== 核心配置 ====================
+  /** 系统提示词 */
+  prompt: string
   model?: Model
   defaultModel?: Model
-  // This field should be considered as not Partial and not optional in v2
   settings?: Partial<AssistantSettings>
-  messages?: AssistantMessage[]
-  /** enableWebSearch 代表使用模型内置网络搜索功能 */
+  /** 是否激活 */
+  isActive?: boolean
+
+  // ==================== 统一配置模块 (v3.0) ====================
+  /** 人格配置 */
+  profile?: import('./assistant').AssistantProfile
+  /** 记忆配置 */
+  memory?: import('./assistant').AssistantMemory
+  /** 工具配置 */
+  tools?: import('./assistant').AssistantTools
+  /** 群聊配置 */
+  groupChat?: import('./assistant').AssistantGroupChat
+  /** 协作配置 */
+  collaboration?: import('./assistant').AssistantCollaboration
+  /** VCP 特有配置 */
+  vcpConfig?: import('./assistant').AssistantVCPConfig
+  /** 气泡主题配置 */
+  bubbleTheme?: import('./assistant').AgentBubbleTheme
+
+  // ==================== 快捷属性 (向后兼容) ====================
+  /** @deprecated Use tools.mcpServers instead */
+  mcpServers?: unknown[]
+  /** @deprecated Use tools.enableWebSearch instead */
   enableWebSearch?: boolean
-  webSearchProviderId?: WebSearchProvider['id']
-  // enableUrlContext 是 Gemini/Anthropic 的特有功能
+  /** @deprecated Use tools.webSearchProviderId instead */
+  webSearchProviderId?: string
+  /** @deprecated Use tools.enableUrlContext instead */
   enableUrlContext?: boolean
+  /** @deprecated Use tools.enableGenerateImage instead */
   enableGenerateImage?: boolean
-  mcpServers?: MCPServer[]
-  knowledgeRecognition?: 'off' | 'on'
-  regularPhrases?: QuickPhrase[] // Added for regular phrase
-  tags?: string[] // 助手标签
+  /** @deprecated Use memory.enabled instead */
   enableMemory?: boolean
-  // for translate. 更好的做法是定义base assistant，把 Assistant 作为多种不同定义 assistant 的联合类型，但重构代价太大
+  /** @deprecated Use vcpConfig.enabled instead */
+  vcpEnabled?: boolean
+
+  // ==================== 知识库 ====================
+  knowledge_bases?: KnowledgeBase[]
+  knowledgeRecognition?: 'off' | 'on'
+
+  // ==================== Cherry Studio 特有 ====================
+  topics: Topic[]
+  messages?: AssistantMessage[]
+  regularPhrases?: QuickPhrase[]
+  /** 翻译相关 */
   content?: string
   targetLanguage?: TranslateLanguage
+
+  // ==================== 元信息 ====================
+  version?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type TranslateAssistant = Assistant & {
@@ -65,6 +108,371 @@ export type TranslateAssistant = Assistant & {
 
 export const isTranslateAssistant = (assistant: Assistant): assistant is TranslateAssistant => {
   return (assistant.model && assistant.targetLanguage && typeof assistant.content === 'string') !== undefined
+}
+
+// ============================================================================
+// 图片助手类型 (Image Assistant)
+// ============================================================================
+
+/** 图片助手类型 */
+export type ImageAssistantType =
+  | 'ecom' // 电商产品图
+  | 'model' // 模特换装
+  | 'pattern' // 图案设计
+  | 'general' // 通用图片
+  | 'edit' // 图片编辑
+  | 'generate' // 图片生成
+  | 'cosmetics' // 美妆产品
+  | 'food' // 食品摄影
+  | 'electronics' // 电子产品
+  | 'jewelry' // 珠宝首饰
+  | 'furniture' // 家具场景
+  | 'footwear' // 鞋履展示
+  | 'product' // 通用产品
+
+/** 电商模块配置 */
+export interface EcomModuleConfig {
+  // 布局
+  layout: 'flat_lay' | 'model_shot' | 'hanging' | 'none'
+  fillMode?: 'filled' | 'flat' | 'none'
+
+  // 风格
+  stylePreset: 'auto' | 'shein' | 'temu' | 'minimal' | 'premium'
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+
+  // 输出选项
+  enableBack?: boolean
+  enableDetail?: boolean
+  detailTypes?: string[] // 多选: 领口、纽扣、面料等
+
+  // 服装描述
+  garmentDescription?: string
+
+  // 提示词
+  systemPrompt?: string
+  negativePrompt?: string
+
+  // 高级选项
+  useSystemPrompt?: boolean
+  professionalRetouch?: boolean
+  batchCount?: number
+  seed?: number
+}
+
+/** 模特换装模块配置 */
+export interface ModelModuleConfig {
+  // 模特设置
+  ageGroup: 'small_kid' | 'big_kid' | 'adult'
+  gender: 'female' | 'male'
+  ethnicity?: 'asian' | 'caucasian' | 'african' | 'mixed'
+  ethnicityPreset?: string
+
+  // 场景和姿态
+  scenePreset: string
+  poseStyle?: string
+  styleMode?: 'daily' | 'commercial'
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+
+  // 输出选项
+  keepBackground?: boolean
+  showFullBody?: boolean
+
+  // 提示词
+  styleDescription?: string
+  negativePrompt?: string
+
+  // 高级设置
+  batchCount?: number
+  seed?: number
+}
+
+/** 图案设计模块配置 */
+export interface PatternModuleConfig {
+  // 生成模式
+  generationMode: 'mode_a' | 'mode_b' | 'mode_c'
+
+  // 输出类型
+  outputType: 'pattern_only' | 'set'
+
+  // 图案设置
+  patternType: string
+  density: 'sparse' | 'medium' | 'dense'
+  colorTone: 'auto' | 'bright' | 'soft' | 'dark' | 'high_contrast'
+
+  // 风格预设
+  stylePreset?: string
+  stylePresetId?: string
+  stylePresetPrompt?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+
+  // 提示词
+  designPrompt?: string
+  colorPrompt?: string
+  negativePrompt?: string
+
+  // 高级设置
+  batchSize?: number
+  tileScale?: number
+  seed?: number
+}
+
+/** 图片编辑模块配置 */
+export interface EditModuleConfig {
+  // 编辑模式
+  mode: 'preset' | 'custom'
+
+  // 模特设置（预设模式）
+  ageGroup?: 'small_kid' | 'big_kid' | 'adult'
+  gender?: 'female' | 'male'
+  ethnicityPreset?: string
+
+  // 场景和姿态（预设模式）
+  styleMode?: 'daily' | 'commercial'
+  scenePreset?: string
+  posePreset?: string
+
+  // 自定义模式
+  customPrompt?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 通用图片生成模块配置 */
+export interface GenerateModuleConfig {
+  // 风格预设
+  stylePreset?: string
+
+  // 批量设置
+  batchSize?: number
+  variationStrength?: number
+
+  // 提示词
+  prompt?: string
+  negativePrompt?: string
+  promptEnhancement?: boolean
+
+  // 参考图设置
+  useReferenceImages?: boolean
+  referenceWeight?: number
+
+  // 高级设置
+  temperature?: number
+  seed?: number
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 美妆产品模块配置 */
+export interface CosmeticsModuleConfig {
+  // 产品类型
+  cosmeticsType: 'lipstick' | 'eyeshadow' | 'foundation' | 'perfume' | 'skincare' | 'nail' | 'set'
+
+  // 产品质感
+  productTexture: 'glossy' | 'matte' | 'velvet' | 'shimmer' | 'transparent'
+
+  // 展示风格
+  displayStyle: 'product' | 'lifestyle' | 'flatlay' | 'floating' | 'application'
+
+  // 背景和光线
+  backgroundStyle: 'white' | 'pink' | 'gradient' | 'marble' | 'floral'
+  lightingStyle: 'soft' | 'high_contrast' | 'dreamy' | 'studio'
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 食品摄影模块配置 */
+export interface FoodModuleConfig {
+  // 食品类别
+  foodCategory: 'beverage' | 'dessert' | 'main_dish' | 'snack' | 'ingredient'
+
+  // 风格和氛围
+  stylePreset: 'minimalist' | 'rustic' | 'modern' | 'traditional'
+  moodPreset: 'warm' | 'fresh' | 'cozy' | 'elegant'
+
+  // 背景
+  backgroundStyle: 'white' | 'wood' | 'marble' | 'dark' | 'colorful'
+
+  // 动态效果
+  enableSteam?: boolean
+  enableDroplets?: boolean
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 电子产品模块配置 */
+export interface ElectronicsModuleConfig {
+  // 产品类型
+  productType: 'phone' | 'laptop' | 'headphones' | 'watch' | 'camera' | 'accessory'
+
+  // 展示风格
+  displayStyle: 'hero' | 'lifestyle' | 'floating' | 'studio' | 'detail'
+
+  // 背景和光线
+  backgroundStyle: 'white' | 'gradient' | 'tech' | 'dark' | 'colorful'
+  lightingStyle: 'soft' | 'dramatic' | 'studio' | 'product'
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 珠宝首饰模块配置 */
+export interface JewelryModuleConfig {
+  // 产品类型
+  jewelryType: 'ring' | 'necklace' | 'earrings' | 'bracelet' | 'watch' | 'set'
+
+  // 材质
+  material: 'gold' | 'silver' | 'platinum' | 'gemstone' | 'pearl' | 'mixed'
+
+  // 展示风格
+  displayStyle: 'hero' | 'worn' | 'flatlay' | 'detail' | 'lifestyle'
+
+  // 背景和光线
+  backgroundStyle: 'white' | 'velvet' | 'marble' | 'gradient' | 'dark'
+  lightingStyle: 'sparkle' | 'soft' | 'dramatic' | 'studio'
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 家具场景模块配置 */
+export interface FurnitureModuleConfig {
+  // 家具类型
+  furnitureType: 'sofa' | 'bed' | 'table' | 'chair' | 'cabinet' | 'lamp' | 'set'
+
+  // 场景风格
+  sceneStyle: 'modern' | 'scandinavian' | 'industrial' | 'classic' | 'minimalist'
+
+  // 展示方式
+  displayStyle: 'room' | 'corner' | 'studio' | 'detail' | 'lifestyle'
+
+  // 光线
+  lightingStyle: 'natural' | 'warm' | 'bright' | 'dramatic'
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 鞋履展示模块配置 */
+export interface FootwearModuleConfig {
+  // 鞋类类型
+  footwearType: 'sneakers' | 'heels' | 'boots' | 'sandals' | 'formal' | 'sports'
+
+  // 展示方式
+  displayStyle: 'hero' | 'worn' | 'floating' | 'flatlay' | 'pair'
+
+  // 背景和光线
+  backgroundStyle: 'white' | 'gradient' | 'lifestyle' | 'studio' | 'street'
+  lightingStyle: 'product' | 'dramatic' | 'natural' | 'studio'
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 通用产品模块配置 */
+export interface ProductModuleConfig {
+  // 展示风格
+  displayStyle: 'hero' | 'lifestyle' | 'floating' | 'studio' | 'flatlay'
+
+  // 背景和光线
+  backgroundStyle: 'white' | 'gradient' | 'natural' | 'colorful' | 'dark'
+  lightingStyle: 'product' | 'soft' | 'dramatic' | 'natural'
+
+  // 额外描述
+  extraDescription?: string
+
+  // 图片设置
+  imageSize?: '1K' | '2K' | '4K'
+  aspectRatio?: string
+}
+
+/** 图片助手配置 */
+export type ImageAssistantConfig = {
+  /** 图片尺寸 */
+  imageSize: '1K' | '2K' | '4K'
+  /** 宽高比 */
+  aspectRatio: string
+  /** 批量生成数量 */
+  batchCount?: number
+  /** 随机种子 */
+  seed?: number
+  /** 模块特定配置 */
+  moduleConfig?:
+    | EcomModuleConfig
+    | ModelModuleConfig
+    | PatternModuleConfig
+    | EditModuleConfig
+    | GenerateModuleConfig
+    | CosmeticsModuleConfig
+    | FoodModuleConfig
+    | ElectronicsModuleConfig
+    | JewelryModuleConfig
+    | FurnitureModuleConfig
+    | FootwearModuleConfig
+    | ProductModuleConfig
+}
+
+/** 图片助手（扩展自 Assistant） */
+export type ImageAssistant = Assistant & {
+  /** 助手类型标识 */
+  type: 'image'
+  /** 图片助手子类型 */
+  imageType: ImageAssistantType
+  /** 图片生成配置 */
+  imageConfig: ImageAssistantConfig
+  /** 图片生成 Provider ID */
+  imageProviderId?: string
+  /** 图片生成模型 ID */
+  imageModelId?: string
+}
+
+/** 类型守卫：判断是否为图片助手 */
+export const isImageAssistant = (assistant: Assistant): assistant is ImageAssistant => {
+  return assistant.type === 'image'
+}
+
+/** 图片助手预设 */
+export type ImageAssistantPreset = Omit<ImageAssistant, 'model' | 'topics'> & {
+  group?: string[]
+  topics?: never
 }
 
 export type AssistantsSortType = 'tags' | 'list'
@@ -110,7 +518,7 @@ const ThinkModelTypes = [
   'deepseek_hybrid'
 ] as const
 
-export type ReasoningEffortOption = NonNullable<OpenAI.ReasoningEffort> | 'auto' | 'default'
+export type ReasoningEffortOption = NonNullable<OpenAI.ReasoningEffort> | 'auto' | 'default' | 'xhigh'
 export type ThinkingOption = ReasoningEffortOption
 export type ThinkingModelType = (typeof ThinkModelTypes)[number]
 export type ThinkingOptionConfig = Record<ThinkingModelType, ThinkingOption[]>
@@ -644,6 +1052,7 @@ export type GenerateImageParams = {
   prompt: string
   negativePrompt?: string
   imageSize: string
+  aspectRatio?: string // 宽高比，如 "1:1", "3:4", "16:9"
   batchSize: number
   seed?: string
   numInferenceSteps?: number
@@ -713,6 +1122,8 @@ export type SidebarIcon =
   | 'notes'
   | 'workflow'
   | 'image_studio'
+  | 'canvas'
+  | 'vcp_dashboard'
 
 export type ExternalToolResult = {
   mcpTools?: MCPTool[]
@@ -879,7 +1290,12 @@ export const BuiltinMCPServerNames = {
   didiMCP: '@cherry/didi-mcp',
   browser: '@cherry/browser',
   nowledgeMem: '@cherry/nowledge-mem',
-  workflow: '@cherry/workflow'
+  workflow: '@cherry/workflow',
+  fashion: '@cherry/fashion',
+  vcpRag: '@cherry/vcp-rag',
+  fashionScraper: '@cherry/fashion-scraper',
+  agentCollab: '@cherry/agent-collab',
+  diary: '@cherry/diary'
 } as const
 
 export type BuiltinMCPServerName = (typeof BuiltinMCPServerNames)[keyof typeof BuiltinMCPServerNames]
@@ -924,7 +1340,10 @@ export interface MCPConfig {
   isBunInstalled: boolean
 }
 
+// VCP 统一协议：工具响应状态（同时适用于 MCP 和 VCP 工具）
 export type MCPToolResponseStatus = 'pending' | 'cancelled' | 'invoking' | 'done' | 'error'
+// VCP 统一协议：类型别名
+export type VCPToolResponseStatus = MCPToolResponseStatus
 
 interface BaseToolResponse {
   id: string // unique id
@@ -943,6 +1362,7 @@ export interface ToolCallResponse extends BaseToolResponse {
   toolCallId?: string
 }
 
+// VCP 统一协议：MCP 工具响应类型（通过 VCPToolExecutorMiddleware 统一执行）
 // export type MCPToolResponse = ToolUseResponse | ToolCallResponse
 export interface MCPToolResponse extends Omit<ToolUseResponse | ToolCallResponse, 'tool'> {
   tool: MCPTool
@@ -950,10 +1370,14 @@ export interface MCPToolResponse extends Omit<ToolUseResponse | ToolCallResponse
   toolUseId?: string
 }
 
+// VCP 统一协议：普通工具响应类型
 export interface NormalToolResponse extends Omit<ToolCallResponse, 'tool'> {
   tool: BaseTool
   toolCallId: string
 }
+
+// VCP 统一协议：类型别名，便于未来完全迁移
+export type VCPToolResponse = MCPToolResponse | NormalToolResponse
 
 export interface MCPToolResultContent {
   type: 'text' | 'image' | 'audio' | 'resource'
@@ -1043,12 +1467,16 @@ export interface MemoryConfig {
   embeddingDimensions?: number
   embeddingModel?: Model
   llmModel?: Model
+  /** Rerank model for search result reranking */
+  rerankModel?: Model
   // Dynamically retrieved, not persistently stored
   embeddingApiClient?: ApiClient
   customFactExtractionPrompt?: string
   customUpdateMemoryPrompt?: string
   /** Indicates whether embedding dimensions are automatically detected */
   isAutoDimensions?: boolean
+  /** Vector database backend type */
+  vectorBackend?: 'libsql' | 'usearch' | 'vexus' | 'memory'
 }
 
 export interface MemoryItem {

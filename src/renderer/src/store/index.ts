@@ -7,13 +7,15 @@ import { createTransform } from 'redux-persist'
 import storeSyncService from '../services/StoreSyncService'
 import assistants from './assistants'
 import backup from './backup'
+import canvas from './canvas'
 import codeTools from './codeTools'
 import copilot from './copilot'
 import externalServices from './externalServices'
+import imageStudio from './imageStudio'
 // 使用 IndexedDB 替代 localStorage，避免同步阻塞主线程
 import storage from './indexedDBStorage'
 import inputToolsReducer from './inputTools'
-import knowledge from './knowledge'
+import knowledge, { resetStuckProcessingItems } from './knowledge'
 import llm from './llm'
 import mcp from './mcp'
 import memory from './memory'
@@ -35,9 +37,9 @@ import tabs from './tabs'
 import toolPermissions from './toolPermissions'
 import translate from './translate'
 import unifiedPaintings from './unifiedPaintings'
+import vectorServices from './vectorServices'
 import websearch from './websearch'
 import workflow from './workflow'
-import imageStudio from './imageStudio'
 
 const logger = loggerService.withContext('Store')
 
@@ -147,14 +149,16 @@ function createPaintingsTransform() {
         return cleaned
       }
 
-            if (key === 'imageStudio') {
+      if (key === 'imageStudio') {
         const cleaned = { ...inboundState }
         // 限制项目数量
         if (Array.isArray(cleaned.projects)) {
           cleaned.projects = limitArrayLength(cleaned.projects, 50).map((p: any) => ({
             ...cleanLargeDataInObject(p),
             // 限制每个项目的版本数量
-            versions: Array.isArray(p.versions) ? limitArrayLength(p.versions, 20).map((v: any) => cleanLargeDataInObject(v)) : []
+            versions: Array.isArray(p.versions)
+              ? limitArrayLength(p.versions, 20).map((v: any) => cleanLargeDataInObject(v))
+              : []
           }))
         }
         // 清理任务队列（只保留未完成的任务）
@@ -178,6 +182,7 @@ function createPaintingsTransform() {
 const rootReducer = combineReducers({
   assistants,
   backup,
+  canvas,
   codeTools,
   nutstore,
   paintings,
@@ -204,7 +209,8 @@ const rootReducer = combineReducers({
   toolPermissions,
   workflow,
   externalServices,
-  imageStudio
+  imageStudio,
+  vectorServices
 })
 
 const persistedReducer = persistReducer(
@@ -260,6 +266,9 @@ export type RootState = ReturnType<typeof rootReducer>
 export type AppDispatch = typeof store.dispatch
 
 export const persistor = persistStore(store, undefined, () => {
+  // Reset knowledge items stuck in 'processing' state after app restart
+  store.dispatch(resetStuckProcessingItems())
+
   // Initialize notes path after rehydration if empty
   const state = store.getState()
   if (!state.note.notesPath) {

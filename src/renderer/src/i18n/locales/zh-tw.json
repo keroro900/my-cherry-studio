@@ -6,6 +6,9 @@
         "failed": "無法新增代理人",
         "invalid_agent": "無效的 Agent"
       },
+      "model": {
+        "tooltip": "目前僅支援 Anthropic 端點的模型可用於 Agent 功能。"
+      },
       "title": "新增代理",
       "type": {
         "placeholder": "選擇 Agent 類型"
@@ -28,13 +31,31 @@
       }
     },
     "gitBash": {
+      "autoDetected": "使用自動檢測的 Git Bash",
+      "autoDiscoveredHint": "自動發現",
+      "clear": {
+        "button": "清除自訂路徑"
+      },
+      "customPath": "使用自訂路徑: {{path}}",
       "error": {
         "description": "在 Windows 上執行代理程式需要 Git Bash。沒有它代理程式無法運作。請從以下地址安裝 Git for Windows",
         "recheck": "重新檢測 Git Bash 安裝",
+        "required": "Windows 上必須設定 Git Bash 路徑",
         "title": "需要 Git Bash"
       },
+      "found": {
+        "title": "Git Bash 已設定"
+      },
       "notFound": "找不到 Git Bash。請先安裝。",
-      "success": "成功偵測到 Git Bash！"
+      "pick": {
+        "button": "選擇 Git Bash 路徑",
+        "failed": "設定 Git Bash 路徑失敗",
+        "invalidPath": "所選檔案不是有效的 Git Bash 執行檔（bash.exe）。",
+        "title": "選擇 Git Bash 執行檔"
+      },
+      "placeholder": "選擇 bash.exe 路徑",
+      "success": "成功偵測到 Git Bash！",
+      "tooltip": "在 Windows 上執行代理需要 Git Bash。如果未安裝，請從 git-scm.com 下載安裝。"
     },
     "input": {
       "placeholder": "在這裡輸入您的訊息，使用 {{key}} 傳送 - @ 選擇路徑，/ 選擇命令"
@@ -455,6 +476,7 @@
         "button": "導入",
         "error": {
           "fetch_failed": "從 URL 獲取資料失敗",
+          "file_required": "請先選擇檔案",
           "invalid_format": "無效的助手格式：缺少必填欄位",
           "url_required": "請輸入 URL"
         },
@@ -468,6 +490,17 @@
         "url_placeholder": "輸入 JSON URL"
       },
       "manage": {
+        "batch_delete": {
+          "button": "刪除",
+          "confirm": "確定要刪除所選的 {{count}} 個助手嗎？"
+        },
+        "batch_export": {
+          "button": "匯出"
+        },
+        "mode": {
+          "manage": "管理",
+          "sort": "排序"
+        },
         "title": "管理助手"
       },
       "my_agents": "我的助手",
@@ -495,6 +528,13 @@
     "search": "搜尋助手...",
     "settings": {
       "default_model": "預設模型",
+      "image": {
+        "aspect_ratio": "寬高比",
+        "batch_count": "批量生成",
+        "model": "圖片模型",
+        "size": "圖片尺寸",
+        "title": "圖片設定"
+      },
       "knowledge_base": {
         "label": "知識庫設定",
         "recognition": {
@@ -515,13 +555,23 @@
       "more": "助手設定",
       "prompt": "提示詞設定",
       "reasoning_effort": {
+        "auto": "自動",
+        "auto_description": "彈性決定推理強度",
         "default": "預設",
+        "default_description": "依賴模型的預設行為，無需額外設定。",
         "high": "盡力思考",
+        "high_description": "高強度推理",
         "label": "思維鏈長度",
         "low": "稍微思考",
+        "low_description": "低強度推理",
         "medium": "正常思考",
+        "medium_description": "中等強度推理",
         "minimal": "最少思考",
-        "off": "關閉"
+        "minimal_description": "最小化推理",
+        "off": "關閉",
+        "off_description": "停用推理",
+        "xhigh": "超高",
+        "xhigh_description": "超高強度推理"
       },
       "regular_phrases": {
         "add": "添加短语",
@@ -599,6 +649,13 @@
       "assistant": {
         "description": "日常對話和快速問答",
         "title": "新增助手"
+      },
+      "image_assistant": {
+        "create_custom": "自訂建立",
+        "description": "圖片生成和編輯",
+        "from_preset": "從預設選擇",
+        "select_title": "選擇圖片助手類型",
+        "title": "新增圖片助手"
       },
       "option": {
         "title": "選擇新增類型"
@@ -1001,6 +1058,29 @@
         "yuque": "匯出到語雀"
       },
       "list": "話題列表",
+      "manage": {
+        "clear_selection": "清除選擇",
+        "delete": {
+          "confirm": {
+            "content": "確定要刪除所選的 {{count}} 個話題嗎？此操作無法復原。",
+            "title": "刪除話題"
+          },
+          "success": "已刪除 {{count}} 個話題"
+        },
+        "deselect_all": "取消全選",
+        "error": {
+          "at_least_one": "至少需要保留一個話題"
+        },
+        "move": {
+          "button": "移動",
+          "placeholder": "選擇目標助手",
+          "success": "已移動 {{count}} 個話題"
+        },
+        "pinned": "已固定的話題",
+        "selected_count": "已選 {{count}} 個",
+        "title": "管理話題",
+        "unpinned": "未固定的話題"
+      },
       "move_to": "移動到",
       "new": "開始新對話",
       "pin": "固定話題",
@@ -1010,6 +1090,10 @@
         },
         "label": "話題提示詞",
         "tips": "話題提示詞：針對目前話題提供額外的補充提示詞"
+      },
+      "search": {
+        "placeholder": "搜尋話題...",
+        "title": "搜尋"
       },
       "title": "話題",
       "unpin": "取消固定"
@@ -1111,6 +1195,7 @@
     "back": "返回",
     "browse": "瀏覽",
     "cancel": "取消",
+    "characters": "個字元",
     "chat": "聊天",
     "clear": "清除",
     "close": "關閉",
@@ -1159,9 +1244,12 @@
     "models": "模型",
     "more": "更多",
     "name": "名稱",
+    "no_data": "暫無資料",
+    "no_description": "暫無描述",
     "no_results": "沒有結果",
     "none": "無",
     "off": "關閉",
+    "on": "開啟",
     "open": "開啟",
     "paste": "貼上",
     "placeholders": {
@@ -1181,6 +1269,7 @@
     "saved": "已儲存",
     "search": "搜尋",
     "select": "選擇",
+    "select_all": "全選",
     "selected": "已選擇",
     "selectedItems": "已選擇 {{count}} 項",
     "selectedMessages": "選中 {{count}} 條訊息",
@@ -1193,11 +1282,14 @@
       }
     },
     "stop": "停止",
+    "subscribe": "訂閱",
     "success": "成功",
     "swap": "交換",
+    "toggle_sidebar": "切換側邊欄",
     "topics": "話題",
     "unknown": "Unknown",
     "unnamed": "未命名",
+    "unsubscribe": "取消訂閱",
     "update_success": "更新成功",
     "upload_files": "上傳檔案",
     "warning": "警告",
@@ -1209,12 +1301,13 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
-    "gemini-image": "[to be translated]:Image Generation (Gemini)",
-    "gemini-image-edit": "[to be translated]:Image Edit (Gemini)",
+    "gemini-image": "圖像生成 (Gemini)",
+    "gemini-image-edit": "圖像編輯 (Gemini)",
     "image-generation": "圖像生成 (OpenAI)",
     "jina-rerank": "Jina Rerank",
     "openai": "OpenAI",
-    "openai-response": "OpenAI-Response"
+    "openai-response": "OpenAI-Response",
+    "video-generation": "影片生成"
   },
   "error": {
     "availableProviders": "可用提供商",
@@ -1354,6 +1447,29 @@
     "title": "檔案",
     "type": "類型"
   },
+  "flowLock": {
+    "click_to_lock": "點擊鎖定目前話題",
+    "confirm_lock": "鎖定",
+    "create_lock": "鎖定話題",
+    "deviation_redirect": "請回到目前話題討論",
+    "deviation_warning": "您的訊息可能偏離了目前話題",
+    "deviations": "偏離次數",
+    "extend": "延長5分鐘",
+    "extended": "已延長 5 分鐘",
+    "keywords": "關鍵字",
+    "keywords_label": "關鍵字 (選填，用逗號分隔)",
+    "keywords_placeholder": "輸入相關關鍵字，如: React, 元件, 狀態管理",
+    "lock_created": "話題已鎖定",
+    "lock_failed": "鎖定失敗",
+    "lock_topic": "鎖定話題",
+    "max_deviations": "最大允許",
+    "remaining": "剩餘",
+    "topic_name": "話題名稱",
+    "topic_placeholder": "輸入要鎖定的話題...",
+    "topic_required": "請輸入話題名稱",
+    "unlock": "解鎖",
+    "unlocked": "已解鎖"
+  },
   "gpustack": {
     "keep_alive_time": {
       "description": "模型在記憶體中保持的時間（預設為 5 分鐘）",
@@ -1361,6 +1477,71 @@
       "title": "保持活躍時間"
     },
     "title": "GPUStack"
+  },
+  "groupchat": {
+    "abbr": "群聊",
+    "active": "進行中",
+    "add_assistant": "新增助手",
+    "agent_error": "助手 {{name}} 回應出錯: {{error}}",
+    "agents": "成員",
+    "create": "新建",
+    "delete_confirm": "確定刪除此會話？",
+    "empty": "暫無群聊會話",
+    "end": "結束",
+    "errors": {
+      "api_error": "API 請求失敗: {{status}} - {{message}}",
+      "auth_error": "API Key 無效或已過期",
+      "json_parse_error": "伺服器傳回了非 JSON 格式的回應",
+      "network_error": "網路連線失敗",
+      "timeout": "請求逾時",
+      "unknown": "未知錯誤"
+    },
+    "idle": "閒置",
+    "input_placeholder": "輸入訊息，使用 @名稱 提及特定助手...",
+    "messages": "則訊息",
+    "new_session": "新群聊",
+    "participants": "人",
+    "send_error": "發送失敗",
+    "settings": {
+      "add_tag": "+ 標籤",
+      "add_tag_tip": "新增標籤（用於自然隨機模式權重）",
+      "avoid_topics": "迴避話題",
+      "avoid_topics_placeholder": "助手應該避免討論的話題",
+      "collab_stats": "協作統計",
+      "enabled": "啟用群聊",
+      "enabled_tip": "允許此助手加入群聊會話",
+      "expertise": "專業領域",
+      "expertise_examples": "例如: AI, 程式設計, 設計, 產品管理",
+      "expertise_placeholder": "輸入專業領域標籤，按 Enter 新增",
+      "expertise_tip": "助手的專業領域標籤，用於智慧配對和發言決策",
+      "info": "設定此助手在多Agent群聊中的行為和角色",
+      "invite_prompt_template": "邀請提示詞範本",
+      "invite_prompt_template_placeholder": "例如: 請 {{VCPChatAgentName}} 分享你的觀點（可選，支援 {{VCPChatAgentName}} 佔位符）",
+      "invite_prompt_template_tip": "邀請發言模式下使用的提示詞範本，支援 {{VCPChatAgentName}} 佔位符替換為被邀請的 Agent 名稱",
+      "keywords": "觸發關鍵字",
+      "keywords_placeholder": "輸入觸發關鍵字，按 Enter 新增",
+      "keywords_tip": "當對話中出現這些關鍵字時，助手更可能被邀請發言",
+      "max_response_length": "最大回覆長度",
+      "member_tags": "成員標籤",
+      "member_tags_tip": "用於自然隨機模式權重計算，標籤相同的成員會有更高的協作機率",
+      "preferred_topics": "偏好話題",
+      "preferred_topics_placeholder": "助手更願意參與的話題類型",
+      "priority": "發言優先順序",
+      "priority_tip": "優先順序越高，在多人競爭發言時越優先 (1-100)",
+      "role": "群聊角色",
+      "speaking_preferences": "發言偏好",
+      "title": "群聊設定",
+      "unified_model": "統一模型",
+      "unified_model_placeholder": "選擇統一使用的模型",
+      "use_unified_model": "使用統一模型",
+      "use_unified_model_tip": "啟用後，所有成員使用統一的模型進行對話，便於控制成本和一致性"
+    },
+    "start": "開始群聊",
+    "start_first": "請先開始群聊",
+    "stats": {
+      "unavailable": "統計資料不可用"
+    },
+    "title": "群聊"
   },
   "history": {
     "continue_chat": "繼續聊天",
@@ -1390,6 +1571,336 @@
     "generating": "生成中",
     "preview": "預覽",
     "split": "分屏"
+  },
+  "image_studio": {
+    "advanced_settings": "進階設置",
+    "aspect_ratio": "寬高比",
+    "batch_count": "批量生成",
+    "canvas": {
+      "download": "下載",
+      "download_all": "下載全部",
+      "ecom_hint": "上傳產品圖片，AI 生成專業電商圖",
+      "ecom_title": "電商實拍",
+      "empty": "請從畫廊選擇圖片或生成新圖片",
+      "feature_ai": "AI 智慧生成",
+      "feature_export": "多格式匯出",
+      "fullscreen": "全螢幕",
+      "generate_hint": "配置參數後點擊生成按鈕",
+      "hint": "拖拽圖片到此處，或點擊上傳",
+      "loading": "載入中...",
+      "model_hint": "上傳服裝圖片，AI 為您生成模特試穿效果",
+      "model_title": "模特換裝",
+      "no_output": "暫無輸出",
+      "pattern_hint": "上傳圖案參考，AI 生成無縫圖案",
+      "pattern_title": "圖案設計",
+      "reset_zoom": "重置縮放",
+      "zoom_in": "放大",
+      "zoom_out": "縮小"
+    },
+    "ecom": {
+      "add_image": "添加圖片",
+      "background": {
+        "gradient": "漸變",
+        "label": "背景風格",
+        "scene": "場景",
+        "transparent": "透明",
+        "white": "純白"
+      },
+      "bottom_image": "下裝圖",
+      "enable_back": "生成背面圖",
+      "enable_detail": "生成細節圖",
+      "garment_desc": "服裝描述",
+      "garment_desc_placeholder": "描述服裝特點...",
+      "image_n": "圖片{{n}}",
+      "images": "產品圖片",
+      "layout": {
+        "all": "全部圖片",
+        "back": "背面圖",
+        "detail": "細節圖",
+        "label": "佈局模式",
+        "main": "主圖"
+      },
+      "layout_flat": "平鋪",
+      "layout_hanging": "懸掛",
+      "layout_model": "模特拍攝",
+      "output": {
+        "format": "輸出格式",
+        "label": "輸出設置",
+        "quality": "品質",
+        "size": "輸出尺寸"
+      },
+      "output_options": "輸出選項",
+      "prompt": {
+        "label": "附加提示詞",
+        "placeholder": "輸入附加生成提示詞..."
+      },
+      "style": {
+        "custom": "自訂",
+        "label": "風格預設",
+        "luxury": "奢華",
+        "natural": "自然",
+        "simple": "簡潔",
+        "tech": "科技"
+      },
+      "style_auto": "自動",
+      "style_minimal": "極簡",
+      "style_premium": "高端",
+      "title": "電商圖片",
+      "top_image": "上裝圖",
+      "upload": {
+        "formats": "支援 JPG, PNG, WebP",
+        "hint": "拖拽或點擊上傳",
+        "label": "上傳產品圖片"
+      }
+    },
+    "gallery": {
+      "empty_tasks": "暫無任務",
+      "empty_versions": "暫無版本",
+      "task_queue": "任務佇列",
+      "title": "畫廊",
+      "version_history": "版本歷史"
+    },
+    "image_settings": "圖片設置",
+    "image_size": "圖片尺寸",
+    "model": {
+      "accessory": "配飾",
+      "add_clothes": "添加服裝",
+      "age_adult": "成人",
+      "age_big_kid": "大童",
+      "age_group": "年齡段",
+      "age_small_kid": "小童",
+      "bottom_clothes": "下裝",
+      "clothes_image": "服裝圖片",
+      "ethnicity": "膚色",
+      "ethnicity_african": "非洲",
+      "ethnicity_asian": "亞洲",
+      "ethnicity_caucasian": "歐美",
+      "ethnicity_mixed": "混血",
+      "gender": "性別",
+      "gender_female": "女",
+      "gender_male": "男",
+      "keep_background": "保留背景",
+      "model_ref_hint": "可選，上傳參考模特",
+      "model_reference": "模特參考",
+      "model_settings": "模特設置",
+      "output_options": "輸出選項",
+      "pose": "姿態",
+      "pose_commercial": "商業",
+      "pose_dynamic": "動感",
+      "pose_fashion": "時尚",
+      "pose_natural": "自然",
+      "scene": "場景",
+      "scene_indoor": "室內",
+      "scene_outdoor": "室外",
+      "scene_pose": "場景與姿態",
+      "scene_solid": "純色背景",
+      "scene_studio": "攝影棚",
+      "scene_urban": "都市街景",
+      "show_full_body": "全身展示",
+      "style_desc": "風格描述",
+      "style_desc_placeholder": "描述期望的風格效果...",
+      "top_clothes": "上裝",
+      "upload_model_ref": "上傳模特圖片"
+    },
+    "model_fitting": {
+      "age": {
+        "label": "年齡範圍",
+        "mature": "36-50",
+        "middle": "26-35",
+        "young": "18-25"
+      },
+      "clothes": {
+        "formats": "支援 JPG, PNG, WebP",
+        "hint": "上傳要試穿的服裝圖片",
+        "label": "上傳服裝"
+      },
+      "model": {
+        "child": "兒童",
+        "female": "女性",
+        "label": "模特類型",
+        "male": "男性"
+      },
+      "pose": {
+        "dynamic": "動感",
+        "label": "姿態",
+        "sitting": "坐姿",
+        "standing": "站姿",
+        "walking": "行走"
+      },
+      "scene": {
+        "indoor": "室內",
+        "label": "場景",
+        "outdoor": "室外",
+        "street": "街景",
+        "studio": "攝影棚"
+      },
+      "title": "模特換裝"
+    },
+    "module_list": {
+      "create_preset": "建立預設",
+      "title": "圖片工坊"
+    },
+    "modules": {
+      "ecom": "電商實拍",
+      "ecom_desc": "商品圖片智慧生成",
+      "model": "模特換裝",
+      "model_desc": "AI模特穿搭展示",
+      "pattern": "圖案設計",
+      "pattern_desc": "無縫圖案與紋理"
+    },
+    "optional": "可選",
+    "pattern": {
+      "color_tone": {
+        "cool": "冷色調",
+        "label": "色調",
+        "neutral": "中性",
+        "vibrant": "鮮艷",
+        "warm": "暖色調"
+      },
+      "density": {
+        "dense": "密集",
+        "label": "圖案密度",
+        "medium": "中等",
+        "sparse": "稀疏"
+      },
+      "mode": {
+        "label": "生成模式",
+        "modeA": "模式A - 基於參考",
+        "modeB": "模式B - 基於描述",
+        "modeC": "模式C - 混合"
+      },
+      "output_type": {
+        "label": "輸出類型",
+        "poster": "海報",
+        "seamless": "無縫圖案",
+        "tshirt": "T恤印花"
+      },
+      "reference": {
+        "hint": "上傳參考圖片（可選）",
+        "label": "參考圖片"
+      },
+      "style_preset": {
+        "count": "{{count}} 個預設可用",
+        "label": "風格預設",
+        "select": "選擇風格..."
+      },
+      "title": "圖案設計"
+    },
+    "prompt": {
+      "negative": "反向提示詞",
+      "negative_placeholder": "描述不希望出現的元素...",
+      "optimize": "優化提示詞",
+      "system": "系統提示詞",
+      "system_placeholder": "設置生成圖片的系統指令...",
+      "title": "提示詞設置"
+    },
+    "prompt_enhancer": {
+      "tooltip": "智能優化提示詞以提升生成效果"
+    },
+    "seed": "隨機種子",
+    "seed_placeholder": "留空則隨機",
+    "select_model": "選擇模型",
+    "select_provider": "選擇服務商",
+    "settings": {
+      "advanced": "進階設置",
+      "age_adult": "成人",
+      "age_big_kid": "大童",
+      "age_group": "年齡段",
+      "age_small_kid": "小童",
+      "aspect_ratio": "寬高比",
+      "basic": "基本設置",
+      "batch_count": "批量生成",
+      "color_prompt": "顏色提示詞",
+      "color_prompt_placeholder": "描述顏色偏好...",
+      "density": "密度",
+      "density_dense": "密集",
+      "density_medium": "中等",
+      "density_sparse": "稀疏",
+      "design_prompt": "設計提示詞",
+      "design_prompt_placeholder": "描述圖案設計...",
+      "enable_back": "生成背面圖",
+      "enable_detail": "生成細節圖",
+      "garment_description": "服裝描述",
+      "garment_description_placeholder": "描述服裝特點...",
+      "gender": "性別",
+      "gender_female": "女",
+      "gender_male": "男",
+      "generation_model": "圖片生成模型",
+      "image_size": "圖片尺寸",
+      "layout": "佈局模式",
+      "layout_flat": "平鋪",
+      "layout_hanging": "懸掛",
+      "layout_model": "模特拍攝",
+      "model": "模型選擇",
+      "negative_prompt": "負面提示詞",
+      "negative_prompt_placeholder": "不希望出現的內容...",
+      "pattern_brick": "磚塊",
+      "pattern_half_drop": "半落",
+      "pattern_mirror": "鏡像",
+      "pattern_seamless": "無縫",
+      "pattern_type": "圖案類型",
+      "prompt": "提示詞",
+      "seed": "隨機種子",
+      "seed_placeholder": "留空則隨機",
+      "select_model": "選擇模型",
+      "style_auto": "自動",
+      "style_description": "風格描述",
+      "style_description_placeholder": "描述期望的風格...",
+      "style_minimal": "極簡",
+      "style_premium": "高端",
+      "style_preset": "風格預設",
+      "system_prompt": "系統提示詞",
+      "system_prompt_placeholder": "輸入系統提示詞...",
+      "title": "設置",
+      "use_system_prompt": "使用系統提示詞"
+    },
+    "sidebar": {
+      "generate": "生成",
+      "generating": "生成中...",
+      "preset_market": "預設市場",
+      "title": "配置"
+    },
+    "task": {
+      "actions": {
+        "cancel": "取消",
+        "pause": "暫停",
+        "resume": "繼續",
+        "retry": "重試"
+      },
+      "batch": {
+        "cancel_all_queued": "取消全部佇列",
+        "retry_all_failed": "重試全部失敗"
+      },
+      "status": {
+        "cancelled": "已取消",
+        "completed": "已完成",
+        "failed": "失敗",
+        "paused": "已暫停",
+        "queued": "等待中",
+        "running": "生成中"
+      },
+      "type": {
+        "generate": "生成",
+        "local_edit": "局部編輯",
+        "regenerate": "重新生成"
+      }
+    },
+    "title": "圖片工坊",
+    "types": {
+      "ecom": "電商圖片",
+      "ecom_desc": "上傳產品圖片，AI 生成專業電商圖片",
+      "generate": "圖片生成",
+      "generate_desc": "根據文字描述生成圖片",
+      "model": "模特試穿",
+      "model_desc": "上傳服裝圖片，AI 生成模特試穿效果",
+      "pattern": "圖案設計",
+      "pattern_desc": "上傳圖案參考，AI 生成無縫圖案"
+    },
+    "version": {
+      "compare": "版本對比",
+      "current": "當前版本",
+      "rollback": "回滾到此版本"
+    }
   },
   "import": {
     "chatgpt": {
@@ -1592,6 +2103,37 @@
     "add_success": "記憶新增成功",
     "add_user": "新增使用者",
     "add_user_failed": "新增使用者失敗",
+    "advanced": {
+      "backends": "記憶後端",
+      "backends_desc": "不同後端適用於不同場景",
+      "clear_backend": "清除",
+      "clear_confirm_content": "確定要清除 {{backend}} 後端的所有記憶嗎？此操作無法復原。",
+      "clear_confirm_title": "清除記憶",
+      "clear_failed": "清除記憶失敗",
+      "clear_success": "記憶已清除",
+      "deepmemo_desc": "使用 Tantivy 引擎的全文搜尋",
+      "diary": "日記",
+      "diary_desc": "基於日記的記憶儲存",
+      "diary_name": "日記名稱",
+      "diary_name_placeholder": "輸入日記名稱...",
+      "lightmemo_desc": "基於 BM25 的快速關鍵字搜尋",
+      "meshmemo_desc": "基於向量的語意搜尋，具有網狀連接",
+      "no_results": "未找到結果",
+      "refresh_stats": "重新整理統計",
+      "results": "結果",
+      "search": "搜尋測試",
+      "search_btn": "搜尋",
+      "search_desc": "測試不同後端的搜尋功能",
+      "search_failed": "搜尋失敗",
+      "search_placeholder": "輸入搜尋查詢...",
+      "tag_boost": "標籤權重",
+      "tagmemo_desc": "基於標籤的記憶組織",
+      "tagmemo_settings": "標籤記憶設定",
+      "title": "進階記憶",
+      "unified": "統一",
+      "use_rrf": "使用 RRF"
+    },
+    "advanced_settings": "進階設置",
     "all_users": "所有使用者",
     "cannot_delete_default_user": "不能刪除預設使用者",
     "configure_memory_first": "請先配置記憶設定",
@@ -1615,8 +2157,10 @@
     "edit_memory": "編輯記憶",
     "embedding_dimensions": "嵌入維度",
     "embedding_model": "嵌入模型",
+    "embedding_model_required": "請先設定嵌入模型才能啟用全域記憶",
     "enable_global_memory_first": "請先啟用全域記憶",
     "end_date": "結束日期",
+    "extracted_tags": "提取的標籤",
     "global_memory": "全域記憶",
     "global_memory_description": "需要開啟助手設定中的全域記憶才能使用",
     "global_memory_disabled_desc": "要使用記憶功能，請先在助手設定中啟用全域記憶。",
@@ -1624,7 +2168,9 @@
     "global_memory_enabled": "全域記憶已啟用",
     "go_to_memory_page": "前往記憶頁面",
     "initial_memory_content": "歡迎！這是你的第一個記憶。",
+    "initialized_success": "初始化成功",
     "llm_model": "LLM 模型",
+    "llm_model_required": "請先設定語言模型才能啟用全域記憶",
     "load_failed": "載入記憶失敗",
     "loading": "載入記憶中...",
     "loading_memories": "正在載入記憶...",
@@ -1633,6 +2179,7 @@
     "memory": "個記憶",
     "memory_content": "記憶內容",
     "memory_placeholder": "輸入記憶內容...",
+    "native_modules": "原生模組",
     "new_user_id": "新使用者ID",
     "new_user_id_placeholder": "輸入唯一的使用者ID",
     "no_matching_memories": "未找到符合的記憶",
@@ -1666,6 +2213,10 @@
     "stored_memories": "儲存的記憶",
     "switch_user": "切換使用者",
     "switch_user_confirm": "將使用者內容切換至 {{user}}？",
+    "tag_count": "標籤數量",
+    "test_features": "測試功能",
+    "test_results": "測試結果",
+    "testing": "正在測試功能...",
     "time": "時間",
     "title": "全域記憶",
     "total_memories": "個記憶",
@@ -1687,7 +2238,25 @@
     "user_memories_reset": "{{user}} 的所有記憶已重置",
     "user_switch_failed": "切換使用者失敗",
     "user_switched": "使用者內容已切換至 {{user}}",
-    "users": "使用者"
+    "users": "使用者",
+    "vector_backend": {
+      "libsql": "LibSQL",
+      "libsql_desc": "SQLite 持久化儲存，相容性好",
+      "memory": "記憶體",
+      "memory_desc": "記憶體儲存，用於開發/測試",
+      "performance_high": "高",
+      "performance_low": "低",
+      "performance_medium": "中",
+      "persistent": "持久化",
+      "title": "向量後端",
+      "tooltip": "選擇向量資料庫後端。更改後需要重建索引。",
+      "usearch": "USearch",
+      "usearch_desc": "高效能 HNSW，npm 預編譯二進位",
+      "vexus": "Vexus",
+      "vexus_desc": "Rust 原生 (vexus-lite)，最高效能",
+      "volatile": "易失性",
+      "warning": "切換後端需要重建索引"
+    }
   },
   "message": {
     "agents": {
@@ -1926,7 +2495,8 @@
       "invoking": "調用中",
       "pending": "等待中",
       "preview": "預覽",
-      "raw": "原始碼"
+      "raw": "原始碼",
+      "tool_call": "[to be translated]:Tool Call"
     },
     "topic": {
       "added": "新話題已新增"
@@ -2093,12 +2663,13 @@
       "embedding": "嵌入",
       "free": "免費",
       "function_calling": "工具",
-      "image_edit": "[to be translated]:Image Edit",
-      "image_generation": "[to be translated]:Image Generation",
+      "image_edit": "圖像編輯",
+      "image_generation": "圖像生成",
       "reasoning": "推理",
       "rerank": "重排",
       "select": "模型類型",
       "text": "文字",
+      "video_generation": "影片生成",
       "vision": "視覺",
       "websearch": "網路搜尋"
     }
@@ -2128,6 +2699,7 @@
     "collapse": "收起",
     "content_placeholder": "請輸入筆記內容...",
     "copyContent": "複製內容",
+    "crossPlatformRestoreWarning": "跨平台設定已還原，但筆記目錄為空。請將您的筆記檔案複製到: {{path}}",
     "delete": "删除",
     "delete_confirm": "確定要刪除此 {{type}} 嗎？",
     "delete_folder_confirm": "確定要刪除資料夾 \"{{name}}\" 及其所有內容嗎？",
@@ -2223,7 +2795,10 @@
     "untitled_folder": "新資料夾",
     "untitled_note": "無標題筆記",
     "upload_failed": "筆記上傳失敗",
-    "upload_success": "筆記上傳成功"
+    "upload_files": "上傳檔案",
+    "upload_folder": "上傳資料夾",
+    "upload_success": "筆記上傳成功",
+    "uploading_files": "正在上傳 {{count}} 個檔案..."
   },
   "notification": {
     "assistant": "助手回應",
@@ -2514,7 +3089,8 @@
   },
   "preview": {
     "copy": {
-      "image": "複製為圖片"
+      "image": "複製為圖片",
+      "src": "複製圖片來源"
     },
     "dialog": "開啟預覽窗口",
     "label": "預覽",
@@ -2568,6 +3144,7 @@
     "lanyun": "藍耘",
     "lmstudio": "LM Studio",
     "longcat": "龍貓",
+    "mimo": "小米 MiMo",
     "minimax": "MiniMax",
     "mistral": "Mistral",
     "modelscope": "ModelScope 魔搭",
@@ -3156,24 +3733,43 @@
         },
         "content": "匯出部分數據，包括聊天記錄、設定。請注意，備份過程可能需要一些時間，感謝您的耐心等候。",
         "lan": {
-          "auto_close_tip": "將於 {{seconds}} 秒後自動關閉...",
-          "confirm_close_message": "檔案傳輸正在進行中。關閉將會中斷傳輸。您確定要強制關閉嗎？",
-          "confirm_close_title": "確認關閉",
           "connected": "已連線",
           "connection_failed": "連線失敗",
           "content": "請確保電腦和手機處於同一網路以使用區域網路傳輸。請打開 Cherry Studio App 掃描此 QR 碼。",
+          "device_list_title": "區域網路裝置",
+          "discovered_devices": "已發現的裝置",
           "error": {
+            "file_too_large": "檔案太大，最大支援 500MB",
             "init_failed": "初始化失敗",
+            "invalid_file_type": "僅支援 ZIP 檔案",
             "no_file": "未選擇檔案",
             "no_ip": "無法取得 IP 位址",
+            "not_connected": "請先完成握手連接",
             "send_failed": "無法傳送檔案"
           },
-          "force_close": "強制關閉",
-          "generating_qr": "正在生成 QR 碼...",
-          "noZipSelected": "未選取壓縮檔案",
-          "scan_qr": "請使用手機掃描QR碼",
-          "selectZip": "選擇壓縮檔案",
-          "sendZip": "開始恢復資料",
+          "file_transfer": {
+            "cancelled": "傳輸已取消",
+            "failed": "檔案傳輸失敗: {{message}}",
+            "progress": "傳送中... {{progress}}%",
+            "success": "檔案傳送成功"
+          },
+          "handshake": {
+            "button": "握手",
+            "failed": "握手失敗: {{message}}",
+            "in_progress": "握手中...",
+            "success": "已與 {{device}} 完成握手",
+            "test_message_received": "收到來自 {{device}} 的回應",
+            "test_message_sent": "已傳送測試訊息"
+          },
+          "idle_hint": "掃描已暫停。開始掃描以尋找區域網路中的 Cherry Studio 裝置。",
+          "ip_addresses": "IP 位址",
+          "last_seen": "最後上線: {{time}}",
+          "metadata": "中繼資料",
+          "no_connection_warning": "請在 Cherry Studio 手機版開啟區域網路傳輸",
+          "no_devices": "尚未發現區域網路裝置",
+          "scan_devices": "掃描裝置",
+          "scanning_hint": "正在掃描區域網路中的 Cherry Studio 裝置...",
+          "send_file": "傳送檔案",
           "status": {
             "completed": "轉帳完成",
             "connected": "已連線",
@@ -3182,9 +3778,11 @@
             "error": "連線錯誤",
             "initializing": "正在初始化連線...",
             "preparing": "正在準備傳輸...",
-            "sending": "傳輸中 {{progress}}%",
-            "waiting_qr_scan": "請掃描QR碼以連接"
+            "sending": "傳輸中 {{progress}}%"
           },
+          "status_badge_idle": "閒置",
+          "status_badge_scanning": "掃描中",
+          "stop_scan": "停止掃描",
           "title": "區域網路傳輸",
           "transfer_progress": "傳輸進度"
         },
@@ -3669,6 +4267,8 @@
     "developer": {
       "enable_developer_mode": "啟用開發者模式",
       "help": "啟用開發者模式後，將可以使用調用鏈功能查看模型調用過程的數據流。",
+      "showvcp_debug": "[to be translated]:VCP Debug Panel",
+      "showvcp_debug_help": "[to be translated]:When enabled, a VCP debug panel will appear in the bottom left corner of the screen to monitor real-time status of VCP functions like knowledge base retrieval and Agent context injection.",
       "title": "開發者模式"
     },
     "display": {
@@ -3696,6 +4296,10 @@
           "top": "頂部"
         },
         "title": "導航欄設定"
+      },
+      "presets": {
+        "manage": "[to be translated]:Manage Presets",
+        "title": "[to be translated]:Theme Presets"
       },
       "sidebar": {
         "chat": {
@@ -3856,16 +4460,19 @@
       "builtinServers": "內置伺服器",
       "builtinServersDescriptions": {
         "brave_search": "一個集成了Brave 搜索 API 的 MCP 伺服器實現，提供網頁與本地搜尋雙重功能。需要配置 BRAVE_API_KEY 環境變數",
+        "browser": "透過 Chrome DevTools 協定控制無頭 Electron 視窗。工具：開啟 URL、執行單行 JS、重置會話。",
         "didi_mcp": "一個集成了滴滴 MCP 伺服器實現，提供網約車服務包括地圖搜尋、價格預估、訂單管理和司機追蹤。僅支援中國大陸地區。需要配置 DIDI_API_KEY 環境變數",
         "dify_knowledge": "Dify 的 MCP 伺服器實現，提供了一個簡單的 API 來與 Dify 進行互動。需要配置 Dify Key",
+        "fashion": "時尚 AI 服務 - 提供時尚趨勢分析、服裝屬性提取、知識庫搜尋和設計建議。整合 Cherry Studio 的 AI 提供者進行圖像分析和生成",
         "fetch": "用於獲取 URL 網頁內容的 MCP 伺服器",
         "filesystem": "實現文件系統操作的模型上下文協議（MCP）的 Node.js 伺服器。需要配置允許訪問的目錄",
         "mcp_auto_install": "自動安裝 MCP 服務（測試版）",
         "memory": "基於本地知識圖譜的持久性記憶基礎實現。這使得模型能夠在不同對話間記住使用者的相關資訊。需要配置 MEMORY_FILE_PATH 環境變數。",
         "no": "無描述",
+        "nowledge_mem": "需要在本地執行 Nowledge Mem 應用程式。將 AI 對話、工具、筆記、代理和檔案保存在電腦的私密記憶中。從 https://mem.nowledge.co/ 下載",
         "python": "在安全的沙盒環境中執行 Python 代碼。使用 Pyodide 運行 Python，支援大多數標準庫和科學計算套件",
         "sequentialthinking": "一個 MCP 伺服器實現，提供了透過結構化思維過程進行動態和反思性問題解決的工具",
-        "workflow": "[to be translated]:AI Workflow Service - Provides workflow management, execution and AI service integration. Supports Qwen, Gemini, Kling, RunningHub and other AI services"
+        "workflow": "AI 工作流服務 - 提供工作流管理、執行和 AI 服務整合。支援 Qwen、Gemini、Kling、RunningHub 等 AI 服務"
       },
       "command": "指令",
       "config_description": "設定模型上下文協議伺服器",
@@ -3909,6 +4516,7 @@
       "jsonSaveError": "保存 JSON 配置失敗",
       "jsonSaveSuccess": "JSON 配置已儲存",
       "logoUrl": "標誌網址",
+      "logs": "日誌",
       "longRunning": "長時間運行模式",
       "longRunningTooltip": "啟用後，伺服器支援長時間任務，接收到進度通知時會重置超時計時器，並延長最大超時時間至10分鐘",
       "marketplaces": "市場",
@@ -3928,6 +4536,7 @@
       "name": "名稱",
       "newServer": "MCP 伺服器",
       "noDescriptionAvailable": "描述不存在",
+      "noLogs": "暫無日誌",
       "noServers": "未設定伺服器",
       "not_support": "不支援此模型",
       "npx_list": {
@@ -3949,6 +4558,7 @@
           "title": "認證成功"
         }
       },
+      "plugin_config": "配置",
       "prompts": {
         "arguments": "參數",
         "availablePrompts": "可用提示",
@@ -4055,7 +4665,8 @@
       "updateError": "更新伺服器失敗",
       "updateSuccess": "伺服器更新成功",
       "url": "URL",
-      "user": "用戶"
+      "user": "用戶",
+      "vcpPlugins": "[to be translated]:VCP Plugins"
     },
     "messages": {
       "divider": {
@@ -4276,6 +4887,12 @@
         "tip": "指定用於處理請求的延遲層級",
         "title": "服務層級"
       },
+      "stream_options": {
+        "include_usage": {
+          "tip": "是否包含 Token 使用量（僅適用於 OpenAI Chat Completions API）",
+          "title": "包含使用量"
+        }
+      },
       "summary_text_mode": {
         "auto": "自動",
         "concise": "簡潔",
@@ -4292,6 +4909,9 @@
         "tip": "控制模型輸出的詳細程度",
         "title": "詳細程度"
       }
+    },
+    "pluginStore": {
+      "title": "[to be translated]:Plugin Store"
     },
     "privacy": {
       "enable_privacy_mode": "匿名發送錯誤報告和資料統計",
@@ -4594,50 +5214,50 @@
     },
     "theme": {
       "category": {
-        "anime": "[to be translated]:Anime",
-        "custom": "[to be translated]:Custom",
-        "default": "[to be translated]:Default",
-        "nature": "[to be translated]:Nature",
-        "professional": "[to be translated]:Professional"
+        "anime": "動漫",
+        "custom": "自訂",
+        "default": "預設",
+        "nature": "自然",
+        "professional": "專業"
       },
       "color_primary": "主題顏色",
       "dark": "深色",
       "effect": {
-        "glass": "[to be translated]:Glass Effect",
-        "gradient": "[to be translated]:Gradient Accents",
-        "rounded": "[to be translated]:Large Radius"
+        "glass": "玻璃效果",
+        "gradient": "漸層點綴",
+        "rounded": "大圓角"
       },
       "light": "淺色",
       "preset": {
         "default": {
-          "desc": "[to be translated]:Simple and elegant green theme",
-          "name": "[to be translated]:Cherry Default"
+          "desc": "簡約優雅的綠色主題",
+          "name": "Cherry 預設"
         },
         "lavender": {
-          "desc": "[to be translated]:Romantic purple with glass effect",
-          "name": "[to be translated]:Lavender Purple"
+          "desc": "浪漫紫色搭配玻璃效果",
+          "name": "薰衣草紫"
         },
         "mint": {
-          "desc": "[to be translated]:Fresh and natural green",
-          "name": "[to be translated]:Mint Green"
+          "desc": "清新自然的綠色",
+          "name": "薄荷綠"
         },
         "neon": {
-          "desc": "[to be translated]:Dark background with neon glow",
-          "name": "[to be translated]:Neon Cyber"
+          "desc": "深色背景搭配霓虹光效",
+          "name": "霓虹賽博"
         },
         "sakura": {
-          "desc": "[to be translated]:Soft pink, anime style",
-          "name": "[to be translated]:Sakura Pink"
+          "desc": "柔和粉色，動漫風格",
+          "name": "櫻花粉"
         },
         "sky": {
-          "desc": "[to be translated]:Fresh and bright blue",
-          "name": "[to be translated]:Sky Blue"
+          "desc": "清新明亮的藍色",
+          "name": "天空藍"
         }
       },
       "presets": {
-        "desc": "[to be translated]:Select a preset theme, or hover to preview",
-        "none": "[to be translated]:Use Custom Colors",
-        "title": "[to be translated]:Theme Presets"
+        "desc": "選擇預設主題，或懸停預覽",
+        "none": "使用自訂顏色",
+        "title": "主題預設"
       },
       "system": "系統",
       "title": "主題",
@@ -4693,6 +5313,12 @@
       },
       "title": "其他設定",
       "websearch": {
+        "api_key_required": {
+          "content": "{{provider}} 需要 API 金鑰才能使用。是否現在設定？",
+          "ok": "設定",
+          "title": "需要 API 金鑰"
+        },
+        "api_providers": "API 提供者",
         "apikey": "API 金鑰",
         "blacklist": "黑名單",
         "blacklist_description": "以下網站不會出現在搜尋結果中",
@@ -4734,7 +5360,15 @@
         },
         "content_limit": "內容長度限制",
         "content_limit_tooltip": "限制搜尋結果的內容長度；超過限制的內容將被截斷。",
+        "default_provider": "預設提供者",
         "free": "免費",
+        "is_default": "預設",
+        "local_provider": {
+          "hint": "登入網站以獲得更好的搜尋結果並個人化您的搜尋設定。",
+          "open_settings": "開啟 {{provider}} 設定",
+          "settings": "本地搜尋設定"
+        },
+        "local_providers": "本地提供者",
         "no_provider_selected": "請選擇搜尋服務商後再檢查",
         "overwrite": "覆蓋搜尋服務",
         "overwrite_tooltip": "強制使用搜尋服務而不是 LLM",
@@ -4745,6 +5379,7 @@
         "search_provider": "搜尋服務商",
         "search_provider_placeholder": "選擇一個搜尋服務商",
         "search_with_time": "搜尋包含日期",
+        "set_as_default": "設為預設",
         "subscribe": "黑名單訂閱",
         "subscribe_add": "新增訂閱",
         "subscribe_add_failed": "订阅源添加失败",
@@ -4832,42 +5467,222 @@
       "show": "顯示系统匣圖示",
       "title": "系统匣"
     },
+    "vcpToolbox": {
+      "actions": {
+        "initFailed": "[to be translated]:VCPToolBox initialization failed",
+        "initSuccess": "[to be translated]:VCPToolBox initialized successfully",
+        "initialize": "[to be translated]:Initialize"
+      },
+      "badge": "[to be translated]:74+ Plugins",
+      "configUpdateFailed": "[to be translated]:Configuration update failed",
+      "debug": {
+        "debugMode": "[to be translated]:Debug Mode",
+        "debugModeHelp": "[to be translated]:Enable to output detailed debug logs",
+        "showVCPOutput": "[to be translated]:Show VCP Output",
+        "showVCPOutputHelp": "[to be translated]:Show detailed VCP tool call output in conversations",
+        "title": "[to be translated]:Debug Settings"
+      },
+      "knowledge": {
+        "diaryList": "[to be translated]:Diary List",
+        "initKnowledge": "[to be translated]:Initialize Knowledge Base",
+        "initKnowledgeFailed": "[to be translated]:Knowledge base initialization failed",
+        "initKnowledgeSuccess": "[to be translated]:Knowledge base initialized successfully",
+        "initializing": "[to be translated]:Initializing...",
+        "noData": "[to be translated]:No data available, please initialize knowledge base first",
+        "pathConfig": {
+          "browse": "[to be translated]:Browse",
+          "rootPath": "[to be translated]:Knowledge Base Root Path",
+          "rootPathHelp": "[to be translated]:Directory for diary and knowledge base files",
+          "selectDirectory": "[to be translated]:Select directory...",
+          "title": "[to be translated]:Path Configuration",
+          "vectorDimension": "[to be translated]:Vector Dimension",
+          "vectorDimensionHelp": "[to be translated]:Embedding vector dimension, depends on the embedding model",
+          "vectorStorePath": "[to be translated]:Vector Store Path",
+          "vectorStorePathHelp": "[to be translated]:Directory for vector index data"
+        },
+        "stats": {
+          "diaryCount": "[to be translated]:Diaries",
+          "totalChunks": "[to be translated]:Chunks",
+          "totalFiles": "[to be translated]:Files",
+          "totalTags": "[to be translated]:Tags"
+        },
+        "title": "[to be translated]:Knowledge Base Status"
+      },
+      "loading": "[to be translated]:Loading...",
+      "loop": {
+        "apiRetries": "[to be translated]:API Retry Count",
+        "apiRetriesHelp": "[to be translated]:Number of retries when API call fails",
+        "apiRetryDelay": "[to be translated]:API Retry Delay (ms)",
+        "apiRetryDelayHelp": "[to be translated]:Delay between retries (milliseconds)",
+        "maxNonStream": "[to be translated]:Max Non-Stream Loop Count",
+        "maxNonStreamHelp": "[to be translated]:Maximum tool call loop count for non-streaming responses",
+        "maxStream": "[to be translated]:Max Stream Loop Count",
+        "maxStreamHelp": "[to be translated]:Maximum tool call loop count for streaming responses",
+        "title": "[to be translated]:VCP Loop Settings"
+      },
+      "notAvailable": {
+        "description": "[to be translated]:VCPToolBox module not found, please ensure it is properly installed",
+        "title": "[to be translated]:VCPToolBox Not Available"
+      },
+      "plugins": {
+        "columns": {
+          "name": "[to be translated]:Name",
+          "status": "[to be translated]:Status",
+          "type": "[to be translated]:Type",
+          "version": "[to be translated]:Version"
+        },
+        "disabled": "[to be translated]:Disabled",
+        "enabled": "[to be translated]:Enabled",
+        "noPlugins": "[to be translated]:No plugins",
+        "noPluginsHelp": "[to be translated]:Please initialize VCPToolBox first",
+        "refresh": "[to be translated]:Refresh",
+        "reload": "[to be translated]:Reload Plugins",
+        "reloadFailed": "[to be translated]:Plugins reload failed",
+        "reloadSuccess": "[to be translated]:Plugins reloaded successfully",
+        "title": "[to be translated]:VCP Plugin List",
+        "types": {
+          "asynchronous": "[to be translated]:Asynchronous",
+          "hybridservice": "[to be translated]:Hybrid Service",
+          "messagePreprocessor": "[to be translated]:Preprocessor",
+          "service": "[to be translated]:Service",
+          "static": "[to be translated]:Static",
+          "synchronous": "[to be translated]:Synchronous"
+        }
+      },
+      "status": {
+        "initialized": "[to be translated]:Initialized",
+        "notAvailable": "[to be translated]:Not Available",
+        "notInitialized": "[to be translated]:Not Initialized"
+      },
+      "tabs": {
+        "general": "[to be translated]:General",
+        "knowledge": "[to be translated]:Knowledge Base",
+        "plugins": "[to be translated]:Plugins"
+      },
+      "title": "[to be translated]:VCPToolBox"
+    },
     "wallpaper": {
-      "blur": "[to be translated]:Blur",
-      "brightness": "[to be translated]:Brightness",
+      "advanced": {
+        "title": "[to be translated]:Wallpaper Advanced Settings"
+      },
+      "blur": "模糊",
+      "brightness": "亮度",
       "builtin": {
+        "gradient": "漸層桌布"
+      },
+      "category": {
+        "anime": "[to be translated]:Anime Wallpapers",
         "gradient": "[to be translated]:Gradient Wallpapers"
       },
-      "displayMode": "[to be translated]:Display Mode",
-      "enable": "[to be translated]:Enable Wallpaper",
+      "custom": "[to be translated]:Custom",
+      "customSource": {
+        "hint": "[to be translated]:Changing wallpaper source will override the preset wallpaper image",
+        "title": "[to be translated]:Custom Wallpaper Source"
+      },
+      "display": {
+        "title": "[to be translated]:Display Settings"
+      },
+      "displayMode": "顯示模式",
+      "effects": {
+        "chatBubble": {
+          "accentLine": "[to be translated]:Accent Line",
+          "accentLineColor": "[to be translated]:Accent Line Color",
+          "shadow": "[to be translated]:Shadow Effect",
+          "title": "[to be translated]:Chat Bubble Decoration"
+        },
+        "codeBlock": {
+          "backgroundColor": "[to be translated]:Background Color",
+          "borderColor": "[to be translated]:Border Color",
+          "title": "[to be translated]:Code Block Style"
+        },
+        "contentOverlay": {
+          "endColor": "[to be translated]:Overlay End Color",
+          "startColor": "[to be translated]:Overlay Start Color",
+          "title": "[to be translated]:Content Overlay"
+        },
+        "enabled": "[to be translated]:Enabled",
+        "inputBar": {
+          "backgroundColor": "[to be translated]:Background Color",
+          "borderColor": "[to be translated]:Border Color",
+          "focusColor": "[to be translated]:Focus Color",
+          "title": "[to be translated]:Input Bar Style"
+        },
+        "reset": "[to be translated]:Reset Effects",
+        "sidebarGlass": {
+          "blurAmount": "[to be translated]:Blur Amount",
+          "endColor": "[to be translated]:Gradient End Color",
+          "saturation": "[to be translated]:Saturation",
+          "startColor": "[to be translated]:Gradient Start Color",
+          "tintColor": "[to be translated]:Tint Color",
+          "title": "[to be translated]:Sidebar Glass Effect"
+        },
+        "title": "[to be translated]:Effect Settings"
+      },
+      "enable": "啟用桌布",
       "excludeWorkflow": {
-        "label": "[to be translated]:Exclude Wallpaper in Workflow",
-        "tip": "[to be translated]:Workflow module needs a clear canvas, recommended to keep enabled"
+        "label": "在工作流中排除桌布",
+        "tip": "工作流模組需要清晰的畫布，建議保持啟用"
+      },
+      "hint": {
+        "disabled": "[to be translated]:Please select a wallpaper preset in \"Preset Themes\" to enable wallpaper feature"
       },
       "local": {
-        "file": "[to be translated]:Local File",
-        "none": "[to be translated]:Not Selected",
-        "select": "[to be translated]:Select"
+        "file": "本地檔案",
+        "none": "未選擇",
+        "select": "選擇"
       },
       "mode": {
-        "center": "[to be translated]:Center",
-        "contain": "[to be translated]:Contain",
-        "cover": "[to be translated]:Cover",
-        "tile": "[to be translated]:Tile"
+        "center": "置中",
+        "contain": "完整顯示",
+        "cover": "填滿",
+        "tile": "平鋪"
       },
-      "opacity": "[to be translated]:Opacity",
-      "reset": "[to be translated]:Reset Parameters",
-      "resetToDefault": "[to be translated]:Reset to Default",
-      "source": {
-        "builtin": "[to be translated]:Built-in",
-        "label": "[to be translated]:Wallpaper Source",
-        "local": "[to be translated]:Local",
+      "opacity": "透明度",
+      "preset": {
+        "anime_dreamy": "[to be translated]:Dreamy Anime",
+        "anime_fantasy": "[to be translated]:Fantasy Adventure",
+        "anime_landscape": "[to be translated]:Anime Landscape",
+        "anime_ocean": "[to be translated]:Ocean Anime",
+        "anime_top": "[to be translated]:Top Anime",
+        "blue_archive": "[to be translated]:Blue Archive",
+        "chainsaw_man": "[to be translated]:Chainsaw Man",
+        "chainsaw_power": "[to be translated]:Chainsaw Man - Power",
+        "cyber_anime": "[to be translated]:Cyberpunk",
+        "fate_saber": "[to be translated]:Fate/Stay Night - Saber",
+        "fate_sakura": "[to be translated]:Fate Sakura",
+        "genshin_impact": "[to be translated]:Genshin Impact",
+        "gojo_satoru": "[to be translated]:Jujutsu Kaisen - Gojo",
+        "gradient_dark": "[to be translated]:Gradient Dark",
+        "gradient_light": "[to be translated]:Gradient Light",
+        "honkai_impact": "[to be translated]:Honkai Impact 3rd",
+        "honkai_starrail": "[to be translated]:Honkai: Star Rail",
+        "jujutsu_kaisen": "[to be translated]:Jujutsu Kaisen",
+        "makima": "[to be translated]:Chainsaw Man - Makima",
+        "my_hero_academia": "[to be translated]:My Hero Academia",
+        "nier_automata": "[to be translated]:NieR: Automata",
+        "pink_anime": "[to be translated]:Pink Anime",
+        "rain_anime": "[to be translated]:Rainy Day",
+        "spy_family": "[to be translated]:Spy x Family",
+        "starry_night": "[to be translated]:Starry Night",
+        "sunset_anime": "[to be translated]:Sunset",
+        "vocaloid": "[to be translated]:Vocaloid"
+      },
+      "presets": {
         "none": "[to be translated]:None",
-        "url": "[to be translated]:URL"
+        "title": "[to be translated]:Preset Themes"
       },
-      "title": "[to be translated]:Wallpaper",
+      "reset": "重設參數",
+      "resetToDefault": "恢復預設",
+      "source": {
+        "builtin": "內建",
+        "label": "桌布來源",
+        "local": "本地",
+        "none": "無",
+        "url": "網址"
+      },
+      "title": "桌布",
       "url": {
-        "input": "[to be translated]:Image URL"
+        "input": "圖片網址"
       }
     },
     "zoom": {
@@ -4877,9 +5692,11 @@
   },
   "title": {
     "apps": "小程序",
+    "canvas": "畫布",
     "code": "Code",
     "files": "文件",
     "home": "主頁",
+    "image_studio": "圖片工作室",
     "knowledge": "知識庫",
     "launchpad": "啟動台",
     "mcp-servers": "MCP 伺服器",
@@ -5046,6 +5863,353 @@
     "noReleaseNotes": "暫無更新日誌",
     "saveDataError": "保存數據失敗，請重試",
     "title": "更新提示"
+  },
+  "vcp": {
+    "advanced_editor": {
+      "description": "Tar/Var/Sar 變數管理、測試預覽、依賴分析、TVStxt 檔案管理",
+      "title": "進階變數編輯器"
+    },
+    "agents": {
+      "create": "新建助手",
+      "create_blank": "空白助手",
+      "create_first": "創建第一個助手",
+      "delete_confirm": "確定刪除此助手？",
+      "empty": "暫無助手",
+      "from_library": "從助手庫選擇",
+      "groupchat": "群聊",
+      "groupchat_config": "群聊配置",
+      "groupchat_enabled": "群聊就緒",
+      "groupchat_only": "僅群聊",
+      "has_greeting": "有問候",
+      "has_memory": "有記憶",
+      "has_personality": "有人設",
+      "import": "導入 VCP Agent",
+      "no_description": "暫無描述",
+      "no_results": "未找到匹配的助手",
+      "search": "搜尋助手...",
+      "settings": "設定",
+      "total": "助手總數",
+      "with_memory": "有記憶",
+      "with_profile": "有人設"
+    },
+    "collaboration": {
+      "allowed_agents": "允許的代理",
+      "allowed_agents_desc": "指定此代理可以與哪些代理協作",
+      "allowed_agents_placeholder": "輸入代理 ID，用逗號分隔",
+      "blocked_agents": "封鎖的代理",
+      "blocked_agents_placeholder": "輸入封鎖的代理 ID，用逗號分隔",
+      "can_delegate": "可以委派任務",
+      "can_delegate_desc": "允許此代理將任務委派給其他代理",
+      "can_initiate": "可以發起協作",
+      "can_initiate_desc": "允許此代理與其他代理發起協作",
+      "info": "配置此代理在群聊中與其他代理協作的方式",
+      "max_tasks": "最大並行任務數",
+      "message_prefix": "訊息前綴",
+      "message_prefix_desc": "協作時添加到訊息前的前綴",
+      "message_prefix_placeholder": "例如：[代理名稱]：",
+      "response_style": "回應風格",
+      "style_adaptive": "自適應",
+      "style_concise": "簡潔",
+      "style_detailed": "詳細",
+      "title": "協作設定"
+    },
+    "dailynote": {
+      "click_to_edit": "點擊編輯",
+      "no_preview": "無預覽",
+      "note_count": "{{count}} 篇日記",
+      "notebook_name": "{{name}}的日記本",
+      "sort_mtime_asc": "最早修改",
+      "sort_mtime_desc": "最近修改",
+      "sort_name_asc": "名稱升序",
+      "sort_name_desc": "名稱降序",
+      "stats_count": "{{count}} 篇",
+      "stats_notebook": "日記本:",
+      "stats_total": "共:",
+      "time_hours_ago": "{{n}} 小時前",
+      "time_just_now": "剛剛",
+      "time_minutes_ago": "{{n}} 分鐘前"
+    },
+    "dashboard": {
+      "agents": {
+        "description": "統一管理所有助手/智能體，支援 VCP 人格配置和群聊協作。",
+        "title": "助手管理"
+      },
+      "coming_soon": "功能開發中，敬請期待。",
+      "groupchat": {
+        "description": "管理多 Agent 群聊會話，配置發言模式、成員標籤、統一模型等。",
+        "go_to_chat": "前往群聊",
+        "title": "群聊管理",
+        "unified_entry": "統一入口"
+      },
+      "menu": {
+        "agents": "Agent 管理",
+        "dailynote": "日記",
+        "forum": "論壇",
+        "groupchat": "群聊管理",
+        "plugins": "插件管理",
+        "settings": "全域設定",
+        "tavern": "酒館",
+        "templates": "模板管理",
+        "variables": "變數管理",
+        "workbench": "工作台"
+      },
+      "settings": {
+        "description": "VCP 系統全域配置，包括預設模型、變數前綴、插件路徑等。",
+        "title": "全域設定"
+      },
+      "templates": {
+        "description": "管理 VCP 提示詞模板，支援變數插值和模板渲染。",
+        "title": "模板管理"
+      },
+      "title": "VCP 控制台",
+      "variables": {
+        "description": "管理 VCP 提示詞變數，支援全域、Agent、會話三種作用域。",
+        "title": "變數管理"
+      }
+    },
+    "forum": {
+      "author": "作者",
+      "author_placeholder": "輸入作者署名",
+      "board": "板塊",
+      "board_all": "全部板塊",
+      "board_chat": "閒聊划水板塊",
+      "board_feedback": "需求回饋板塊",
+      "board_tech": "VCP技術板塊",
+      "content_placeholder": "輸入帖子內容，支援 Markdown",
+      "create_post": "建立帖子",
+      "fill_required": "請填寫必填項",
+      "image": "圖片",
+      "loading": "載入中...",
+      "new_post": "發帖",
+      "no_posts": "暫無帖子",
+      "post_content": "內容 (Markdown)",
+      "post_created": "帖子建立成功",
+      "post_title": "標題",
+      "replies": "回覆",
+      "reply_list": "回覆列表",
+      "reply_placeholder": "輸入回覆內容...",
+      "reply_sent": "回覆成功",
+      "search_placeholder": "搜尋帖子...",
+      "send_reply": "傳送回覆",
+      "title": "VCP 論壇",
+      "title_placeholder": "輸入帖子標題"
+    },
+    "memory": {
+      "title": "記憶設定"
+    },
+    "plugin": {
+      "author": "作者",
+      "available": "可用插件",
+      "category": {
+        "ai": "AI",
+        "builtin_service": "內建服務",
+        "code": "程式碼",
+        "diary": "日記",
+        "file": "檔案",
+        "image": "圖像",
+        "network": "網路",
+        "search": "搜尋",
+        "service": "服務",
+        "utility": "工具",
+        "video": "影片"
+      },
+      "commands": "命令列表",
+      "config_title": "插件配置",
+      "configure": "配置",
+      "details": "插件詳情",
+      "disabled": "已停用",
+      "disabled_success": "插件已停用",
+      "distributed": "分散式",
+      "enabled": "已啟用",
+      "enabled_success": "插件已啟用",
+      "info_tooltip": "查看插件詳情",
+      "install": "安裝",
+      "installed": "已安裝",
+      "load_error": "載入插件列表失敗",
+      "loading": "載入中...",
+      "no_commands": "暫無命令",
+      "no_config": "此插件無需配置",
+      "no_description": "暫無描述",
+      "no_plugins": "暫無插件",
+      "no_readme": "暫無說明",
+      "no_search_results": "未找到匹配的插件",
+      "no_system_prompt": "暫無系統提示詞",
+      "open_window": "獨立視窗",
+      "readme": "說明文件",
+      "refresh": "重新整理",
+      "requires_config": "需要配置",
+      "search_placeholder": "搜尋插件...",
+      "store": "插件商店",
+      "system_prompt": "系統提示詞",
+      "system_prompt_loaded": "已載入插件系統提示詞",
+      "system_prompt_placeholder": "可選的系統提示詞",
+      "tab_all": "全部",
+      "tab_distributed": "分散式",
+      "test": "測試",
+      "test_error": "執行失敗",
+      "test_success": "執行成功，耗時 {{time}}ms",
+      "test_tooltip": "測試執行此插件",
+      "testing": "正在測試 {{name}}...",
+      "title": "VCP 插件管理",
+      "toggle_error": "切換狀態失敗",
+      "total": "總數",
+      "uninstall": "解除安裝",
+      "update": "更新",
+      "version": "版本"
+    },
+    "profile": {
+      "add_dialogue": "新增對話",
+      "background": "背景",
+      "background_desc": "描述代理的背景故事或上下文",
+      "background_placeholder": "輸入代理的背景故事...",
+      "example_dialogues": "範例對話",
+      "greeting": "問候語",
+      "greeting_placeholder": "輸入代理的問候語...",
+      "info": "配置代理的個性和溝通風格",
+      "no_dialogues": "尚無範例對話",
+      "personality": "個性",
+      "personality_desc": "描述代理的個性特徵",
+      "personality_placeholder": "例如：友善、專業、好奇...",
+      "title": "檔案設定",
+      "tone": "溝通語氣",
+      "tone_casual": "隨意",
+      "tone_formal": "正式",
+      "tone_placeholder": "選擇溝通語氣",
+      "tone_playful": "活潑",
+      "tone_professional": "專業",
+      "traits": "性格特徵",
+      "traits_placeholder": "輸入性格特徵，用逗號分隔"
+    },
+    "sar": {
+      "create_failed": "建立失敗",
+      "create_success": "Sar 配置建立成功",
+      "delete_failed": "刪除失敗",
+      "delete_success": "Sar 配置刪除成功"
+    },
+    "settings": {
+      "agent_desc": "描述",
+      "agent_name": "名稱",
+      "agent_preview": "Agent 預覽",
+      "clean_failed": "清理日誌失敗",
+      "debug": "除錯設定",
+      "description": "配置 VCP Agent 以啟用智慧上下文注入功能",
+      "info_desc": "選擇一個 VCP Agent 後，系統會根據 Agent 的配置自動注入相關上下文（如知識庫檢索結果、日記內容等）到對話中。",
+      "info_title": "VCP 上下文注入",
+      "knowledge": "知識庫設定",
+      "logs": "日誌設定",
+      "logs_cleaned": "日誌已清理",
+      "loop": "VCP 循環設定",
+      "no_agents": "暫無 VCP Agent，請先在 VCP 管理中創建",
+      "plugins": "插件管理",
+      "plugins_refreshed": "插件列表已重新整理",
+      "preprocessor": "預處理器排序",
+      "refresh_failed": "重新整理插件失敗",
+      "select_agent": "選擇 VCP Agent",
+      "select_agent_first": "請先選擇 VCP Agent",
+      "select_placeholder": "選擇一個 VCP Agent",
+      "system_prompt": "系統提示詞",
+      "title": "VCP Agent",
+      "variables": "變數"
+    },
+    "templates": {
+      "category": "分類",
+      "category_agent": "Agent 模板",
+      "category_custom": "自訂模板",
+      "category_system": "系統模板",
+      "content": "內容",
+      "content_required": "請輸入模板內容",
+      "create": "新建模板",
+      "create_first": "建立第一個模板",
+      "create_success": "模板建立成功",
+      "delete_confirm": "確定刪除此模板？",
+      "delete_failed": "刪除失敗",
+      "delete_success": "模板刪除成功",
+      "description": "描述",
+      "edit": "編輯模板",
+      "empty": "暫無模板",
+      "list": "模板列表",
+      "load_failed": "載入模板失敗",
+      "name": "模板名",
+      "name_required": "請輸入模板名",
+      "no_results": "未找到匹配的模板",
+      "preview": "預覽",
+      "save_failed": "保存失敗",
+      "search": "搜尋模板...",
+      "total": "模板總數",
+      "update_success": "模板更新成功",
+      "usage_title": "模板使用說明",
+      "variables": "變數"
+    },
+    "test": {
+      "input_required": "請輸入測試文字"
+    },
+    "tvstxt": {
+      "create": "建立 TVStxt 檔案",
+      "create_failed": "建立失敗",
+      "create_success": "檔案建立成功",
+      "must_be_txt": "檔案名必須以 .txt 結尾",
+      "name_required": "請輸入檔案名",
+      "save_failed": "保存失敗",
+      "save_success": "檔案保存成功"
+    },
+    "variables": {
+      "category": "類型",
+      "create": "新建變數",
+      "create_success": "變數建立成功",
+      "delete_confirm": "確定刪除此變數？",
+      "delete_failed": "刪除失敗",
+      "delete_success": "變數刪除成功",
+      "description": "描述",
+      "empty": "暫無變數",
+      "load_failed": "載入變數失敗",
+      "name": "變數名",
+      "no_results": "未找到匹配的變數",
+      "save_failed": "保存失敗",
+      "scope": "作用域",
+      "search": "搜尋變數...",
+      "tab_user": "用戶變數",
+      "total": "變數總數",
+      "types_title": "變數類型說明",
+      "update_success": "變數更新成功",
+      "user_variables": "用戶變數",
+      "value": "值"
+    },
+    "workbench": {
+      "clear": "清空",
+      "columns": {
+        "actions": "操作",
+        "duration": "耗時",
+        "name": "名稱",
+        "source": "來源",
+        "status": "狀態",
+        "time": "時間",
+        "type": "類型"
+      },
+      "description": "查看和管理 VCP 工具調用記錄",
+      "filter": {
+        "assistant": "助手",
+        "status": "狀態",
+        "tool": "工具",
+        "type": "類型"
+      },
+      "refresh": "重新整理",
+      "search": "搜尋工具調用...",
+      "selectCall": "選擇一條調用記錄查看詳情",
+      "stats": {
+        "avgTime": "平均耗時",
+        "crew": "Crew 活動",
+        "pending": "待處理",
+        "successRate": "成功率",
+        "tools": "工具數",
+        "total": "總調用"
+      },
+      "tabs": {
+        "calls": "調用記錄",
+        "logs": "日誌",
+        "tasks": "任務"
+      },
+      "title": "VCP 工作台"
+    }
   },
   "warning": {
     "missing_provider": "供應商不存在，已回退到預設供應商 {{provider}}。這可能導致問題。"

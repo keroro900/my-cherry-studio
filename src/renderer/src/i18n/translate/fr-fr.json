@@ -420,6 +420,9 @@
     },
     "delete": {
       "content": "La suppression de l'aide supprimera tous les sujets et fichiers sous l'aide. Êtes-vous sûr de vouloir la supprimer ?",
+      "error": {
+        "remain_one": "Interdiction de supprimer le dernier assistant"
+      },
       "title": "Supprimer l'Aide"
     },
     "edit": {
@@ -3166,6 +3169,7 @@
         "label": "Données de l'application",
         "migration_title": "Migration des données",
         "new_path": "Nouveau chemin",
+        "open": "Répertoire ouvert",
         "original_path": "Chemin d'origine",
         "path_change_failed": "Échec de la modification du répertoire de données",
         "path_changed_without_copy": "Le chemin a été modifié avec succès",
@@ -4853,7 +4857,7 @@
         "content_limit_tooltip": "Limiter la longueur du contenu des résultats de recherche ; le contenu dépassant cette limite sera tronqué",
         "default_provider": "Fournisseur par défaut",
         "free": "Gratuit",
-        "is_default": "[to be translated]:Default",
+        "is_default": "Défaut",
         "local_provider": {
           "hint": "Connectez-vous au site Web pour obtenir de meilleurs résultats de recherche et personnaliser vos paramètres de recherche.",
           "open_settings": "Ouvrir les paramètres de {{provider}}",
@@ -4870,7 +4874,7 @@
         "search_provider": "Fournisseur de recherche",
         "search_provider_placeholder": "Sélectionnez un fournisseur de recherche",
         "search_with_time": "Rechercher avec date",
-        "set_as_default": "[to be translated]:Set as Default",
+        "set_as_default": "Définir par défaut",
         "subscribe": "Abonnement à la liste noire",
         "subscribe_add": "Ajouter un abonnement",
         "subscribe_add_failed": "Échec de l'ajout de la source d'abonnement",
