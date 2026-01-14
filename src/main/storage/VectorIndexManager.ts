@@ -14,7 +14,7 @@ import { DATA_PATH } from '@main/config'
 import Embeddings from '@main/knowledge/embedjs/embeddings/Embeddings'
 import type { CharacterIndexManager} from '@main/knowledge/vector/VexusAdapter';
 import { createCharacterIndexManager } from '@main/knowledge/vector/VexusAdapter'
-import { getEmbeddingDimensions } from '@main/utils/EmbeddingDimensions'
+import { getEmbeddingDimensionsWithInfo, needsDynamicDimensionDetection } from '@main/utils/EmbeddingDimensions'
 import type { ApiClient } from '@types'
 import { existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs'
 import path from 'path'
@@ -140,11 +140,16 @@ export class VectorIndexManager {
   /**
    * 检测维度不匹配
    *
+   * 优先使用动态检测维度 (调用 API 获取实际维度)，
+   * 因为静态表可能不包含所有模型，且代理服务可能返回不同维度。
+   *
    * @param embedApiClient - Embedding API 客户端 (用于获取配置维度)
+   * @param useDynamicDetection - 是否使用动态检测 (默认 true，当静态表无法精确匹配时)
    * @returns 维度不匹配检测结果
    */
   public async detectDimensionMismatch(
-    embedApiClient?: ApiClient
+    embedApiClient?: ApiClient,
+    useDynamicDetection: boolean = true
   ): Promise<DimensionMismatchResult> {
     try {
       const storage = getUnifiedStorage()
@@ -167,10 +172,39 @@ export class VectorIndexManager {
       // 获取配置维度
       let configDimension = 1536 // 默认值
       let modelId: string | undefined
+      let detectionMethod = 'default'
 
       if (embedApiClient) {
         modelId = embedApiClient.model
-        configDimension = getEmbeddingDimensions(modelId)
+
+        // 检查是否需要动态检测
+        const needsDynamic = needsDynamicDimensionDetection(modelId)
+        const staticResult = getEmbeddingDimensionsWithInfo(modelId)
+
+        if (useDynamicDetection && needsDynamic) {
+          // 静态表无法精确匹配，使用动态检测
+          logger.info('Static table cannot exactly match model, using dynamic detection', {
+            modelId,
+            staticDimensions: staticResult.dimensions,
+            matchSource: staticResult.source
+          })
+
+          try {
+            configDimension = await this.detectActualDimensions(embedApiClient)
+            detectionMethod = 'dynamic'
+          } catch (error) {
+            logger.warn('Dynamic detection failed, falling back to static', {
+              modelId,
+              error: (error as Error).message
+            })
+            configDimension = staticResult.dimensions
+            detectionMethod = 'static-fallback'
+          }
+        } else {
+          // 静态表精确匹配，直接使用
+          configDimension = staticResult.dimensions
+          detectionMethod = staticResult.source
+        }
       }
 
       const hasMismatch = indexDimension !== configDimension && indexDimension > 0
@@ -179,6 +213,7 @@ export class VectorIndexManager {
         indexDimension,
         configDimension,
         modelId,
+        detectionMethod,
         hasMismatch
       })
 
@@ -188,7 +223,7 @@ export class VectorIndexManager {
         configDimension,
         modelId,
         details: hasMismatch
-          ? `索引维度 (${indexDimension}) 与配置维度 (${configDimension}) 不匹配`
+          ? `索引维度 (${indexDimension}) 与配置维度 (${configDimension}) 不匹配 [检测方式: ${detectionMethod}]`
           : undefined
       }
     } catch (error) {
@@ -218,12 +253,13 @@ export class VectorIndexManager {
    * @returns 实际维度
    */
   private async detectActualDimensions(embedApiClient: ApiClient): Promise<number> {
-    const expectedDimensions = getEmbeddingDimensions(embedApiClient.model)
+    const staticResult = getEmbeddingDimensionsWithInfo(embedApiClient.model)
 
     try {
       logger.info('Detecting actual embedding dimensions...', {
         model: embedApiClient.model,
-        expectedDimensions
+        staticDimensions: staticResult.dimensions,
+        staticSource: staticResult.source
       })
 
       // 创建临时 Embeddings 实例进行测试
@@ -239,12 +275,12 @@ export class VectorIndexManager {
       const testVector = await testEmbeddings.embedQuery('dimension detection test')
       const actualDimensions = testVector.length
 
-      if (actualDimensions !== expectedDimensions) {
+      if (actualDimensions !== staticResult.dimensions) {
         logger.warn('Embedding dimensions mismatch detected!', {
           model: embedApiClient.model,
-          expected: expectedDimensions,
+          staticExpected: staticResult.dimensions,
           actual: actualDimensions,
-          message: '代理服务/模型返回的维度与预期不同，将使用实际检测到的维度'
+          message: '代理服务/模型返回的维度与静态表预期不同，将使用实际检测到的维度'
         })
       } else {
         logger.info('Embedding dimensions verified', { dimensions: actualDimensions })
@@ -252,11 +288,11 @@ export class VectorIndexManager {
 
       return actualDimensions
     } catch (error) {
-      logger.error('Failed to detect actual dimensions, using expected', {
+      logger.error('Failed to detect actual dimensions, using static', {
         error: (error as Error).message,
-        expectedDimensions
+        staticDimensions: staticResult.dimensions
       })
-      return expectedDimensions
+      return staticResult.dimensions
     }
   }
 
@@ -1004,6 +1040,132 @@ export class VectorIndexManager {
       await this.diaryIndexManager.dispose(save)
       this.diaryIndexManager = null
       logger.info('DiaryIndexManager disposed')
+    }
+  }
+
+  /**
+   * 彻底清理所有索引和数据库记录
+   *
+   * 这是一个危险操作，会删除所有向量索引和 embedding 数据！
+   * 使用场景：
+   * - 维度完全不匹配无法恢复
+   * - 需要重新开始
+   * - 数据库损坏
+   *
+   * @param options.deleteDatabase - 是否删除数据库中的 embedding 字段 (默认 false)
+   * @param options.deleteChunks - 是否删除数据库中的 chunks 记录 (默认 false，危险！)
+   * @returns 清理结果
+   */
+  public async purgeAll(options?: {
+    deleteDatabase?: boolean
+    deleteChunks?: boolean
+  }): Promise<{
+    success: boolean
+    deletedIndexFiles: number
+    clearedEmbeddings: number
+    deletedChunks: number
+    error?: string
+  }> {
+    const { deleteDatabase = false, deleteChunks = false } = options || {}
+    let deletedIndexFiles = 0
+    let clearedEmbeddings = 0
+    let deletedChunks = 0
+
+    logger.warn('PURGE ALL: Starting complete cleanup', { deleteDatabase, deleteChunks })
+
+    try {
+      // 1. 删除所有向量索引文件
+      const indexDir = path.join(DATA_PATH, 'UnifiedStorage', 'vectors')
+      if (existsSync(indexDir)) {
+        const files = readdirSync(indexDir)
+        for (const file of files) {
+          if (file.endsWith('.usearch') || file.endsWith('.mapping.json')) {
+            const filePath = path.join(indexDir, file)
+            unlinkSync(filePath)
+            deletedIndexFiles++
+          }
+        }
+      }
+      logger.info('Deleted vector index files', { count: deletedIndexFiles })
+
+      // 2. 删除日记本索引文件
+      const diaryIndexDir = path.join(DATA_PATH, 'UnifiedStorage', 'diary-indices')
+      if (existsSync(diaryIndexDir)) {
+        const files = readdirSync(diaryIndexDir)
+        for (const file of files) {
+          if (file.endsWith('.usearch') || file.endsWith('.mapping.json')) {
+            const filePath = path.join(diaryIndexDir, file)
+            unlinkSync(filePath)
+            deletedIndexFiles++
+          }
+        }
+      }
+
+      // 3. 清理日记本索引管理器
+      await this.disposeDiaryIndexManager(false)
+
+      // 4. 可选：清除数据库中的 embedding 字段
+      if (deleteDatabase) {
+        try {
+          const storage = getUnifiedStorage()
+          const db = storage.getDatabase()
+
+          // 清除 embedding 字段
+          const result = await db.execute(`
+            UPDATE chunks SET embedding = NULL WHERE embedding IS NOT NULL
+          `)
+          clearedEmbeddings = result.rowsAffected
+          logger.info('Cleared embeddings from database', { count: clearedEmbeddings })
+        } catch (error) {
+          logger.error('Failed to clear embeddings from database', error as Error)
+        }
+      }
+
+      // 5. 可选：删除 chunks 记录 (极其危险！)
+      if (deleteChunks) {
+        try {
+          const storage = getUnifiedStorage()
+          const db = storage.getDatabase()
+
+          // 删除所有 chunks
+          const result = await db.execute(`DELETE FROM chunks`)
+          deletedChunks = result.rowsAffected
+          logger.warn('DELETED all chunks from database', { count: deletedChunks })
+        } catch (error) {
+          logger.error('Failed to delete chunks from database', error as Error)
+        }
+      }
+
+      // 6. 重新初始化向量索引 (使用默认维度)
+      try {
+        const storage = getUnifiedStorage()
+        await storage.reinitVectorIndex(1536) // 默认维度，后续重建时会更新
+        logger.info('Vector index reinitialized with default dimensions')
+      } catch (error) {
+        logger.warn('Failed to reinitialize vector index', error as Error)
+      }
+
+      logger.info('PURGE ALL completed', {
+        deletedIndexFiles,
+        clearedEmbeddings,
+        deletedChunks
+      })
+
+      return {
+        success: true,
+        deletedIndexFiles,
+        clearedEmbeddings,
+        deletedChunks
+      }
+    } catch (error) {
+      logger.error('PURGE ALL failed', error as Error)
+      return {
+        success: false,
+        deletedIndexFiles,
+        clearedEmbeddings,
+        deletedChunks,
+        error: (error as Error).message
+      }
     }
   }
 }

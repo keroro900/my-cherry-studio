@@ -530,6 +530,37 @@ export function registerVCPReindexIpcHandlers(): void {
     }
   )
 
+  // 彻底清理所有索引 (危险操作！)
+  ipcMain.handle(
+    'vcp:storage:purge-all',
+    async (
+      _event: IpcMainInvokeEvent,
+      params?: { deleteDatabase?: boolean; deleteChunks?: boolean }
+    ): Promise<{
+      success: boolean
+      deletedIndexFiles: number
+      clearedEmbeddings: number
+      deletedChunks: number
+      error?: string
+    }> => {
+      logger.warn('PURGE ALL requested', params)
+
+      try {
+        const manager = getVectorIndexManager()
+        return await manager.purgeAll(params)
+      } catch (error) {
+        logger.error('Failed to purge all', error as Error)
+        return {
+          success: false,
+          deletedIndexFiles: 0,
+          clearedEmbeddings: 0,
+          deletedChunks: 0,
+          error: (error as Error).message
+        }
+      }
+    }
+  )
+
   isRegistered = true
   logger.info('VCP Reindex IPC handlers registered successfully')
 }
@@ -557,6 +588,7 @@ export function unregisterVCPReindexIpcHandlers(): void {
   ipcMain.removeHandler('vcp:storage:recover-diary-from-sqlite')
   ipcMain.removeHandler('vcp:storage:search-diary-index')
   ipcMain.removeHandler('vcp:storage:search-across-diaries')
+  ipcMain.removeHandler('vcp:storage:purge-all')
 
   isRegistered = false
   logger.info('VCP Reindex IPC handlers unregistered')
