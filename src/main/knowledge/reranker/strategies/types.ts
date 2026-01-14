@@ -4,7 +4,9 @@ export const RERANKER_PROVIDERS = {
   VOYAGEAI: 'voyageai',
   BAILIAN: 'bailian',
   JINA: 'jina',
-  TEI: 'tei'
+  TEI: 'tei',
+  COHERE: 'cohere',
+  BGE: 'bge'
 } as const
 
 export type RerankProvider = (typeof RERANKER_PROVIDERS)[keyof typeof RERANKER_PROVIDERS]

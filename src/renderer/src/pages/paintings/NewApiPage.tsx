@@ -81,29 +81,14 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
   const spaceClickTimer = useRef<NodeJS.Timeout>(null)
   const newApiProvider = newApiProviders.find((p) => p.id === routeName) || newApiProviders[0]
 
-  // P0: 空 provider 防护 - 当没有配置任何 NewAPI provider 时显示引导界面
-  if (!newApiProvider) {
-    return (
-      <Container>
-        <Navbar>
-          <NavbarCenter style={{ borderRight: 'none' }}>{t('paintings.title')}</NavbarCenter>
-        </Navbar>
-        <EmptyProviderContainer>
-          <Empty description={t('paintings.no_provider_configured', { defaultValue: '未配置图像生成服务商' })}>
-            <Button type="primary" onClick={() => navigate('/settings/provider')}>
-              {t('paintings.configure_provider', { defaultValue: '配置服务商' })}
-            </Button>
-          </Empty>
-        </EmptyProviderContainer>
-      </Container>
-    )
-  }
+  // 使用安全的 providerId，确保 hooks 一致调用
+  const safeProviderId = newApiProvider?.id || ''
 
   const filteredPaintings = useMemo(
-    () => (newApiPaintings[mode] || []).filter((p) => p.providerId === newApiProvider.id),
-    [newApiPaintings, mode, newApiProvider.id]
+    () => (newApiPaintings[mode] || []).filter((p) => p.providerId === safeProviderId),
+    [newApiPaintings, mode, safeProviderId]
   )
-  const [painting, setPainting] = useState<PaintingAction>({ ...DEFAULT_PAINTING, providerId: newApiProvider.id })
+  const [painting, setPainting] = useState<PaintingAction>({ ...DEFAULT_PAINTING, providerId: safeProviderId })
 
   const modeOptions = [
     { label: t('paintings.mode.generate'), value: 'openai_image_generate' },
@@ -119,17 +104,17 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
 
   const updatePaintingState = useCallback(
     (updates: Partial<PaintingAction>) => {
-      const updatedPainting = { ...painting, providerId: newApiProvider.id, ...updates }
+      if (!newApiProvider) return
+      const updatedPainting = { ...painting, providerId: safeProviderId, ...updates }
       setPainting(updatedPainting)
       updatePainting(mode, updatedPainting)
     },
-    [painting, newApiProvider.id, mode, updatePainting]
+    [painting, safeProviderId, mode, updatePainting, newApiProvider]
   )
 
   // ---------------- Model Related Configurations ----------------
-  // const modelOptions = MODELS.map((m) => ({ label: m.name, value: m.name }))
-
   const modelOptions = useMemo(() => {
+    if (!newApiProvider) return []
     const customModels = newApiProvider.models
       .filter(
         (m) =>
@@ -146,7 +131,7 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
         endpointType: m.endpoint_type // 保留端点类型以区分 API 调用方式
       }))
     return [...customModels]
-  }, [newApiProvider.models])
+  }, [newApiProvider])
 
   // 根据 group 将模型进行分组，便于在下拉列表中分组渲染
   const groupedModelOptions = useMemo(() => {
@@ -165,14 +150,71 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
       ...DEFAULT_PAINTING,
       model: painting.model || modelOptions[0]?.value || '',
       id: uuid(),
-      providerId: newApiProvider.id
+      providerId: safeProviderId
     }
-  }, [modelOptions, painting.model, newApiProvider.id])
+  }, [modelOptions, painting.model, safeProviderId])
 
   const selectedModelConfig = useMemo(
     () => MODELS.find((m) => m.name === painting.model) || MODELS[0],
     [painting.model]
   )
+
+  // 获取当前选中模型的端点类型
+  const currentModelEndpointType = useMemo(() => {
+    const selectedOption = modelOptions.find((m) => m.value === painting.model)
+    return selectedOption?.endpointType || 'image-generation'
+  }, [modelOptions, painting.model])
+
+  // Effects - 必须在条件返回之前调用
+  useEffect(() => {
+    if (!newApiProvider) return
+    if (filteredPaintings.length === 0) {
+      const newPainting = getNewPainting()
+      addPainting(mode, newPainting)
+      setPainting(newPainting)
+    } else {
+      const found = filteredPaintings.find((p) => p.id === painting.id)
+      if (found) {
+        setPainting(found)
+      } else {
+        setPainting(filteredPaintings[0])
+      }
+    }
+  }, [filteredPaintings, mode, addPainting, getNewPainting, painting.id, newApiProvider])
+
+  useEffect(() => {
+    const timer = spaceClickTimer.current
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!newApiProvider) return
+    if (!painting.model && modelOptions.length > 0) {
+      updatePaintingState({ model: modelOptions[0].value })
+    }
+  }, [modelOptions, painting.model, updatePaintingState, newApiProvider])
+
+  // P0: 空 provider 防护 - 当没有配置任何 NewAPI provider 时显示引导界面
+  if (!newApiProvider) {
+    return (
+      <Container>
+        <Navbar>
+          <NavbarCenter style={{ borderRight: 'none' }}>{t('paintings.title')}</NavbarCenter>
+        </Navbar>
+        <EmptyProviderContainer>
+          <Empty description={t('paintings.no_provider_configured', { defaultValue: '未配置图像生成服务商' })}>
+            <Button type="primary" onClick={() => navigate('/settings/provider')}>
+              {t('paintings.configure_provider', { defaultValue: '配置服务商' })}
+            </Button>
+          </Empty>
+        </EmptyProviderContainer>
+      </Container>
+    )
+  }
 
   const handleModelChange = (value: string) => {
     const modelConfig = MODELS.find((m) => m.name === value)
@@ -244,12 +286,6 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
 
     return downloadedFiles.filter((file): file is FileMetadata => file !== null)
   }
-
-  // 获取当前选中模型的端点类型
-  const currentModelEndpointType = useMemo(() => {
-    const selectedOption = modelOptions.find((m) => m.value === painting.model)
-    return selectedOption?.endpointType || 'image-generation'
-  }, [modelOptions, painting.model])
 
   const onGenerate = async () => {
     await checkProviderEnabled(newApiProvider, t)
@@ -764,38 +800,6 @@ const NewApiPage: FC<{ Options: string[] }> = ({ Options }) => {
   const handleShowAddModelPopup = () => {
     navigate(`/settings/provider?id=${newApiProvider.id}`)
   }
-
-  useEffect(() => {
-    if (filteredPaintings.length === 0) {
-      const newPainting = getNewPainting()
-      addPainting(mode, newPainting)
-      setPainting(newPainting)
-    } else {
-      // 如果当前 painting 存在于 filteredPaintings 中，则优先显示当前 painting
-      const found = filteredPaintings.find((p) => p.id === painting.id)
-      if (found) {
-        setPainting(found)
-      } else {
-        setPainting(filteredPaintings[0])
-      }
-    }
-  }, [filteredPaintings, mode, addPainting, getNewPainting, painting.id])
-
-  useEffect(() => {
-    const timer = spaceClickTimer.current
-    return () => {
-      if (timer) {
-        clearTimeout(timer)
-      }
-    }
-  }, [])
-
-  // if painting.model is not set, set it to the first model in modelOptions
-  useEffect(() => {
-    if (!painting.model && modelOptions.length > 0) {
-      updatePaintingState({ model: modelOptions[0].value })
-    }
-  }, [modelOptions, painting.model, updatePaintingState])
 
   return (
     <Container>

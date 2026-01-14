@@ -14,7 +14,7 @@ import type { Model, Provider } from '@renderer/types'
 
 import { ExecutionContextManager } from '../engine/ExecutionContext'
 import { WorkflowEngine } from '../engine/WorkflowEngine'
-import type { Workflow, WorkflowEdge,WorkflowNode } from '../types'
+import type { Workflow, WorkflowEdge, WorkflowNode } from '../types'
 
 const logger = loggerService.withContext('WorkflowExecutionService')
 

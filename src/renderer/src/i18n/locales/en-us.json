@@ -531,6 +531,13 @@
     "search": "Search assistants...",
     "settings": {
       "default_model": "Default Model",
+      "image": {
+        "aspect_ratio": "Aspect Ratio",
+        "batch_count": "Batch Count",
+        "model": "Image Model",
+        "size": "Image Size",
+        "title": "Image Settings"
+      },
       "knowledge_base": {
         "label": "Knowledge Base Settings",
         "recognition": {
@@ -645,6 +652,13 @@
       "assistant": {
         "description": "Daily conversations and quick Q&A",
         "title": "Add Assistant"
+      },
+      "image_assistant": {
+        "create_custom": "Create Custom",
+        "description": "Image generation and editing",
+        "from_preset": "From Preset",
+        "select_title": "Select Image Assistant Type",
+        "title": "Add Image Assistant"
       },
       "option": {
         "title": "Select Type"
@@ -1184,6 +1198,7 @@
     "back": "Back",
     "browse": "Browse",
     "cancel": "Cancel",
+    "characters": "characters",
     "chat": "Chat",
     "clear": "Clear",
     "close": "Close",
@@ -1232,6 +1247,8 @@
     "models": "Models",
     "more": "More",
     "name": "Name",
+    "no_data": "No data",
+    "no_description": "No description",
     "no_results": "No results",
     "none": "None",
     "off": "Off",
@@ -1271,6 +1288,7 @@
     "subscribe": "Subscribe",
     "success": "Success",
     "swap": "Swap",
+    "toggle_sidebar": "Toggle Sidebar",
     "topics": "Topics",
     "unknown": "Unknown",
     "unnamed": "Unnamed",
@@ -1432,6 +1450,29 @@
     "title": "Files",
     "type": "Type"
   },
+  "flowLock": {
+    "click_to_lock": "Click to lock current topic",
+    "confirm_lock": "Lock",
+    "create_lock": "Lock Topic",
+    "deviation_redirect": "Please return to the current topic",
+    "deviation_warning": "Your message may deviate from the current topic",
+    "deviations": "Deviations",
+    "extend": "Extend 5 minutes",
+    "extended": "Extended by 5 minutes",
+    "keywords": "Keywords",
+    "keywords_label": "Keywords (optional, comma separated)",
+    "keywords_placeholder": "Enter related keywords, e.g.: React, components, state management",
+    "lock_created": "Topic locked",
+    "lock_failed": "Lock failed",
+    "lock_topic": "Lock Topic",
+    "max_deviations": "Max Allowed",
+    "remaining": "Remaining",
+    "topic_name": "Topic Name",
+    "topic_placeholder": "Enter the topic to lock...",
+    "topic_required": "Please enter a topic name",
+    "unlock": "Unlock",
+    "unlocked": "Unlocked"
+  },
   "gpustack": {
     "keep_alive_time": {
       "description": "The time in minutes to keep the connection alive, default is 5 minutes.",
@@ -1439,6 +1480,71 @@
       "title": "Keep Alive Time"
     },
     "title": "GPUStack"
+  },
+  "groupchat": {
+    "abbr": "Group",
+    "active": "Active",
+    "add_assistant": "Add Assistant",
+    "agent_error": "Agent {{name}} response error: {{error}}",
+    "agents": "members",
+    "create": "Create",
+    "delete_confirm": "Are you sure you want to delete this session?",
+    "empty": "No group chat sessions",
+    "end": "End",
+    "errors": {
+      "api_error": "API request failed: {{status}} - {{message}}",
+      "auth_error": "Invalid or expired API Key",
+      "json_parse_error": "Server returned non-JSON response",
+      "network_error": "Network connection failed",
+      "timeout": "Request timeout",
+      "unknown": "Unknown error"
+    },
+    "idle": "Idle",
+    "input_placeholder": "Type a message, use @name to mention a specific assistant...",
+    "messages": "messages",
+    "new_session": "New Group Chat",
+    "participants": "participants",
+    "send_error": "Failed to send",
+    "settings": {
+      "add_tag": "+ Tag",
+      "add_tag_tip": "Add tag (used for natural random mode weight)",
+      "avoid_topics": "Topics to Avoid",
+      "avoid_topics_placeholder": "Topics the assistant should avoid discussing",
+      "collab_stats": "Collaboration Statistics",
+      "enabled": "Enable Group Chat",
+      "enabled_tip": "Allow this assistant to join group chat sessions",
+      "expertise": "Expertise",
+      "expertise_examples": "e.g., AI, Programming, Design, Product Management",
+      "expertise_placeholder": "Enter expertise tags, press Enter to add",
+      "expertise_tip": "Assistant's expertise tags for intelligent matching and speaking decisions",
+      "info": "Configure this assistant's behavior and role in multi-agent group chats",
+      "invite_prompt_template": "Invitation Prompt Template",
+      "invite_prompt_template_placeholder": "e.g., Please {{VCPChatAgentName}} share your thoughts (optional, supports {{VCPChatAgentName}} placeholder)",
+      "invite_prompt_template_tip": "Prompt template used in invitation speaking mode, supports {{VCPChatAgentName}} placeholder to be replaced with the invited agent's name",
+      "keywords": "Trigger Keywords",
+      "keywords_placeholder": "Enter trigger keywords, press Enter to add",
+      "keywords_tip": "When these keywords appear in conversation, the assistant is more likely to speak",
+      "max_response_length": "Max Response Length",
+      "member_tags": "Member Tags",
+      "member_tags_tip": "Used for natural random mode weight calculation, members with the same tags have higher collaboration probability",
+      "preferred_topics": "Preferred Topics",
+      "preferred_topics_placeholder": "Topics the assistant prefers to participate in",
+      "priority": "Speaking Priority",
+      "priority_tip": "Higher priority means the assistant speaks first when competing (1-100)",
+      "role": "Group Chat Role",
+      "speaking_preferences": "Speaking Preferences",
+      "title": "Group Chat Settings",
+      "unified_model": "Unified Model",
+      "unified_model_placeholder": "Select the model to use for all members",
+      "use_unified_model": "Use Unified Model",
+      "use_unified_model_tip": "When enabled, all members use the same model for conversations, making it easier to control costs and maintain consistency"
+    },
+    "start": "Start Chat",
+    "start_first": "Please start the group chat first",
+    "stats": {
+      "unavailable": "Statistics unavailable"
+    },
+    "title": "Group Chat"
   },
   "history": {
     "continue_chat": "Continue Chatting",
@@ -1470,164 +1576,333 @@
     "split": "Split"
   },
   "image_studio": {
-    "modules": {
-      "ecom": "E-commerce",
-      "model": "Model Fitting",
-      "pattern": "Pattern Design"
-    },
-    "select_provider": "Select Provider",
-    "select_model": "Select Model",
-    "sidebar": {
-      "title": "Configuration",
-      "generate": "Generate",
-      "generating": "Generating..."
-    },
+    "advanced_settings": "Advanced Settings",
+    "aspect_ratio": "Aspect Ratio",
+    "batch_count": "Batch Count",
     "canvas": {
+      "download": "Download",
+      "download_all": "Download All",
+      "ecom_hint": "Upload product images, AI generates professional e-commerce photos",
+      "ecom_title": "E-commerce Photo",
       "empty": "Select an image from the gallery or generate a new one",
-      "loading": "Loading..."
-    },
-    "gallery": {
-      "title": "Gallery",
-      "version_history": "Version History",
-      "task_queue": "Task Queue",
-      "empty_versions": "No versions yet",
-      "empty_tasks": "No tasks in queue"
-    },
-    "task": {
-      "status": {
-        "queued": "Queued",
-        "running": "Running",
-        "completed": "Completed",
-        "failed": "Failed",
-        "cancelled": "Cancelled"
-      },
-      "type": {
-        "generate": "Generate",
-        "regenerate": "Regenerate",
-        "local_edit": "Local Edit"
-      },
-      "actions": {
-        "pause": "Pause",
-        "resume": "Resume",
-        "cancel": "Cancel",
-        "retry": "Retry"
-      }
-    },
-    "version": {
-      "current": "Current Version",
-      "rollback": "Rollback to this version",
-      "compare": "Compare versions"
+      "feature_ai": "AI Smart Generation",
+      "feature_export": "Multi-format Export",
+      "fullscreen": "Fullscreen",
+      "generate_hint": "Configure settings and click generate",
+      "hint": "Drag images here or click to upload",
+      "loading": "Loading...",
+      "model_hint": "Upload clothing images, AI generates model try-on effects",
+      "model_title": "Model Fitting",
+      "no_output": "No Output",
+      "pattern_hint": "Upload pattern reference, AI generates seamless patterns",
+      "pattern_title": "Pattern Design",
+      "reset_zoom": "Reset Zoom",
+      "zoom_in": "Zoom In",
+      "zoom_out": "Zoom Out"
     },
     "ecom": {
-      "title": "E-commerce Image",
-      "upload": {
-        "label": "Upload Product Image",
-        "hint": "Drag and drop or click to upload",
-        "formats": "Supports JPG, PNG, WebP"
+      "add_image": "Add Image",
+      "background": {
+        "gradient": "Gradient",
+        "label": "Background Style",
+        "scene": "Scene",
+        "transparent": "Transparent",
+        "white": "Pure White"
       },
+      "bottom_image": "Bottom Image",
+      "enable_back": "Generate Back View",
+      "enable_detail": "Generate Detail View",
+      "garment_desc": "Garment Description",
+      "garment_desc_placeholder": "Describe garment features...",
+      "image_n": "Image {{n}}",
+      "images": "Product Images",
       "layout": {
-        "label": "Layout Mode",
-        "main": "Main Image",
+        "all": "All Images",
         "back": "Back Image",
         "detail": "Detail Image",
-        "all": "All Images"
+        "label": "Layout Mode",
+        "main": "Main Image"
       },
-      "style": {
-        "label": "Style Preset",
-        "simple": "Simple Clean",
-        "luxury": "Luxury",
-        "natural": "Natural",
-        "tech": "Tech",
-        "custom": "Custom"
-      },
-      "background": {
-        "label": "Background Style",
-        "white": "Pure White",
-        "gradient": "Gradient",
-        "scene": "Scene",
-        "transparent": "Transparent"
-      },
+      "layout_flat": "Flat Lay",
+      "layout_hanging": "Hanging",
+      "layout_model": "Model Shooting",
       "output": {
-        "label": "Output Settings",
-        "size": "Output Size",
         "format": "Output Format",
-        "quality": "Quality"
+        "label": "Output Settings",
+        "quality": "Quality",
+        "size": "Output Size"
       },
+      "output_options": "Output Options",
       "prompt": {
         "label": "Additional Prompt",
         "placeholder": "Enter additional generation prompt..."
+      },
+      "style": {
+        "custom": "Custom",
+        "label": "Style Preset",
+        "luxury": "Luxury",
+        "natural": "Natural",
+        "simple": "Simple Clean",
+        "tech": "Tech"
+      },
+      "style_auto": "Auto",
+      "style_minimal": "Minimal",
+      "style_premium": "Premium",
+      "title": "E-commerce Image",
+      "top_image": "Top Image",
+      "upload": {
+        "formats": "Supports JPG, PNG, WebP",
+        "hint": "Drag and drop or click to upload",
+        "label": "Upload Product Image"
       }
+    },
+    "gallery": {
+      "empty_tasks": "No tasks in queue",
+      "empty_versions": "No versions yet",
+      "task_queue": "Task Queue",
+      "title": "Gallery",
+      "version_history": "Version History"
+    },
+    "image_settings": "Image Settings",
+    "image_size": "Image Size",
+    "model": {
+      "accessory": "Accessory",
+      "add_clothes": "Add Clothing",
+      "age_adult": "Adult",
+      "age_big_kid": "Big Kid",
+      "age_group": "Age Group",
+      "age_small_kid": "Small Kid",
+      "bottom_clothes": "Bottom",
+      "clothes_image": "Clothing Image",
+      "ethnicity": "Ethnicity",
+      "ethnicity_african": "African",
+      "ethnicity_asian": "Asian",
+      "ethnicity_caucasian": "Caucasian",
+      "ethnicity_mixed": "Mixed",
+      "gender": "Gender",
+      "gender_female": "Female",
+      "gender_male": "Male",
+      "keep_background": "Keep Background",
+      "model_ref_hint": "Optional, upload reference model",
+      "model_reference": "Model Reference",
+      "model_settings": "Model Settings",
+      "output_options": "Output Options",
+      "pose": "Pose",
+      "pose_commercial": "Commercial",
+      "pose_dynamic": "Dynamic",
+      "pose_fashion": "Fashion",
+      "pose_natural": "Natural",
+      "scene": "Scene",
+      "scene_indoor": "Indoor",
+      "scene_outdoor": "Outdoor",
+      "scene_pose": "Scene & Pose",
+      "scene_solid": "Solid Background",
+      "scene_studio": "Studio",
+      "scene_urban": "Urban Street",
+      "show_full_body": "Show Full Body",
+      "style_desc": "Style Description",
+      "style_desc_placeholder": "Describe the desired style...",
+      "top_clothes": "Top",
+      "upload_model_ref": "Upload Model Image"
     },
     "model_fitting": {
-      "title": "Model Fitting",
-      "clothes": {
-        "label": "Upload Clothes",
-        "hint": "Upload the clothes image to fit",
-        "formats": "Supports JPG, PNG, WebP"
-      },
-      "model": {
-        "label": "Model Type",
-        "male": "Male",
-        "female": "Female",
-        "child": "Child"
-      },
       "age": {
         "label": "Age Range",
-        "young": "18-25",
+        "mature": "36-50",
         "middle": "26-35",
-        "mature": "36-50"
+        "young": "18-25"
       },
-      "scene": {
-        "label": "Scene",
-        "studio": "Studio",
-        "outdoor": "Outdoor",
-        "indoor": "Indoor",
-        "street": "Street"
+      "clothes": {
+        "formats": "Supports JPG, PNG, WebP",
+        "hint": "Upload the clothes image to fit",
+        "label": "Upload Clothes"
+      },
+      "model": {
+        "child": "Child",
+        "female": "Female",
+        "label": "Model Type",
+        "male": "Male"
       },
       "pose": {
+        "dynamic": "Dynamic",
         "label": "Pose",
-        "standing": "Standing",
-        "walking": "Walking",
         "sitting": "Sitting",
-        "dynamic": "Dynamic"
-      }
+        "standing": "Standing",
+        "walking": "Walking"
+      },
+      "scene": {
+        "indoor": "Indoor",
+        "label": "Scene",
+        "outdoor": "Outdoor",
+        "street": "Street",
+        "studio": "Studio"
+      },
+      "title": "Model Fitting"
     },
+    "module_list": {
+      "create_preset": "Create Preset",
+      "title": "Image Studio"
+    },
+    "modules": {
+      "ecom": "E-commerce",
+      "ecom_desc": "Smart product image generation",
+      "model": "Model Fitting",
+      "model_desc": "AI model styling showcase",
+      "pattern": "Pattern Design",
+      "pattern_desc": "Seamless patterns & textures"
+    },
+    "optional": "Optional",
     "pattern": {
-      "title": "Pattern Design",
+      "color_tone": {
+        "cool": "Cool",
+        "label": "Color Tone",
+        "neutral": "Neutral",
+        "vibrant": "Vibrant",
+        "warm": "Warm"
+      },
+      "density": {
+        "dense": "Dense",
+        "label": "Pattern Density",
+        "medium": "Medium",
+        "sparse": "Sparse"
+      },
       "mode": {
         "label": "Generation Mode",
         "modeA": "Mode A - Reference-based",
         "modeB": "Mode B - Description-based",
         "modeC": "Mode C - Mixed"
       },
-      "reference": {
-        "label": "Reference Image",
-        "hint": "Upload reference image (optional)"
-      },
       "output_type": {
         "label": "Output Type",
+        "poster": "Poster",
         "seamless": "Seamless Pattern",
-        "tshirt": "T-shirt Print",
-        "poster": "Poster"
+        "tshirt": "T-shirt Print"
       },
-      "density": {
-        "label": "Pattern Density",
-        "sparse": "Sparse",
-        "medium": "Medium",
-        "dense": "Dense"
-      },
-      "color_tone": {
-        "label": "Color Tone",
-        "warm": "Warm",
-        "cool": "Cool",
-        "neutral": "Neutral",
-        "vibrant": "Vibrant"
+      "reference": {
+        "hint": "Upload reference image (optional)",
+        "label": "Reference Image"
       },
       "style_preset": {
+        "count": "{{count}} presets available",
         "label": "Style Preset",
-        "select": "Select style...",
-        "count": "{{count}} presets available"
+        "select": "Select style..."
+      },
+      "title": "Pattern Design"
+    },
+    "prompt": {
+      "negative": "Negative Prompt",
+      "negative_placeholder": "Describe elements to avoid...",
+      "optimize": "Optimize Prompt",
+      "system": "System Prompt",
+      "system_placeholder": "Set system instructions for image generation...",
+      "title": "Prompt Settings"
+    },
+    "prompt_enhancer": {
+      "tooltip": "Enhance prompts with AI for better results"
+    },
+    "seed": "Seed",
+    "seed_placeholder": "Leave empty for random",
+    "select_model": "Select Model",
+    "select_provider": "Select Provider",
+    "settings": {
+      "advanced": "Advanced Settings",
+      "age_adult": "Adult",
+      "age_big_kid": "Big Kid",
+      "age_group": "Age Group",
+      "age_small_kid": "Small Kid",
+      "aspect_ratio": "Aspect Ratio",
+      "basic": "Basic Settings",
+      "batch_count": "Batch Count",
+      "color_prompt": "Color Prompt",
+      "color_prompt_placeholder": "Describe color preferences...",
+      "density": "Density",
+      "density_dense": "Dense",
+      "density_medium": "Medium",
+      "density_sparse": "Sparse",
+      "design_prompt": "Design Prompt",
+      "design_prompt_placeholder": "Describe pattern design...",
+      "enable_back": "Generate Back Image",
+      "enable_detail": "Generate Detail Image",
+      "garment_description": "Garment Description",
+      "garment_description_placeholder": "Describe garment features...",
+      "gender": "Gender",
+      "gender_female": "Female",
+      "gender_male": "Male",
+      "generation_model": "Image Generation Model",
+      "image_size": "Image Size",
+      "layout": "Layout Mode",
+      "layout_flat": "Flat Lay",
+      "layout_hanging": "Hanging",
+      "layout_model": "Model Shot",
+      "model": "Model Selection",
+      "negative_prompt": "Negative Prompt",
+      "negative_prompt_placeholder": "Content to avoid...",
+      "pattern_brick": "Brick",
+      "pattern_half_drop": "Half Drop",
+      "pattern_mirror": "Mirror",
+      "pattern_seamless": "Seamless",
+      "pattern_type": "Pattern Type",
+      "prompt": "Prompt",
+      "seed": "Random Seed",
+      "seed_placeholder": "Leave empty for random",
+      "select_model": "Select Model",
+      "style_auto": "Auto",
+      "style_description": "Style Description",
+      "style_description_placeholder": "Describe expected style...",
+      "style_minimal": "Minimal",
+      "style_premium": "Premium",
+      "style_preset": "Style Preset",
+      "system_prompt": "System Prompt",
+      "system_prompt_placeholder": "Enter system prompt...",
+      "title": "Settings",
+      "use_system_prompt": "Use System Prompt"
+    },
+    "sidebar": {
+      "generate": "Generate",
+      "generating": "Generating...",
+      "preset_market": "Preset Market",
+      "title": "Configuration"
+    },
+    "task": {
+      "actions": {
+        "cancel": "Cancel",
+        "pause": "Pause",
+        "resume": "Resume",
+        "retry": "Retry"
+      },
+      "batch": {
+        "cancel_all_queued": "Cancel All Queued",
+        "retry_all_failed": "Retry All Failed"
+      },
+      "status": {
+        "cancelled": "Cancelled",
+        "completed": "Completed",
+        "failed": "Failed",
+        "paused": "Paused",
+        "queued": "Queued",
+        "running": "Running"
+      },
+      "type": {
+        "generate": "Generate",
+        "local_edit": "Local Edit",
+        "regenerate": "Regenerate"
       }
+    },
+    "title": "Image Studio",
+    "types": {
+      "ecom": "E-commerce Photo",
+      "ecom_desc": "Upload product images, AI generates professional e-commerce photos",
+      "generate": "Image Generation",
+      "generate_desc": "Generate images from text descriptions",
+      "model": "Model Fitting",
+      "model_desc": "Upload clothing images, AI generates model try-on effects",
+      "pattern": "Pattern Design",
+      "pattern_desc": "Upload pattern reference, AI generates seamless patterns"
+    },
+    "version": {
+      "compare": "Compare versions",
+      "current": "Current Version",
+      "rollback": "Rollback to this version"
     }
   },
   "import": {
@@ -1831,6 +2106,37 @@
     "add_success": "Memory added successfully",
     "add_user": "Add User",
     "add_user_failed": "Failed to add user",
+    "advanced": {
+      "backends": "Memory Backends",
+      "backends_desc": "Different backends for different use cases",
+      "clear_backend": "Clear",
+      "clear_confirm_content": "Are you sure you want to clear all memories in {{backend}} backend? This action cannot be undone.",
+      "clear_confirm_title": "Clear Memory",
+      "clear_failed": "Failed to clear memory",
+      "clear_success": "Memory cleared",
+      "deepmemo_desc": "Full-text search with Tantivy engine",
+      "diary": "Diary",
+      "diary_desc": "Diary-based memory storage",
+      "diary_name": "Diary Name",
+      "diary_name_placeholder": "Enter diary name...",
+      "lightmemo_desc": "Fast BM25-based keyword search",
+      "meshmemo_desc": "Vector-based semantic search with mesh connections",
+      "no_results": "No results found",
+      "refresh_stats": "Refresh Stats",
+      "results": "Results",
+      "search": "Search Test",
+      "search_btn": "Search",
+      "search_desc": "Test search across different backends",
+      "search_failed": "Search failed",
+      "search_placeholder": "Enter search query...",
+      "tag_boost": "Tag Boost",
+      "tagmemo_desc": "Tag-based memory organization",
+      "tagmemo_settings": "TagMemo Settings",
+      "title": "Advanced Memory",
+      "unified": "Unified",
+      "use_rrf": "Use RRF"
+    },
+    "advanced_settings": "Advanced Settings",
     "all_users": "All Users",
     "cannot_delete_default_user": "Cannot delete the default user",
     "configure_memory_first": "Please configure memory settings first",
@@ -1854,8 +2160,10 @@
     "edit_memory": "Edit Memory",
     "embedding_dimensions": "Embedding Dimensions",
     "embedding_model": "Embedding Model",
+    "embedding_model_required": "Please configure an embedding model first to enable global memory",
     "enable_global_memory_first": "Please enable global memory first",
     "end_date": "End Date",
+    "extracted_tags": "Extracted tags",
     "global_memory": "Global Memory",
     "global_memory_description": "To use memory features, please enable global memory in assistant settings.",
     "global_memory_disabled_desc": "To use memory features, please enable global memory in assistant settings first.",
@@ -1863,7 +2171,9 @@
     "global_memory_enabled": "Global memory enabled",
     "go_to_memory_page": "Go to Memory Page",
     "initial_memory_content": "Welcome! This is your first memory.",
+    "initialized_success": "Initialized successfully",
     "llm_model": "LLM Model",
+    "llm_model_required": "Please configure a language model first to enable global memory",
     "load_failed": "Failed to load memories",
     "loading": "Loading memories...",
     "loading_memories": "Loading memories...",
@@ -1872,6 +2182,7 @@
     "memory": "memory",
     "memory_content": "Memory Content",
     "memory_placeholder": "Enter memory content...",
+    "native_modules": "Native Modules",
     "new_user_id": "New User ID",
     "new_user_id_placeholder": "Enter a unique user ID",
     "no_matching_memories": "No matching memories found",
@@ -1905,6 +2216,10 @@
     "stored_memories": "Stored Memories",
     "switch_user": "Switch User",
     "switch_user_confirm": "Switch user context to {{user}}?",
+    "tag_count": "Tag count",
+    "test_features": "Test Features",
+    "test_results": "Test Results",
+    "testing": "Testing features...",
     "time": "Time",
     "title": "Memories",
     "total_memories": "total memories",
@@ -1926,7 +2241,25 @@
     "user_memories_reset": "All memories for {{user}} have been reset",
     "user_switch_failed": "Failed to switch user",
     "user_switched": "User context switched to {{user}}",
-    "users": "users"
+    "users": "users",
+    "vector_backend": {
+      "libsql": "LibSQL",
+      "libsql_desc": "SQLite persistent storage, good compatibility",
+      "memory": "Memory",
+      "memory_desc": "In-memory storage, for development/testing",
+      "performance_high": "High",
+      "performance_low": "Low",
+      "performance_medium": "Medium",
+      "persistent": "Persistent",
+      "title": "Vector Backend",
+      "tooltip": "Select vector database backend. Changing this will require rebuilding the index.",
+      "usearch": "USearch",
+      "usearch_desc": "High-performance HNSW, npm prebuilt binaries",
+      "vexus": "Vexus",
+      "vexus_desc": "Rust native (vexus-lite), highest performance",
+      "volatile": "Volatile",
+      "warning": "Switching backend will require rebuilding the index"
+    }
   },
   "message": {
     "agents": {
@@ -2165,7 +2498,8 @@
       "invoking": "Invoking",
       "pending": "Pending",
       "preview": "Preview",
-      "raw": "Raw"
+      "raw": "Raw",
+      "tool_call": "Tool Call"
     },
     "topic": {
       "added": "New topic added"
@@ -3937,6 +4271,8 @@
     "developer": {
       "enable_developer_mode": "Enable Developer Mode",
       "help": "After enabling developer mode, you can use the trace feature to view the data flow during model invocation.",
+      "showvcp_debug": "VCP Debug Panel",
+      "showvcp_debug_help": "When enabled, a VCP debug panel will appear in the bottom left corner of the screen to monitor real-time status of VCP functions like knowledge base retrieval and Agent context injection.",
       "title": "Developer Mode"
     },
     "display": {
@@ -3964,6 +4300,10 @@
           "top": "Top"
         },
         "title": "Navbar Settings"
+      },
+      "presets": {
+        "manage": "Manage Presets",
+        "title": "Theme Presets"
       },
       "sidebar": {
         "chat": {
@@ -4127,6 +4467,7 @@
         "browser": "Control a headless Electron window via Chrome DevTools Protocol. Tools: open URL, execute single-line JS, reset session.",
         "didi_mcp": "DiDi MCP server providing ride-hailing services including map search, price estimation, order management, and driver tracking. Only available in Mainland China. Requires configuring the DIDI_API_KEY environment variable",
         "dify_knowledge": "Dify's MCP server implementation provides a simple API to interact with Dify. Requires configuring the Dify Key",
+        "fashion": "Fashion AI Service - Provides fashion trend analysis, garment attribute extraction, knowledge base search and design suggestions. Integrates with Cherry Studio's AI providers for image analysis and generation",
         "fetch": "MCP server for retrieving URL web content",
         "filesystem": "A Node.js server implementing the Model Context Protocol (MCP) for file system operations. Requires configuration of directories allowed for access.",
         "mcp_auto_install": "Automatically install MCP service (beta)",
@@ -4221,6 +4562,7 @@
           "title": "Authentication Successful"
         }
       },
+      "plugin_config": "Configure",
       "prompts": {
         "arguments": "Arguments",
         "availablePrompts": "Available Prompts",
@@ -4327,7 +4669,8 @@
       "updateError": "Failed to update server",
       "updateSuccess": "Server updated successfully",
       "url": "URL",
-      "user": "User"
+      "user": "User",
+      "vcpPlugins": "VCP Plugins"
     },
     "messages": {
       "divider": {
@@ -4570,6 +4913,9 @@
         "tip": "Control the level of detail in the model's output",
         "title": "Verbosity"
       }
+    },
+    "pluginStore": {
+      "title": "Plugin Store"
     },
     "privacy": {
       "enable_privacy_mode": "Anonymous reporting of errors and statistics",
@@ -5125,17 +5471,164 @@
       "show": "Show Tray Icon",
       "title": "Tray"
     },
+    "vcpToolbox": {
+      "actions": {
+        "initFailed": "VCPToolBox initialization failed",
+        "initSuccess": "VCPToolBox initialized successfully",
+        "initialize": "Initialize"
+      },
+      "badge": "74+ Plugins",
+      "configUpdateFailed": "Configuration update failed",
+      "debug": {
+        "debugMode": "Debug Mode",
+        "debugModeHelp": "Enable to output detailed debug logs",
+        "showVCPOutput": "Show VCP Output",
+        "showVCPOutputHelp": "Show detailed VCP tool call output in conversations",
+        "title": "Debug Settings"
+      },
+      "knowledge": {
+        "diaryList": "Diary List",
+        "initKnowledge": "Initialize Knowledge Base",
+        "initKnowledgeFailed": "Knowledge base initialization failed",
+        "initKnowledgeSuccess": "Knowledge base initialized successfully",
+        "initializing": "Initializing...",
+        "noData": "No data available, please initialize knowledge base first",
+        "pathConfig": {
+          "browse": "Browse",
+          "rootPath": "Knowledge Base Root Path",
+          "rootPathHelp": "Directory for diary and knowledge base files",
+          "selectDirectory": "Select directory...",
+          "title": "Path Configuration",
+          "vectorDimension": "Vector Dimension",
+          "vectorDimensionHelp": "Embedding vector dimension, depends on the embedding model",
+          "vectorStorePath": "Vector Store Path",
+          "vectorStorePathHelp": "Directory for vector index data"
+        },
+        "stats": {
+          "diaryCount": "Diaries",
+          "totalChunks": "Chunks",
+          "totalFiles": "Files",
+          "totalTags": "Tags"
+        },
+        "title": "Knowledge Base Status"
+      },
+      "loading": "Loading...",
+      "loop": {
+        "apiRetries": "API Retry Count",
+        "apiRetriesHelp": "Number of retries when API call fails",
+        "apiRetryDelay": "API Retry Delay (ms)",
+        "apiRetryDelayHelp": "Delay between retries (milliseconds)",
+        "maxNonStream": "Max Non-Stream Loop Count",
+        "maxNonStreamHelp": "Maximum tool call loop count for non-streaming responses",
+        "maxStream": "Max Stream Loop Count",
+        "maxStreamHelp": "Maximum tool call loop count for streaming responses",
+        "title": "VCP Loop Settings"
+      },
+      "notAvailable": {
+        "description": "VCPToolBox module not found, please ensure it is properly installed",
+        "title": "VCPToolBox Not Available"
+      },
+      "plugins": {
+        "columns": {
+          "name": "Name",
+          "status": "Status",
+          "type": "Type",
+          "version": "Version"
+        },
+        "disabled": "Disabled",
+        "enabled": "Enabled",
+        "noPlugins": "No plugins",
+        "noPluginsHelp": "Please initialize VCPToolBox first",
+        "refresh": "Refresh",
+        "reload": "Reload Plugins",
+        "reloadFailed": "Plugins reload failed",
+        "reloadSuccess": "Plugins reloaded successfully",
+        "title": "VCP Plugin List",
+        "types": {
+          "asynchronous": "Asynchronous",
+          "hybridservice": "Hybrid Service",
+          "messagePreprocessor": "Preprocessor",
+          "service": "Service",
+          "static": "Static",
+          "synchronous": "Synchronous"
+        }
+      },
+      "status": {
+        "initialized": "Initialized",
+        "notAvailable": "Not Available",
+        "notInitialized": "Not Initialized"
+      },
+      "tabs": {
+        "general": "General",
+        "knowledge": "Knowledge Base",
+        "plugins": "Plugins"
+      },
+      "title": "VCPToolBox"
+    },
     "wallpaper": {
+      "advanced": {
+        "title": "Wallpaper Advanced Settings"
+      },
       "blur": "Blur",
       "brightness": "Brightness",
       "builtin": {
         "gradient": "Gradient Wallpapers"
       },
+      "category": {
+        "anime": "Anime Wallpapers",
+        "gradient": "Gradient Wallpapers"
+      },
+      "custom": "Custom",
+      "customSource": {
+        "hint": "Changing wallpaper source will override the preset wallpaper image",
+        "title": "Custom Wallpaper Source"
+      },
+      "display": {
+        "title": "Display Settings"
+      },
       "displayMode": "Display Mode",
+      "effects": {
+        "chatBubble": {
+          "accentLine": "Accent Line",
+          "accentLineColor": "Accent Line Color",
+          "shadow": "Shadow Effect",
+          "title": "Chat Bubble Decoration"
+        },
+        "codeBlock": {
+          "backgroundColor": "Background Color",
+          "borderColor": "Border Color",
+          "title": "Code Block Style"
+        },
+        "contentOverlay": {
+          "endColor": "Overlay End Color",
+          "startColor": "Overlay Start Color",
+          "title": "Content Overlay"
+        },
+        "enabled": "Enabled",
+        "inputBar": {
+          "backgroundColor": "Background Color",
+          "borderColor": "Border Color",
+          "focusColor": "Focus Color",
+          "title": "Input Bar Style"
+        },
+        "reset": "Reset Effects",
+        "sidebarGlass": {
+          "blurAmount": "Blur Amount",
+          "endColor": "Gradient End Color",
+          "saturation": "Saturation",
+          "startColor": "Gradient Start Color",
+          "tintColor": "Tint Color",
+          "title": "Sidebar Glass Effect"
+        },
+        "title": "Effect Settings"
+      },
       "enable": "Enable Wallpaper",
       "excludeWorkflow": {
         "label": "Exclude Wallpaper in Workflow",
         "tip": "Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "hint": {
+        "disabled": "Please select a wallpaper preset in \"Preset Themes\" to enable wallpaper feature"
       },
       "local": {
         "file": "Local File",
@@ -5149,6 +5642,39 @@
         "tile": "Tile"
       },
       "opacity": "Opacity",
+      "preset": {
+        "anime_dreamy": "Dreamy Anime",
+        "anime_fantasy": "Fantasy Adventure",
+        "anime_landscape": "Anime Landscape",
+        "anime_ocean": "Ocean Anime",
+        "anime_top": "Top Anime",
+        "blue_archive": "Blue Archive",
+        "chainsaw_man": "Chainsaw Man",
+        "chainsaw_power": "Chainsaw Man - Power",
+        "cyber_anime": "Cyberpunk",
+        "fate_saber": "Fate/Stay Night - Saber",
+        "fate_sakura": "Fate Sakura",
+        "genshin_impact": "Genshin Impact",
+        "gojo_satoru": "Jujutsu Kaisen - Gojo",
+        "gradient_dark": "Gradient Dark",
+        "gradient_light": "Gradient Light",
+        "honkai_impact": "Honkai Impact 3rd",
+        "honkai_starrail": "Honkai: Star Rail",
+        "jujutsu_kaisen": "Jujutsu Kaisen",
+        "makima": "Chainsaw Man - Makima",
+        "my_hero_academia": "My Hero Academia",
+        "nier_automata": "NieR: Automata",
+        "pink_anime": "Pink Anime",
+        "rain_anime": "Rainy Day",
+        "spy_family": "Spy x Family",
+        "starry_night": "Starry Night",
+        "sunset_anime": "Sunset",
+        "vocaloid": "Vocaloid"
+      },
+      "presets": {
+        "none": "None",
+        "title": "Preset Themes"
+      },
       "reset": "Reset Parameters",
       "resetToDefault": "Reset to Default",
       "source": {
@@ -5170,6 +5696,7 @@
   },
   "title": {
     "apps": "Apps",
+    "canvas": "Canvas",
     "code": "Code",
     "files": "Files",
     "home": "Home",
@@ -5340,6 +5867,353 @@
     "noReleaseNotes": "No release notes",
     "saveDataError": "Failed to save data, please try again.",
     "title": "Update"
+  },
+  "vcp": {
+    "advanced_editor": {
+      "description": "Tar/Var/Sar variable management, test preview, dependency analysis, TVStxt file management",
+      "title": "Advanced Variable Editor"
+    },
+    "agents": {
+      "create": "Create Assistant",
+      "create_blank": "Blank Assistant",
+      "create_first": "Create your first assistant",
+      "delete_confirm": "Are you sure to delete this assistant?",
+      "empty": "No assistants",
+      "from_library": "From Library",
+      "groupchat": "Group Chat",
+      "groupchat_config": "Group Chat Config",
+      "groupchat_enabled": "Group Chat Ready",
+      "groupchat_only": "Group Chat Only",
+      "has_greeting": "Has Greeting",
+      "has_memory": "Has Memory",
+      "has_personality": "Has Personality",
+      "import": "Import VCP Agent",
+      "no_description": "No description",
+      "no_results": "No matching assistants found",
+      "search": "Search assistants...",
+      "settings": "Settings",
+      "total": "Total Assistants",
+      "with_memory": "With Memory",
+      "with_profile": "With Profile"
+    },
+    "collaboration": {
+      "allowed_agents": "Allowed Agents",
+      "allowed_agents_desc": "Specify which agents this agent can collaborate with",
+      "allowed_agents_placeholder": "Enter agent IDs, separated by commas",
+      "blocked_agents": "Blocked Agents",
+      "blocked_agents_placeholder": "Enter blocked agent IDs, separated by commas",
+      "can_delegate": "Can Delegate Tasks",
+      "can_delegate_desc": "Allow this agent to delegate tasks to other agents",
+      "can_initiate": "Can Initiate Collaboration",
+      "can_initiate_desc": "Allow this agent to initiate collaboration with other agents",
+      "info": "Configure how this agent collaborates with other agents in group chats",
+      "max_tasks": "Max Concurrent Tasks",
+      "message_prefix": "Message Prefix",
+      "message_prefix_desc": "Prefix added to messages when collaborating",
+      "message_prefix_placeholder": "e.g., [Agent Name]:",
+      "response_style": "Response Style",
+      "style_adaptive": "Adaptive",
+      "style_concise": "Concise",
+      "style_detailed": "Detailed",
+      "title": "Collaboration Settings"
+    },
+    "dailynote": {
+      "click_to_edit": "Click to edit",
+      "no_preview": "No preview",
+      "note_count": "{{count}} notes",
+      "notebook_name": "{{name}}'s Notebook",
+      "sort_mtime_asc": "Oldest modified",
+      "sort_mtime_desc": "Recently modified",
+      "sort_name_asc": "Name A-Z",
+      "sort_name_desc": "Name Z-A",
+      "stats_count": "{{count}} notes",
+      "stats_notebook": "Notebook:",
+      "stats_total": "Total:",
+      "time_hours_ago": "{{n}} hours ago",
+      "time_just_now": "Just now",
+      "time_minutes_ago": "{{n}} minutes ago"
+    },
+    "dashboard": {
+      "agents": {
+        "description": "Unified management of all assistants/agents with VCP persona configuration and group chat collaboration.",
+        "title": "Assistant Management"
+      },
+      "coming_soon": "Coming soon, stay tuned.",
+      "groupchat": {
+        "description": "Manage multi-Agent group chat sessions, configure speaking modes, member tags, unified model, etc.",
+        "go_to_chat": "Go to Chat",
+        "title": "Group Chat",
+        "unified_entry": "Unified Entry"
+      },
+      "menu": {
+        "agents": "Agents",
+        "dailynote": "Daily Notes",
+        "forum": "Forum",
+        "groupchat": "Group Chat",
+        "plugins": "Plugins",
+        "settings": "Settings",
+        "tavern": "Tavern",
+        "templates": "Templates",
+        "variables": "Variables",
+        "workbench": "Workbench"
+      },
+      "settings": {
+        "description": "VCP global configuration, including default model, variable prefix, plugin paths, etc.",
+        "title": "Settings"
+      },
+      "templates": {
+        "description": "Manage VCP prompt templates with variable interpolation and template rendering.",
+        "title": "Templates"
+      },
+      "title": "VCP Dashboard",
+      "variables": {
+        "description": "Manage VCP prompt variables with global, agent, and session scopes.",
+        "title": "Variables"
+      }
+    },
+    "forum": {
+      "author": "Author",
+      "author_placeholder": "Enter author name",
+      "board": "Board",
+      "board_all": "All Boards",
+      "board_chat": "Casual Chat",
+      "board_feedback": "Feedback",
+      "board_tech": "VCP Technical",
+      "content_placeholder": "Enter post content, supports Markdown",
+      "create_post": "Create Post",
+      "fill_required": "Please fill in required fields",
+      "image": "Image",
+      "loading": "Loading...",
+      "new_post": "New Post",
+      "no_posts": "No posts yet",
+      "post_content": "Content (Markdown)",
+      "post_created": "Post created successfully",
+      "post_title": "Title",
+      "replies": "Replies",
+      "reply_list": "Reply List",
+      "reply_placeholder": "Enter your reply...",
+      "reply_sent": "Reply sent successfully",
+      "search_placeholder": "Search posts...",
+      "send_reply": "Send Reply",
+      "title": "VCP Forum",
+      "title_placeholder": "Enter post title"
+    },
+    "memory": {
+      "title": "Memory Settings"
+    },
+    "plugin": {
+      "author": "Author",
+      "available": "Available",
+      "category": {
+        "ai": "AI",
+        "builtin_service": "Built-in Service",
+        "code": "Code",
+        "diary": "Diary",
+        "file": "File",
+        "image": "Image",
+        "network": "Network",
+        "search": "Search",
+        "service": "Service",
+        "utility": "Utility",
+        "video": "Video"
+      },
+      "commands": "Commands",
+      "config_title": "Plugin Configuration",
+      "configure": "Configure",
+      "details": "Plugin Details",
+      "disabled": "Disabled",
+      "disabled_success": "Plugin disabled",
+      "distributed": "Distributed",
+      "enabled": "Enabled",
+      "enabled_success": "Plugin enabled",
+      "info_tooltip": "View plugin details",
+      "install": "Install",
+      "installed": "Installed",
+      "load_error": "Failed to load plugin list",
+      "loading": "Loading...",
+      "no_commands": "No commands",
+      "no_config": "This plugin requires no configuration",
+      "no_description": "No description",
+      "no_plugins": "No plugins available",
+      "no_readme": "No README",
+      "no_search_results": "No matching plugins found",
+      "no_system_prompt": "No system prompt",
+      "open_window": "Open Window",
+      "readme": "README",
+      "refresh": "Refresh",
+      "requires_config": "Requires configuration",
+      "search_placeholder": "Search plugins...",
+      "store": "Plugin Store",
+      "system_prompt": "System Prompt",
+      "system_prompt_loaded": "Plugin system prompt loaded",
+      "system_prompt_placeholder": "Optional system prompt",
+      "tab_all": "All",
+      "tab_distributed": "Distributed",
+      "test": "Test",
+      "test_error": "Execution failed",
+      "test_success": "Execution successful, took {{time}}ms",
+      "test_tooltip": "Test execute this plugin",
+      "testing": "Testing {{name}}...",
+      "title": "VCP Plugin Manager",
+      "toggle_error": "Failed to toggle status",
+      "total": "Total",
+      "uninstall": "Uninstall",
+      "update": "Update",
+      "version": "Version"
+    },
+    "profile": {
+      "add_dialogue": "Add Dialogue",
+      "background": "Background",
+      "background_desc": "Describe the agent's background story or context",
+      "background_placeholder": "Enter the agent's background story...",
+      "example_dialogues": "Example Dialogues",
+      "greeting": "Greeting Message",
+      "greeting_placeholder": "Enter a greeting message for the agent...",
+      "info": "Configure the agent's personality and communication style",
+      "no_dialogues": "No example dialogues added yet",
+      "personality": "Personality",
+      "personality_desc": "Describe the agent's personality traits",
+      "personality_placeholder": "e.g., friendly, professional, curious...",
+      "title": "Profile Settings",
+      "tone": "Communication Tone",
+      "tone_casual": "Casual",
+      "tone_formal": "Formal",
+      "tone_placeholder": "Select a communication tone",
+      "tone_playful": "Playful",
+      "tone_professional": "Professional",
+      "traits": "Character Traits",
+      "traits_placeholder": "Enter character traits, separated by commas"
+    },
+    "sar": {
+      "create_failed": "Failed to create",
+      "create_success": "Sar configuration created successfully",
+      "delete_failed": "Failed to delete",
+      "delete_success": "Sar configuration deleted successfully"
+    },
+    "settings": {
+      "agent_desc": "Description",
+      "agent_name": "Name",
+      "agent_preview": "Agent Preview",
+      "clean_failed": "Failed to clean logs",
+      "debug": "Debug Settings",
+      "description": "Configure VCP Agent to enable intelligent context injection",
+      "info_desc": "After selecting a VCP Agent, the system will automatically inject relevant context (such as knowledge base search results, diary content, etc.) into the conversation based on the Agent's configuration.",
+      "info_title": "VCP Context Injection",
+      "knowledge": "Knowledge Base Settings",
+      "logs": "Log Settings",
+      "logs_cleaned": "Logs cleaned",
+      "loop": "VCP Loop Settings",
+      "no_agents": "No VCP Agents available. Please create one in VCP management first.",
+      "plugins": "Plugin Management",
+      "plugins_refreshed": "Plugin list refreshed",
+      "preprocessor": "Preprocessor Order",
+      "refresh_failed": "Failed to refresh plugins",
+      "select_agent": "Select VCP Agent",
+      "select_agent_first": "Please select a VCP Agent first",
+      "select_placeholder": "Select a VCP Agent",
+      "system_prompt": "System Prompt",
+      "title": "VCP Agent",
+      "variables": "Variables"
+    },
+    "templates": {
+      "category": "Category",
+      "category_agent": "Agent Templates",
+      "category_custom": "Custom Templates",
+      "category_system": "System Templates",
+      "content": "Content",
+      "content_required": "Please enter template content",
+      "create": "Create Template",
+      "create_first": "Create your first template",
+      "create_success": "Template created successfully",
+      "delete_confirm": "Are you sure to delete this template?",
+      "delete_failed": "Failed to delete",
+      "delete_success": "Template deleted successfully",
+      "description": "Description",
+      "edit": "Edit Template",
+      "empty": "No templates",
+      "list": "Template List",
+      "load_failed": "Failed to load templates",
+      "name": "Template Name",
+      "name_required": "Please enter template name",
+      "no_results": "No matching templates found",
+      "preview": "Preview",
+      "save_failed": "Failed to save",
+      "search": "Search templates...",
+      "total": "Total Templates",
+      "update_success": "Template updated successfully",
+      "usage_title": "Template Usage Guide",
+      "variables": "Variables"
+    },
+    "test": {
+      "input_required": "Please enter test text"
+    },
+    "tvstxt": {
+      "create": "Create TVStxt File",
+      "create_failed": "Failed to create",
+      "create_success": "File created successfully",
+      "must_be_txt": "File name must end with .txt",
+      "name_required": "Please enter file name",
+      "save_failed": "Failed to save",
+      "save_success": "File saved successfully"
+    },
+    "variables": {
+      "category": "Type",
+      "create": "Create Variable",
+      "create_success": "Variable created successfully",
+      "delete_confirm": "Are you sure to delete this variable?",
+      "delete_failed": "Failed to delete",
+      "delete_success": "Variable deleted successfully",
+      "description": "Description",
+      "empty": "No variables",
+      "load_failed": "Failed to load variables",
+      "name": "Variable Name",
+      "no_results": "No matching variables found",
+      "save_failed": "Failed to save",
+      "scope": "Scope",
+      "search": "Search variables...",
+      "tab_user": "User Variables",
+      "total": "Total Variables",
+      "types_title": "Variable Types",
+      "update_success": "Variable updated successfully",
+      "user_variables": "User Variables",
+      "value": "Value"
+    },
+    "workbench": {
+      "clear": "Clear",
+      "columns": {
+        "actions": "Actions",
+        "duration": "Duration",
+        "name": "Name",
+        "source": "Source",
+        "status": "Status",
+        "time": "Time",
+        "type": "Type"
+      },
+      "description": "View and manage VCP tool call records",
+      "filter": {
+        "assistant": "Assistant",
+        "status": "Status",
+        "tool": "Tool",
+        "type": "Type"
+      },
+      "refresh": "Refresh",
+      "search": "Search tool calls...",
+      "selectCall": "Select a call record to view details",
+      "stats": {
+        "avgTime": "Avg Time",
+        "crew": "Crew Activity",
+        "pending": "Pending",
+        "successRate": "Success Rate",
+        "tools": "Tools",
+        "total": "Total Calls"
+      },
+      "tabs": {
+        "calls": "Calls",
+        "logs": "Logs",
+        "tasks": "Tasks"
+      },
+      "title": "VCP Workbench"
+    }
   },
   "warning": {
     "missing_provider": "The supplier does not exist; reverted to the default supplier {{provider}}. This may cause issues."

@@ -7,13 +7,15 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { updateEcomConfig } from '@renderer/store/imageStudio'
-import { Checkbox, Collapse, Input, Radio, Select, Slider, Upload } from 'antd'
 import type { UploadFile } from 'antd'
-import { ImagePlus, Sparkles, Wand2 } from 'lucide-react'
+import { Checkbox, Collapse, Input, Radio, Select, Slider, Upload } from 'antd'
+import { ImagePlus, Wand2 } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
+
+import { PromptEnhancer } from '../../common'
 
 const EcomConfigPanel: FC = () => {
   const { t } = useTranslation()
@@ -44,12 +46,19 @@ const EcomConfigPanel: FC = () => {
         <UploadArea>
           {fileList.map((file, index) => (
             <UploadedImage key={file.uid}>
-              <img src={file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj as Blob) : '')} alt="" />
+              <img
+                src={file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj as Blob) : '')}
+                alt=""
+              />
               <RemoveButton onClick={() => handleRemoveImage(index)}>
                 <DeleteOutlined />
               </RemoveButton>
               <ImageLabel>
-                {index === 0 ? t('image_studio.ecom.top_image') : index === 1 ? t('image_studio.ecom.bottom_image') : `图片${index + 1}`}
+                {index === 0
+                  ? t('image_studio.ecom.top_image')
+                  : index === 1
+                    ? t('image_studio.ecom.bottom_image')
+                    : t('image_studio.ecom.image_n', { n: index + 1 })}
               </ImageLabel>
             </UploadedImage>
           ))}
@@ -61,8 +70,7 @@ const EcomConfigPanel: FC = () => {
               multiple
               beforeUpload={() => false}
               onChange={handleUploadChange}
-              fileList={fileList}
-            >
+              fileList={fileList}>
               <AddImageButton>
                 <PlusOutlined />
                 <span>{t('image_studio.ecom.add_image')}</span>
@@ -74,13 +82,12 @@ const EcomConfigPanel: FC = () => {
 
       {/* 布局模式 */}
       <Section>
-        <SectionTitle>{t('image_studio.ecom.layout')}</SectionTitle>
+        <SectionTitle>{t('image_studio.ecom.layout.label')}</SectionTitle>
         <Radio.Group
           value={config.layout}
           onChange={(e) => dispatch(updateEcomConfig({ layout: e.target.value }))}
           buttonStyle="solid"
-          size="small"
-        >
+          size="small">
           <Radio.Button value="model_shot">{t('image_studio.ecom.layout_model')}</Radio.Button>
           <Radio.Button value="flat_lay">{t('image_studio.ecom.layout_flat')}</Radio.Button>
           <Radio.Button value="hanging">{t('image_studio.ecom.layout_hanging')}</Radio.Button>
@@ -89,17 +96,20 @@ const EcomConfigPanel: FC = () => {
 
       {/* 风格预设 */}
       <Section>
-        <SectionTitle>{t('image_studio.ecom.style')}</SectionTitle>
+        <SectionTitle>{t('image_studio.ecom.style.label')}</SectionTitle>
         <StyleGrid>
-          {['auto', 'shein', 'temu', 'minimal', 'premium'].map((style) => (
+          {(['auto', 'shein', 'temu', 'minimal', 'premium'] as const).map((style) => (
             <StyleOption
               key={style}
               $active={config.stylePreset === style}
-              onClick={() => dispatch(updateEcomConfig({ stylePreset: style }))}
-            >
-              {style === 'auto' ? t('image_studio.ecom.style_auto') :
-               style === 'minimal' ? t('image_studio.ecom.style_minimal') :
-               style === 'premium' ? t('image_studio.ecom.style_premium') : style.toUpperCase()}
+              onClick={() => dispatch(updateEcomConfig({ stylePreset: style }))}>
+              {style === 'auto'
+                ? t('image_studio.ecom.style_auto')
+                : style === 'minimal'
+                  ? t('image_studio.ecom.style_minimal')
+                  : style === 'premium'
+                    ? t('image_studio.ecom.style_premium')
+                    : style.toUpperCase()}
             </StyleOption>
           ))}
         </StyleGrid>
@@ -148,14 +158,12 @@ const EcomConfigPanel: FC = () => {
         <CheckboxGroup>
           <Checkbox
             checked={config.enableBack}
-            onChange={(e) => dispatch(updateEcomConfig({ enableBack: e.target.checked }))}
-          >
+            onChange={(e) => dispatch(updateEcomConfig({ enableBack: e.target.checked }))}>
             {t('image_studio.ecom.enable_back')}
           </Checkbox>
           <Checkbox
             checked={config.enableDetail}
-            onChange={(e) => dispatch(updateEcomConfig({ enableDetail: e.target.checked }))}
-          >
+            onChange={(e) => dispatch(updateEcomConfig({ enableDetail: e.target.checked }))}>
             {t('image_studio.ecom.enable_detail')}
           </Checkbox>
         </CheckboxGroup>
@@ -168,11 +176,6 @@ const EcomConfigPanel: FC = () => {
             <Wand2 size={16} />
             {t('image_studio.prompt.title')}
           </SectionTitle>
-          <PromptActions>
-            <ActionButton title={t('image_studio.prompt.optimize')}>
-              <Sparkles size={14} />
-            </ActionButton>
-          </PromptActions>
         </SectionHeader>
 
         <PromptEditor>
@@ -188,7 +191,16 @@ const EcomConfigPanel: FC = () => {
           </PromptSection>
 
           <PromptSection>
-            <PromptLabel>{t('image_studio.ecom.garment_desc')}</PromptLabel>
+            <PromptLabelRow>
+              <PromptLabel>{t('image_studio.ecom.garment_desc')}</PromptLabel>
+              <PromptEnhancer
+                value={config.garmentDescription || ''}
+                module="ecom"
+                mode="garment"
+                moduleConfig={config}
+                onApply={(enhanced) => dispatch(updateEcomConfig({ garmentDescription: enhanced }))}
+              />
+            </PromptLabelRow>
             <Input.TextArea
               value={config.garmentDescription}
               onChange={(e) => dispatch(updateEcomConfig({ garmentDescription: e.target.value }))}
@@ -236,7 +248,9 @@ const EcomConfigPanel: FC = () => {
                   <Input
                     type="number"
                     value={config.seed || ''}
-                    onChange={(e) => dispatch(updateEcomConfig({ seed: e.target.value ? Number(e.target.value) : undefined }))}
+                    onChange={(e) =>
+                      dispatch(updateEcomConfig({ seed: e.target.value ? Number(e.target.value) : undefined }))
+                    }
                     placeholder={t('image_studio.seed_placeholder')}
                     size="small"
                   />
@@ -259,13 +273,13 @@ export default EcomConfigPanel
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 `
 
 const Section = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 `
 
 const SectionHeader = styled.div`
@@ -408,26 +422,6 @@ const CheckboxGroup = styled.div`
   gap: 8px;
 `
 
-const PromptActions = styled.div`
-  display: flex;
-  gap: 4px;
-`
-
-const ActionButton = styled.button`
-  padding: 4px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-3);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-
-  &:hover {
-    color: var(--color-primary);
-    background: var(--color-primary-soft);
-  }
-`
-
 const PromptEditor = styled.div`
   display: flex;
   flex-direction: column;
@@ -441,6 +435,12 @@ const PromptSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
+`
+
+const PromptLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `
 
 const PromptLabel = styled.span`

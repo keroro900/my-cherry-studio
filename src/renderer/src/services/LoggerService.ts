@@ -113,8 +113,18 @@ class LoggerService {
    * @param data - Additional data to log
    */
   private processLog(level: LogLevel, message: string, data: any[]): void {
+    // 如果 window source 未初始化，使用静默降级模式
+    // 这样可以避免在模块加载时（init.ts 运行前）产生警告
     if (!this.window) {
-      console.error('[LoggerService] window source not initialized, please initialize window source first')
+      // 在开发模式下，仍然允许控制台输出，但不发送到主进程
+      if (IS_DEV && LEVEL_MAP[level] >= LEVEL_MAP[LEVEL.WARN]) {
+        const logMessage = this.module ? `[${this.module}] ${message}` : message
+        if (level === LEVEL.ERROR) {
+          console.error('[early]', logMessage, ...data)
+        } else if (level === LEVEL.WARN) {
+          console.warn('[early]', logMessage, ...data)
+        }
+      }
       return
     }
 

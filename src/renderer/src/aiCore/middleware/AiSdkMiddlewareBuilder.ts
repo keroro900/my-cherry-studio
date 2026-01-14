@@ -1,7 +1,7 @@
 import type { WebSearchPluginConfig } from '@cherrystudio/ai-core/built-in/plugins'
 import { loggerService } from '@logger'
 import { isGemini3Model, isSupportedThinkingTokenQwenModel } from '@renderer/config/models'
-import type { MCPTool } from '@renderer/types'
+import type { ImageAssistantConfig, MCPTool } from '@renderer/types'
 import { type Assistant, type Message, type Model, type Provider, SystemProviderIds } from '@renderer/types'
 import type { Chunk } from '@renderer/types/chunk'
 import { isOllamaProvider, isSupportEnableThinkingProvider } from '@renderer/utils/provider'
@@ -44,6 +44,8 @@ export interface AiSdkMiddlewareConfig {
   webSearchPluginConfig?: WebSearchPluginConfig
   // 知识库识别开关，默认开启
   knowledgeRecognition?: 'off' | 'on'
+  // 图片助手配置（用于现代 SDK 图片生成）
+  imageConfig?: ImageAssistantConfig
 }
 
 /**

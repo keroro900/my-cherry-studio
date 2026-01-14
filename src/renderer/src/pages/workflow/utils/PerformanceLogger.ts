@@ -66,7 +66,7 @@ export class PerformanceLogger {
     performanceEntries.set(operationId, entry)
 
     if (verboseMode) {
-      logger.debug(`[${operationId}] ===== 开始: ${operation} =====`, metadata || '')
+      logger.debug(`[${operationId}] ===== 开始: ${operation} =====`, metadata || {})
     }
 
     return operationId
@@ -102,7 +102,7 @@ export class PerformanceLogger {
 
     if (verboseMode) {
       const elapsed = Date.now() - entry.startTime
-      logger.debug(`[${operationId}] 阶段: ${phaseName} (+${elapsed}ms)`, metadata || '')
+      logger.debug(`[${operationId}] 阶段: ${phaseName} (+${elapsed}ms)`, metadata || {})
     }
   }
 
@@ -209,7 +209,10 @@ export class PerformanceLogger {
    * 创建一个带上下文的日志器
    * 方便在单个操作中多次调用
    */
-  static createLogger(operation: string, metadata?: Record<string, any>): {
+  static createLogger(
+    operation: string,
+    metadata?: Record<string, any>
+  ): {
     operationId: string
     phase: (name: string, phaseMeta?: Record<string, any>) => void
     end: (endMeta?: Record<string, any>) => ReturnType<typeof PerformanceLogger.end>

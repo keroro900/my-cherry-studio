@@ -60,7 +60,13 @@
   --theme-glass-border: rgba(255, 255, 255, 0.2);
 
   /* ==================== 壁纸变量 ==================== */
+  /* 背景图片变量 - 由 GlobalStyleProvider 动态设置 */
+  --chat-background-image: none;
+  --chat-background-repeat: no-repeat;
+  --chat-background-position: center 30%;
+  --chat-background-size: cover;
 
+  /* 旧壁纸变量（保持兼容性） */
   --wallpaper-url: none;
   --wallpaper-size: cover;
   --wallpaper-position: center;
@@ -80,10 +86,10 @@
 
 /*
  * 壁纸功能设计说明：
- * 1. 使用 React 组件 <GlobalWallpaper /> 渲染壁纸层
- * 2. 壁纸层位于最底层（z-index: -1），不影响主题系统
- * 3. 主题系统控制组件配色，壁纸只负责背景图
- * 4. 两者叠加共存，互不干扰
+ * 1. 壁纸直接应用在 body 元素的 background-image 上
+ * 2. CSS 变量由 GlobalStyleProvider 动态设置
+ * 3. 效果通过 CSS class 控制（sidebar-glass-enabled, chat-bubble-decoration-enabled 等）
+ * 4. 主题系统控制组件配色，壁纸只负责背景图
  */
 
 /* 壁纸启用时，让 body 和 html 背景透明，露出壁纸层 */
@@ -142,10 +148,61 @@ body.wallpaper-enabled .workflow-root,
 body.wallpaper-enabled .workflow-node-panel,
 body.wallpaper-enabled .workflow-config-panel,
 body.wallpaper-enabled .home-tabs,
-body.wallpaper-enabled #app-sidebar,
 body.wallpaper-enabled #launchpad-page {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+/* ==================== 侧边栏玻璃效果 ==================== */
+/* 仅在 sidebar-glass-enabled 类存在时生效 */
+/* CSS 变量由 GlobalStyleProvider 动态设置 */
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar {
+  position: relative;
+  background: transparent !important;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, var(--sidebar-glass-start) 0%, var(--sidebar-glass-end) 100%),
+    radial-gradient(120% 100% at 50% 0%, var(--sidebar-glass-tint) 0%, transparent 70%);
+  backdrop-filter: blur(var(--sidebar-glass-blur, 5px)) saturate(var(--sidebar-glass-saturate, 1.2));
+  -webkit-backdrop-filter: blur(var(--sidebar-glass-blur, 5px)) saturate(var(--sidebar-glass-saturate, 1.2));
+}
+
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 侧边栏项目悬停效果 */
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar .item:hover,
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar div[class^='Icon']:hover {
+  background-color: var(--content-bgcolor-soft);
+  box-shadow: var(--box-shadow);
+  border-radius: 12px;
+}
+
+/* 侧边栏项目激活效果 */
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar .active,
+body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar div[class^='Icon'].active {
+  background-color: var(--content-bgcolor-hard);
+  box-shadow: var(--box-shadow);
+  border-radius: 12px;
+  outline: 1px solid var(--sidebar-border);
+}
+
+/* 不支持 backdrop-filter 的回退 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body.wallpaper-enabled.sidebar-glass-enabled #app-sidebar::before {
+    background: linear-gradient(180deg, var(--sidebar-glass-start), var(--sidebar-glass-end));
+  }
 }
 
 /* 壁纸启用时，主要页面使用透明背景 */
@@ -155,11 +212,120 @@ body.wallpaper-enabled #launchpad-page {
   background-color: transparent;
 }
 
+/* ==================== 内容容器遮罩效果 ==================== */
+/* 仅在 content-overlay-enabled 类存在时生效 */
+body.wallpaper-enabled.content-overlay-enabled #content-container {
+  position: relative;
+}
+
+body.wallpaper-enabled.content-overlay-enabled #content-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--content-overlay-color-start),
+    var(--content-overlay-color-end)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+body.wallpaper-enabled.content-overlay-enabled #content-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 消息区域透明背景 */
+body.wallpaper-enabled #content-container #messages {
+  background-color: transparent;
+}
+
 /* 工作流模块排除壁纸效果 - 保持不透明背景 */
 body.wallpaper-exclude-workflow .workflow-root {
   background: var(--color-background-mute) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* ==================== 输入栏增强样式 ==================== */
+/* 仅在 input-bar-effect-enabled 类存在时生效 */
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container'],
+body.wallpaper-enabled.input-bar-effect-enabled #inputbar-container {
+  background-color: var(--inputbar-background-color);
+  border: 1px solid var(--inputbar-border-color);
+  border-radius: var(--common-border-radius);
+  transition:
+    border-color var(--transition-duration) var(--transition-easing),
+    background-color var(--transition-duration) var(--transition-easing),
+    box-shadow var(--transition-duration) var(--transition-easing);
+}
+
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container:focus-within,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container']:focus-within,
+body.wallpaper-enabled.input-bar-effect-enabled #inputbar-container:focus-within {
+  border-color: var(--input-focus-border-color);
+  box-shadow: var(--input-focus-shadow);
+}
+
+/* 输入栏文本域样式 */
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container textarea,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container'] textarea,
+body.wallpaper-enabled.input-bar-effect-enabled #inputbar textarea {
+  background-color: transparent;
+  color: var(--color-text);
+}
+
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container textarea::placeholder,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container'] textarea::placeholder,
+body.wallpaper-enabled.input-bar-effect-enabled #inputbar textarea::placeholder {
+  color: var(--color-text-2);
+  opacity: 1;
+}
+
+/* 输入栏按钮样式 */
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container .icon-button,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container'] .icon-button {
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-text-2);
+  transition:
+    background-color var(--transition-duration) var(--transition-easing),
+    color var(--transition-duration) var(--transition-easing);
+}
+
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container .icon-button:hover,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container'] .icon-button:hover {
+  background-color: rgba(var(--input-focus-border-color-rgb), 0.1);
+  color: var(--input-focus-border-color);
+}
+
+body.wallpaper-enabled.input-bar-effect-enabled .inputbar-container .icon-button:active,
+body.wallpaper-enabled.input-bar-effect-enabled [class*='inputbar-container'] .icon-button:active {
+  background-color: rgba(var(--input-focus-border-color-rgb), 0.15);
+}
+
+/* ==================== 代码块样式 ==================== */
+/* 仅在 code-block-effect-enabled 类存在时生效 */
+body.wallpaper-enabled.code-block-effect-enabled code {
+  background-color: var(--code-block-bg);
+  transition:
+    background-color var(--transition-duration) var(--transition-easing),
+    color var(--transition-duration) var(--transition-easing);
+}
+
+body.wallpaper-enabled.code-block-effect-enabled pre {
+  background-color: var(--code-block-bg);
+  border: 1px solid var(--code-block-border-color);
+  border-radius: var(--common-border-radius);
+  transition:
+    background-color var(--transition-duration) var(--transition-easing),
+    border-color var(--transition-duration) var(--transition-easing);
+}
+
+body.wallpaper-enabled.code-block-effect-enabled pre code {
+  background-color: transparent;
 }
 
 /* ==================== 主题效果类 ==================== */

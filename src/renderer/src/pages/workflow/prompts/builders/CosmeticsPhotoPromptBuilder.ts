@@ -119,7 +119,8 @@ Do not output any text, JSON, or explanations - only generate the image.`
    * 构建用户提示词
    */
   buildUserPrompt(): string {
-    const { cosmeticsType, productTexture, displayStyle, backgroundSetting, lightingEffect, extraDescription } = this.config
+    const { cosmeticsType, productTexture, displayStyle, backgroundSetting, lightingEffect, extraDescription } =
+      this.config
 
     const cosmeticsLabel = this.getCosmeticsLabel(cosmeticsType)
     const textureLabel = this.getTextureLabel(productTexture)
@@ -208,16 +209,11 @@ Return as JSON with fields: product_type, packaging_material, texture_type, colo
         'Skincare products (serums, creams, lotions). Focus on clean, clinical yet luxurious presentation. Highlight texture and packaging quality.',
       makeup:
         'Makeup products (lipstick, foundation, eyeshadow). Emphasize color accuracy, pigmentation, and packaging design.',
-      perfume:
-        'Fragrance bottles and packaging. Capture glass clarity, liquid color, and luxury presentation.',
-      haircare:
-        'Hair care products (shampoo, conditioner, treatments). Show bottle design and product texture.',
-      nail:
-        'Nail polish and nail care. Focus on bottle shape, color accuracy, and brush applicator.',
-      bodycare:
-        'Body care products (body lotions, scrubs, oils). Highlight texture and packaging appeal.',
-      tools:
-        'Beauty tools and accessories (brushes, applicators). Show quality craftsmanship and design.'
+      perfume: 'Fragrance bottles and packaging. Capture glass clarity, liquid color, and luxury presentation.',
+      haircare: 'Hair care products (shampoo, conditioner, treatments). Show bottle design and product texture.',
+      nail: 'Nail polish and nail care. Focus on bottle shape, color accuracy, and brush applicator.',
+      bodycare: 'Body care products (body lotions, scrubs, oils). Highlight texture and packaging appeal.',
+      tools: 'Beauty tools and accessories (brushes, applicators). Show quality craftsmanship and design.'
     }
     return tips[type] || tips.skincare
   }

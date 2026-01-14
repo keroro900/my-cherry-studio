@@ -8,6 +8,8 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 // Fixed chalk import for ESM
 import chalk from 'chalk'
 
+import { getDynamicFusionService } from './DynamicFusionService'
+
 const logger = loggerService.withContext('MCPServer:SequentialThinkingServer')
 
 interface ThoughtData {
@@ -142,6 +144,215 @@ class SequentialThinkingServer {
       }
     }
   }
+
+  // ==================== 思维融合 (VCPToolBox 对标: 超动态递归融合) ====================
+
+  /**
+   * 融合多个思维步骤
+   * 支持多种融合策略: consensus, debate, expansion, compression
+   */
+  public async fuseThoughts(input: unknown): Promise<{
+    content: Array<{ type: string; text: string }>
+    isError?: boolean
+  }> {
+    try {
+      const data = input as Record<string, unknown>
+
+      // 获取待融合的思维
+      let thoughtsToFuse: string[]
+
+      if (data.thoughtNumbers && Array.isArray(data.thoughtNumbers)) {
+        // 指定思维编号
+        const numbers = data.thoughtNumbers as number[]
+        thoughtsToFuse = numbers
+          .map((n) => this.thoughtHistory.find((t) => t.thoughtNumber === n)?.thought)
+          .filter((t): t is string => !!t)
+      } else if (data.branchId && typeof data.branchId === 'string') {
+        // 融合分支思维
+        const branchThoughts = this.branches[data.branchId] || []
+        thoughtsToFuse = branchThoughts.map((t) => t.thought)
+      } else {
+        // 默认融合所有思维
+        thoughtsToFuse = this.thoughtHistory.map((t) => t.thought)
+      }
+
+      if (thoughtsToFuse.length < 2) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  error: 'Need at least 2 thoughts to fuse',
+                  availableThoughts: this.thoughtHistory.length
+                },
+                null,
+                2
+              )
+            }
+          ],
+          isError: true
+        }
+      }
+
+      // 获取融合策略
+      const strategyName = (data.strategy as string) || 'consensus'
+      const fusionService = getDynamicFusionService()
+
+      // 验证策略是否存在
+      if (!fusionService.getStrategy(strategyName)) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  error: `Unknown fusion strategy: ${strategyName}`,
+                  availableStrategies: fusionService.getAvailableStrategies()
+                },
+                null,
+                2
+              )
+            }
+          ],
+          isError: true
+        }
+      }
+
+      // 执行融合 (使用字符串版本的 API)
+      const context = (data.context as string) || 'Fuse the following thoughts into a coherent synthesis'
+      const fusionResult = await fusionService.fuseStrings(thoughtsToFuse, context, strategyName)
+
+      // 格式化输出
+      const formattedResult = this.formatFusionResult(fusionResult, strategyName, thoughtsToFuse.length)
+      logger.info(formattedResult)
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                fusedThought: fusionResult.result,
+                strategy: strategyName,
+                inputCount: thoughtsToFuse.length,
+                confidence: fusionResult.confidence,
+                iterations: fusionResult.iterations,
+                metadata: fusionResult.metadata
+              },
+              null,
+              2
+            )
+          }
+        ]
+      }
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                error: error instanceof Error ? error.message : String(error),
+                status: 'fusion_failed'
+              },
+              null,
+              2
+            )
+          }
+        ],
+        isError: true
+      }
+    }
+  }
+
+  /**
+   * 递归融合思维 (多轮迭代直到收敛)
+   */
+  public async recursiveFuse(input: unknown): Promise<{
+    content: Array<{ type: string; text: string }>
+    isError?: boolean
+  }> {
+    try {
+      const data = input as Record<string, unknown>
+
+      const thoughts = this.thoughtHistory.map((t) => t.thought)
+      if (thoughts.length < 2) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ error: 'Need at least 2 thoughts for recursive fusion' }, null, 2)
+            }
+          ],
+          isError: true
+        }
+      }
+
+      const maxIterations = (data.maxIterations as number) || 3
+      const convergenceThreshold = (data.convergenceThreshold as number) || 0.9
+      const context = (data.context as string) || 'Recursively refine and synthesize these thoughts'
+
+      const fusionService = getDynamicFusionService()
+      const result = await fusionService.recursiveFuseStrings(thoughts, context, {
+        maxIterations,
+        convergenceThreshold,
+        strategy: (data.strategy as string) || 'consensus'
+      })
+
+      logger.info(
+        chalk.magenta(
+          `🔄 Recursive Fusion Complete: ${result.iterations} iterations, confidence: ${result.confidence.toFixed(2)}`
+        )
+      )
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                finalResult: result.result,
+                iterations: result.iterations,
+                confidence: result.confidence,
+                converged: result.confidence >= convergenceThreshold,
+                inputThoughtCount: thoughts.length
+              },
+              null,
+              2
+            )
+          }
+        ]
+      }
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }, null, 2)
+          }
+        ],
+        isError: true
+      }
+    }
+  }
+
+  private formatFusionResult(
+    result: { result: string; confidence: number; iterations: number },
+    strategy: string,
+    inputCount: number
+  ): string {
+    const header = chalk.magenta(`🔀 Fusion [${strategy}] - ${inputCount} thoughts → 1`)
+    const confidence = chalk.cyan(`Confidence: ${(result.confidence * 100).toFixed(1)}%`)
+    const iterations = chalk.yellow(`Iterations: ${result.iterations}`)
+
+    return `
+${header}
+${confidence} | ${iterations}
+────────────────────────────────────────
+${result.result.substring(0, 200)}${result.result.length > 200 ? '...' : ''}
+────────────────────────────────────────`
+  }
 }
 
 const SEQUENTIAL_THINKING_TOOL: Tool = {
@@ -248,6 +459,92 @@ You should:
   }
 }
 
+// ==================== 思维融合工具 (VCPToolBox 对标) ====================
+
+const FUSE_THOUGHTS_TOOL: Tool = {
+  name: 'fusethoughts',
+  description: `Fuse multiple sequential thoughts into a coherent synthesis using various strategies.
+
+This tool takes your thought history and combines them using one of several fusion strategies:
+- consensus: Find common ground and synthesize agreement
+- debate: Explore contradictions and resolve them
+- expansion: Elaborate and expand on ideas
+- compression: Distill to essential points
+
+When to use:
+- After completing several sequential thoughts to create a summary
+- To combine branched thoughts back into a single thread
+- To resolve conflicting ideas from different thought branches
+- To create a final synthesis before concluding
+
+The fusion result can be used as input for further thinking or as a final output.`,
+  inputSchema: {
+    type: 'object',
+    properties: {
+      strategy: {
+        type: 'string',
+        enum: ['consensus', 'debate', 'expansion', 'compression'],
+        description: 'Fusion strategy to use (default: consensus)'
+      },
+      thoughtNumbers: {
+        type: 'array',
+        items: { type: 'integer', minimum: 1 },
+        description: 'Specific thought numbers to fuse (optional, defaults to all)'
+      },
+      branchId: {
+        type: 'string',
+        description: 'Fuse thoughts from a specific branch (optional)'
+      },
+      context: {
+        type: 'string',
+        description: 'Additional context for the fusion process'
+      }
+    }
+  }
+}
+
+const RECURSIVE_FUSE_TOOL: Tool = {
+  name: 'recursivefuse',
+  description: `Recursively fuse thoughts through multiple iterations until convergence.
+
+This tool repeatedly applies fusion strategies to your thoughts, refining the result
+with each iteration until a convergence threshold is reached or max iterations hit.
+
+Best for:
+- Complex thought chains that need multiple passes to synthesize
+- When you want the highest quality synthesis possible
+- Resolving deeply nested or branched thought structures
+
+The recursive process automatically adjusts confidence based on how stable
+the output becomes between iterations.`,
+  inputSchema: {
+    type: 'object',
+    properties: {
+      strategy: {
+        type: 'string',
+        enum: ['consensus', 'debate', 'expansion', 'compression'],
+        description: 'Fusion strategy to use (default: consensus)'
+      },
+      maxIterations: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 10,
+        description: 'Maximum fusion iterations (default: 3)'
+      },
+      convergenceThreshold: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+        description: 'Confidence threshold to stop iteration (default: 0.9)'
+      },
+      context: {
+        type: 'string',
+        description: 'Additional context for the fusion process'
+      }
+    }
+  }
+}
+
 class ThinkingServer {
   public server: Server
   private thinkingServer: SequentialThinkingServer
@@ -257,7 +554,7 @@ class ThinkingServer {
     this.server = new Server(
       {
         name: 'sequential-thinking-server',
-        version: '0.2.0'
+        version: '0.3.0' // Updated for fusion support
       },
       {
         capabilities: {
@@ -269,23 +566,34 @@ class ThinkingServer {
   }
 
   initialize() {
+    // 注册所有工具 (包含融合工具)
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-      tools: [SEQUENTIAL_THINKING_TOOL]
+      tools: [SEQUENTIAL_THINKING_TOOL, FUSE_THOUGHTS_TOOL, RECURSIVE_FUSE_TOOL]
     }))
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      if (request.params.name === 'sequentialthinking') {
-        return this.thinkingServer.processThought(request.params.arguments)
-      }
+      const { name, arguments: args } = request.params
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Unknown tool: ${request.params.name}`
+      switch (name) {
+        case 'sequentialthinking':
+          return this.thinkingServer.processThought(args)
+
+        case 'fusethoughts':
+          return this.thinkingServer.fuseThoughts(args)
+
+        case 'recursivefuse':
+          return this.thinkingServer.recursiveFuse(args)
+
+        default:
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Unknown tool: ${name}`
+              }
+            ],
+            isError: true
           }
-        ],
-        isError: true
       }
     })
   }

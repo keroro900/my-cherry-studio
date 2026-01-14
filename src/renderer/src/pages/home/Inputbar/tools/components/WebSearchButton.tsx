@@ -1,5 +1,6 @@
 import { ActionIconButton } from '@renderer/components/Buttons'
 import type { ToolQuickPanelController } from '@renderer/pages/home/Inputbar/types'
+import type { WebSearchProviderId } from '@renderer/types'
 import { Tooltip } from 'antd'
 import type { FC } from 'react'
 import { memo, useCallback } from 'react'
@@ -34,7 +35,7 @@ const WebSearchButton: FC<Props> = ({ quickPanelController, assistantId }) => {
         active={!!enableWebSearch}
         aria-label={ariaLabel}
         aria-pressed={!!enableWebSearch}>
-        <WebSearchProviderIcon pid={selectedProviderId} />
+        <WebSearchProviderIcon pid={selectedProviderId as WebSearchProviderId | undefined} />
       </ActionIconButton>
     </Tooltip>
   )

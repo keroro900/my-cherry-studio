@@ -17,8 +17,11 @@ export const useSmoothStream = ({ onUpdate, streamDone, minDelay = 10, initialTe
   const lastUpdateTimeRef = useRef<number>(0)
 
   const addChunk = useCallback((chunk: string) => {
-    const chars = Array.from(segmenter.segment(chunk)).map((s) => s.segment)
-    chunkQueueRef.current = [...chunkQueueRef.current, ...(chars || [])]
+    // 优化: 使用 push 代替展开运算符，避免创建新数组
+    const segments = segmenter.segment(chunk)
+    for (const seg of segments) {
+      chunkQueueRef.current.push(seg.segment)
+    }
   }, [])
 
   const reset = useCallback(
@@ -26,7 +29,7 @@ export const useSmoothStream = ({ onUpdate, streamDone, minDelay = 10, initialTe
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
-      chunkQueueRef.current = []
+      chunkQueueRef.current.length = 0 // 原地清空数组
       displayedTextRef.current = newText
       onUpdate(newText)
     },
@@ -35,8 +38,10 @@ export const useSmoothStream = ({ onUpdate, streamDone, minDelay = 10, initialTe
 
   const renderLoop = useCallback(
     (currentTime: number) => {
+      const queue = chunkQueueRef.current
+
       // 1. 如果队列为空
-      if (chunkQueueRef.current.length === 0) {
+      if (queue.length === 0) {
         // 如果流已结束，确保显示最终状态并停止循环
         if (streamDone) {
           const finalText = displayedTextRef.current
@@ -56,24 +61,22 @@ export const useSmoothStream = ({ onUpdate, streamDone, minDelay = 10, initialTe
       lastUpdateTimeRef.current = currentTime
 
       // 3. 动态计算本次渲染的字符数
-      let charsToRenderCount = Math.max(1, Math.floor(chunkQueueRef.current.length / 5))
+      let charsToRenderCount = Math.max(1, Math.floor(queue.length / 5))
 
       // 如果流已结束，一次性渲染所有剩余字符
       if (streamDone) {
-        charsToRenderCount = chunkQueueRef.current.length
+        charsToRenderCount = queue.length
       }
 
-      const charsToRender = chunkQueueRef.current.slice(0, charsToRenderCount)
+      // 优化: 使用 splice 原地修改数组，避免创建新数组
+      const charsToRender = queue.splice(0, charsToRenderCount)
       displayedTextRef.current += charsToRender.join('')
 
       // 4. 立即更新UI
       onUpdate(displayedTextRef.current)
 
-      // 5. 更新队列
-      chunkQueueRef.current = chunkQueueRef.current.slice(charsToRenderCount)
-
-      // 6. 如果还有内容需要渲染，继续下一帧
-      if (chunkQueueRef.current.length > 0) {
+      // 5. 如果还有内容需要渲染，继续下一帧
+      if (queue.length > 0) {
         animationFrameRef.current = requestAnimationFrame(renderLoop)
       }
     },

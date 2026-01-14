@@ -36,7 +36,7 @@ const AssistantMCPSettings: React.FC<Props> = ({ assistant, updateAssistant }) =
   }
 
   const handleServerToggle = (serverId: string) => {
-    const currentServerIds = assistant.mcpServers?.map((server) => server.id) || []
+    const currentServerIds = (assistant.mcpServers as MCPServer[] | undefined)?.map((server) => server.id) || []
 
     if (currentServerIds.includes(serverId)) {
       // Remove server if it's already enabled
@@ -68,7 +68,8 @@ const AssistantMCPSettings: React.FC<Props> = ({ assistant, updateAssistant }) =
       {allMcpServers.length > 0 ? (
         <ServerList>
           {allMcpServers.map((server) => {
-            const isEnabled = assistant.mcpServers?.some((s) => s.id === server.id) || false
+            const isEnabled =
+              (assistant.mcpServers as MCPServer[] | undefined)?.some((s) => s.id === server.id) || false
 
             return (
               <ServerItem key={server.id} isEnabled={isEnabled}>

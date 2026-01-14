@@ -14,6 +14,7 @@ import * as WebSearchModule from './core/WebSearchMiddleware'
 import * as ImageGenerationModule from './feat/ImageGenerationMiddleware'
 import * as ThinkingTagExtractionModule from './feat/ThinkingTagExtractionMiddleware'
 import * as ToolUseExtractionMiddleware from './feat/ToolUseExtractionMiddleware'
+import * as VCPToolExecutorModule from './VCPToolExecutorMiddleware'
 
 /**
  * 中间件注册表 - 提供所有可用中间件的集中访问
@@ -84,6 +85,11 @@ export const MiddlewareRegistry = {
   [ImageGenerationModule.MIDDLEWARE_NAME]: {
     name: ImageGenerationModule.MIDDLEWARE_NAME,
     middleware: ImageGenerationModule.ImageGenerationMiddleware
+  },
+  // VCP 工具执行中间件
+  [VCPToolExecutorModule.MIDDLEWARE_NAME]: {
+    name: VCPToolExecutorModule.MIDDLEWARE_NAME,
+    middleware: VCPToolExecutorModule.VCPToolExecutorMiddleware
   }
 } as const
 
@@ -112,7 +118,8 @@ export const DefaultCompletionsNamedMiddlewares = [
   MiddlewareRegistry[ErrorHandlerModule.MIDDLEWARE_NAME], // 错误处理
   MiddlewareRegistry[TransformCoreToSdkParamsModule.MIDDLEWARE_NAME], // 参数转换
   MiddlewareRegistry[AbortHandlerModule.MIDDLEWARE_NAME], // 中止处理
-  MiddlewareRegistry[McpToolChunkModule.MIDDLEWARE_NAME], // 工具处理
+  MiddlewareRegistry[VCPToolExecutorModule.MIDDLEWARE_NAME], // VCP 工具执行（统一协议）
+  MiddlewareRegistry[McpToolChunkModule.MIDDLEWARE_NAME], // 工具处理（备用，用于内置工具）
   MiddlewareRegistry[TextChunkModule.MIDDLEWARE_NAME], // 文本处理
   MiddlewareRegistry[WebSearchModule.MIDDLEWARE_NAME], // Web搜索处理
   MiddlewareRegistry[ToolUseExtractionMiddleware.MIDDLEWARE_NAME], // 工具使用提取处理
@@ -145,5 +152,6 @@ export {
   ThinkChunkModule,
   ThinkingTagExtractionModule,
   TransformCoreToSdkParamsModule,
+  VCPToolExecutorModule,
   WebSearchModule
 }

@@ -6,7 +6,7 @@ import { ShadowTransparentContainer } from './styles'
 import type { BasicPreviewHandles } from './types'
 import { renderSvgInShadowHost } from './utils'
 
-interface SvgPreviewProps {
+export interface SvgPreviewProps {
   children: string
   enableToolbar?: boolean
   className?: string

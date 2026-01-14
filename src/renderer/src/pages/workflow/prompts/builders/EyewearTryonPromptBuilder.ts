@@ -204,11 +204,9 @@ Return as JSON with fields: eyewear_type, face_position, lighting_direction, ski
     const tips: Record<string, string> = {
       glasses:
         'Standard prescription glasses. Focus on clear lenses, proper frame weight, and professional appearance.',
-      sunglasses:
-        'Fashion sunglasses with tinted lenses. Emphasize style, lens color, and fashionable appearance.',
+      sunglasses: 'Fashion sunglasses with tinted lenses. Emphasize style, lens color, and fashionable appearance.',
       goggles: 'Protective goggles. Larger frame coverage, wrap-around design, safety-focused appearance.',
-      sports:
-        'Sports eyewear. Durable frame, secure fit appearance, athletic aesthetic with performance focus.',
+      sports: 'Sports eyewear. Durable frame, secure fit appearance, athletic aesthetic with performance focus.',
       reading: 'Reading glasses. Smaller frame, positioned lower on nose, intellectual appearance.'
     }
     return tips[type] || tips.glasses

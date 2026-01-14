@@ -4,17 +4,22 @@ import { useAssistant } from '@renderer/hooks/useAssistant'
 import { useAssistantPreset } from '@renderer/hooks/useAssistantPresets'
 import { useSidebarIconShow } from '@renderer/hooks/useSidebarIcon'
 import type { Assistant } from '@renderer/types'
+import { isImageAssistant } from '@renderer/types'
 import { Menu, Modal } from 'antd'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
+import AssistantBubbleThemeSettings from './AssistantBubbleThemeSettings'
+import AssistantGroupChatSettings from './AssistantGroupChatSettings'
+import AssistantImageSettings from './AssistantImageSettings'
 import AssistantKnowledgeBaseSettings from './AssistantKnowledgeBaseSettings'
 import AssistantMCPSettings from './AssistantMCPSettings'
 import AssistantMemorySettings from './AssistantMemorySettings'
 import AssistantModelSettings from './AssistantModelSettings'
 import AssistantPromptSettings from './AssistantPromptSettings'
 import AssistantRegularPromptsSettings from './AssistantRegularPromptsSettings'
+import AssistantVCPSettings from './AssistantVCPSettings'
 
 interface AssistantSettingPopupShowParams {
   assistant: Assistant
@@ -29,6 +34,10 @@ type AssistantSettingPopupTab =
   | 'mcp'
   | 'regular_phrases'
   | 'memory'
+  | 'image'
+  | 'groupchat'
+  | 'vcp'
+  | 'bubble_theme'
 
 interface Props extends AssistantSettingPopupShowParams {
   resolve: (assistant: Assistant) => void
@@ -72,6 +81,10 @@ const AssistantSettingPopupContainer: React.FC<Props> = ({ resolve, tab, ...prop
       key: 'prompt',
       label: t('assistants.settings.prompt')
     },
+    isImageAssistant(assistant) && {
+      key: 'image',
+      label: t('assistants.settings.image.title')
+    },
     showKnowledgeIcon && {
       key: 'knowledge_base',
       label: t('assistants.settings.knowledge_base.label')
@@ -87,6 +100,18 @@ const AssistantSettingPopupContainer: React.FC<Props> = ({ resolve, tab, ...prop
     {
       key: 'memory',
       label: t('memory.title', 'Memories')
+    },
+    {
+      key: 'vcp',
+      label: t('vcp.settings.title', 'VCP Agent')
+    },
+    {
+      key: 'groupchat',
+      label: t('groupchat.settings.title', '群聊设置')
+    },
+    {
+      key: 'bubble_theme',
+      label: t('assistants.settings.bubble_theme.title', '气泡主题')
     }
   ].filter(Boolean) as { key: string; label: string }[]
 
@@ -160,6 +185,32 @@ const AssistantSettingPopupContainer: React.FC<Props> = ({ resolve, tab, ...prop
               updateAssistant={updateAssistant}
               updateAssistantSettings={updateAssistantSettings}
               onClose={onCancel}
+            />
+          )}
+          {menu === 'image' && isImageAssistant(assistant) && (
+            <AssistantImageSettings
+              assistant={assistant}
+              updateAssistant={updateAssistant}
+              updateAssistantSettings={updateAssistantSettings}
+            />
+          )}
+          {menu === 'vcp' && (
+            <AssistantVCPSettings
+              assistant={assistant}
+              updateAssistant={updateAssistant}
+              updateAssistantSettings={updateAssistantSettings}
+            />
+          )}
+          {menu === 'groupchat' && (
+            <AssistantGroupChatSettings
+              assistant={assistant}
+              updateAssistant={updateAssistant as (assistant: Partial<Assistant>) => void}
+            />
+          )}
+          {menu === 'bubble_theme' && (
+            <AssistantBubbleThemeSettings
+              assistant={assistant}
+              updateAssistant={updateAssistant as (assistant: Partial<Assistant>) => void}
             />
           )}
         </Settings>

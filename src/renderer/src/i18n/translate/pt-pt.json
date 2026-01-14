@@ -531,6 +531,13 @@
     "search": "Pesquisar Assistente",
     "settings": {
       "default_model": "Modelo Padrão",
+      "image": {
+        "aspect_ratio": "[to be translated]:Aspect Ratio",
+        "batch_count": "[to be translated]:Batch Count",
+        "model": "[to be translated]:Image Model",
+        "size": "[to be translated]:Image Size",
+        "title": "[to be translated]:Image Settings"
+      },
       "knowledge_base": {
         "label": "Configurações da Base de Conhecimento",
         "recognition": {
@@ -645,6 +652,13 @@
       "assistant": {
         "description": "Conversas diárias e perguntas e respostas rápidas",
         "title": "Adicionar assistente"
+      },
+      "image_assistant": {
+        "create_custom": "[to be translated]:Create Custom",
+        "description": "[to be translated]:Image generation and editing",
+        "from_preset": "[to be translated]:From Preset",
+        "select_title": "[to be translated]:Select Image Assistant Type",
+        "title": "[to be translated]:Add Image Assistant"
       },
       "option": {
         "title": "Selecionar Tipo"
@@ -1184,6 +1198,7 @@
     "back": "Voltar",
     "browse": "Navegar",
     "cancel": "Cancelar",
+    "characters": "[to be translated]:characters",
     "chat": "Bate-papo",
     "clear": "Limpar",
     "close": "Fechar",
@@ -1232,6 +1247,8 @@
     "models": "Modelos",
     "more": "Mais",
     "name": "Nome",
+    "no_data": "[to be translated]:No data",
+    "no_description": "[to be translated]:No description",
     "no_results": "Nenhum resultado",
     "none": "Nenhum",
     "off": "Desligado",
@@ -1271,6 +1288,7 @@
     "subscribe": "Subscrever",
     "success": "Sucesso",
     "swap": "Trocar",
+    "toggle_sidebar": "[to be translated]:Toggle Sidebar",
     "topics": "Tópicos",
     "unknown": "Desconhecido",
     "unnamed": "Sem nome",
@@ -1291,7 +1309,8 @@
     "image-generation": "Geração de Imagens (OpenAI)",
     "jina-rerank": "Jina Reordenar",
     "openai": "OpenAI",
-    "openai-response": "Resposta OpenAI"
+    "openai-response": "Resposta OpenAI",
+    "video-generation": "[to be translated]:Video Generation"
   },
   "error": {
     "availableProviders": "Provedores disponíveis",
@@ -1431,6 +1450,29 @@
     "title": "Arquivo",
     "type": "Tipo"
   },
+  "flowLock": {
+    "click_to_lock": "[to be translated]:Click to lock current topic",
+    "confirm_lock": "[to be translated]:Lock",
+    "create_lock": "[to be translated]:Lock Topic",
+    "deviation_redirect": "[to be translated]:Please return to the current topic",
+    "deviation_warning": "[to be translated]:Your message may deviate from the current topic",
+    "deviations": "[to be translated]:Deviations",
+    "extend": "[to be translated]:Extend 5 minutes",
+    "extended": "[to be translated]:Extended by 5 minutes",
+    "keywords": "[to be translated]:Keywords",
+    "keywords_label": "[to be translated]:Keywords (optional, comma separated)",
+    "keywords_placeholder": "[to be translated]:Enter related keywords, e.g.: React, components, state management",
+    "lock_created": "[to be translated]:Topic locked",
+    "lock_failed": "[to be translated]:Lock failed",
+    "lock_topic": "[to be translated]:Lock Topic",
+    "max_deviations": "[to be translated]:Max Allowed",
+    "remaining": "[to be translated]:Remaining",
+    "topic_name": "[to be translated]:Topic Name",
+    "topic_placeholder": "[to be translated]:Enter the topic to lock...",
+    "topic_required": "[to be translated]:Please enter a topic name",
+    "unlock": "[to be translated]:Unlock",
+    "unlocked": "[to be translated]:Unlocked"
+  },
   "gpustack": {
     "keep_alive_time": {
       "description": "O tempo que o modelo permanece na memória (padrão: 5 minutos)",
@@ -1438,6 +1480,71 @@
       "title": "Manter tempo ativo"
     },
     "title": "GPUStack"
+  },
+  "groupchat": {
+    "abbr": "[to be translated]:Group",
+    "active": "[to be translated]:Active",
+    "add_assistant": "[to be translated]:Add Assistant",
+    "agent_error": "[to be translated]:Agent {{name}} response error: {{error}}",
+    "agents": "[to be translated]:members",
+    "create": "[to be translated]:Create",
+    "delete_confirm": "[to be translated]:Are you sure you want to delete this session?",
+    "empty": "[to be translated]:No group chat sessions",
+    "end": "[to be translated]:End",
+    "errors": {
+      "api_error": "[to be translated]:API request failed: {{status}} - {{message}}",
+      "auth_error": "[to be translated]:Invalid or expired API Key",
+      "json_parse_error": "[to be translated]:Server returned non-JSON response",
+      "network_error": "[to be translated]:Network connection failed",
+      "timeout": "[to be translated]:Request timeout",
+      "unknown": "[to be translated]:Unknown error"
+    },
+    "idle": "[to be translated]:Idle",
+    "input_placeholder": "[to be translated]:Type a message, use @name to mention a specific assistant...",
+    "messages": "[to be translated]:messages",
+    "new_session": "[to be translated]:New Group Chat",
+    "participants": "[to be translated]:participants",
+    "send_error": "[to be translated]:Failed to send",
+    "settings": {
+      "add_tag": "[to be translated]:+ Tag",
+      "add_tag_tip": "[to be translated]:Add tag (used for natural random mode weight)",
+      "avoid_topics": "[to be translated]:Topics to Avoid",
+      "avoid_topics_placeholder": "[to be translated]:Topics the assistant should avoid discussing",
+      "collab_stats": "[to be translated]:Collaboration Statistics",
+      "enabled": "[to be translated]:Enable Group Chat",
+      "enabled_tip": "[to be translated]:Allow this assistant to join group chat sessions",
+      "expertise": "[to be translated]:Expertise",
+      "expertise_examples": "[to be translated]:e.g., AI, Programming, Design, Product Management",
+      "expertise_placeholder": "[to be translated]:Enter expertise tags, press Enter to add",
+      "expertise_tip": "[to be translated]:Assistant's expertise tags for intelligent matching and speaking decisions",
+      "info": "[to be translated]:Configure this assistant's behavior and role in multi-agent group chats",
+      "invite_prompt_template": "[to be translated]:Invitation Prompt Template",
+      "invite_prompt_template_placeholder": "[to be translated]:e.g., Please {{VCPChatAgentName}} share your thoughts (optional, supports {{VCPChatAgentName}} placeholder)",
+      "invite_prompt_template_tip": "[to be translated]:Prompt template used in invitation speaking mode, supports {{VCPChatAgentName}} placeholder to be replaced with the invited agent's name",
+      "keywords": "[to be translated]:Trigger Keywords",
+      "keywords_placeholder": "[to be translated]:Enter trigger keywords, press Enter to add",
+      "keywords_tip": "[to be translated]:When these keywords appear in conversation, the assistant is more likely to speak",
+      "max_response_length": "[to be translated]:Max Response Length",
+      "member_tags": "[to be translated]:Member Tags",
+      "member_tags_tip": "[to be translated]:Used for natural random mode weight calculation, members with the same tags have higher collaboration probability",
+      "preferred_topics": "[to be translated]:Preferred Topics",
+      "preferred_topics_placeholder": "[to be translated]:Topics the assistant prefers to participate in",
+      "priority": "[to be translated]:Speaking Priority",
+      "priority_tip": "[to be translated]:Higher priority means the assistant speaks first when competing (1-100)",
+      "role": "[to be translated]:Group Chat Role",
+      "speaking_preferences": "[to be translated]:Speaking Preferences",
+      "title": "[to be translated]:Group Chat Settings",
+      "unified_model": "[to be translated]:Unified Model",
+      "unified_model_placeholder": "[to be translated]:Select the model to use for all members",
+      "use_unified_model": "[to be translated]:Use Unified Model",
+      "use_unified_model_tip": "[to be translated]:When enabled, all members use the same model for conversations, making it easier to control costs and maintain consistency"
+    },
+    "start": "[to be translated]:Start Chat",
+    "start_first": "[to be translated]:Please start the group chat first",
+    "stats": {
+      "unavailable": "[to be translated]:Statistics unavailable"
+    },
+    "title": "[to be translated]:Group Chat"
   },
   "history": {
     "continue_chat": "Continuar conversando",
@@ -1467,6 +1574,336 @@
     "generating": "Gerando",
     "preview": "Visualizar",
     "split": "Dividir"
+  },
+  "image_studio": {
+    "advanced_settings": "[to be translated]:Advanced Settings",
+    "aspect_ratio": "[to be translated]:Aspect Ratio",
+    "batch_count": "[to be translated]:Batch Count",
+    "canvas": {
+      "download": "[to be translated]:Download",
+      "download_all": "[to be translated]:Download All",
+      "ecom_hint": "[to be translated]:Upload product images, AI generates professional e-commerce photos",
+      "ecom_title": "[to be translated]:E-commerce Photo",
+      "empty": "[to be translated]:Select an image from the gallery or generate a new one",
+      "feature_ai": "[to be translated]:AI Smart Generation",
+      "feature_export": "[to be translated]:Multi-format Export",
+      "fullscreen": "[to be translated]:Fullscreen",
+      "generate_hint": "[to be translated]:Configure settings and click generate",
+      "hint": "[to be translated]:Drag images here or click to upload",
+      "loading": "[to be translated]:Loading...",
+      "model_hint": "[to be translated]:Upload clothing images, AI generates model try-on effects",
+      "model_title": "[to be translated]:Model Fitting",
+      "no_output": "[to be translated]:No Output",
+      "pattern_hint": "[to be translated]:Upload pattern reference, AI generates seamless patterns",
+      "pattern_title": "[to be translated]:Pattern Design",
+      "reset_zoom": "[to be translated]:Reset Zoom",
+      "zoom_in": "[to be translated]:Zoom In",
+      "zoom_out": "[to be translated]:Zoom Out"
+    },
+    "ecom": {
+      "add_image": "[to be translated]:Add Image",
+      "background": {
+        "gradient": "[to be translated]:Gradient",
+        "label": "[to be translated]:Background Style",
+        "scene": "[to be translated]:Scene",
+        "transparent": "[to be translated]:Transparent",
+        "white": "[to be translated]:Pure White"
+      },
+      "bottom_image": "[to be translated]:Bottom Image",
+      "enable_back": "[to be translated]:Generate Back View",
+      "enable_detail": "[to be translated]:Generate Detail View",
+      "garment_desc": "[to be translated]:Garment Description",
+      "garment_desc_placeholder": "[to be translated]:Describe garment features...",
+      "image_n": "[to be translated]:Image {{n}}",
+      "images": "[to be translated]:Product Images",
+      "layout": {
+        "all": "[to be translated]:All Images",
+        "back": "[to be translated]:Back Image",
+        "detail": "[to be translated]:Detail Image",
+        "label": "[to be translated]:Layout Mode",
+        "main": "[to be translated]:Main Image"
+      },
+      "layout_flat": "[to be translated]:Flat Lay",
+      "layout_hanging": "[to be translated]:Hanging",
+      "layout_model": "[to be translated]:Model Shooting",
+      "output": {
+        "format": "[to be translated]:Output Format",
+        "label": "[to be translated]:Output Settings",
+        "quality": "[to be translated]:Quality",
+        "size": "[to be translated]:Output Size"
+      },
+      "output_options": "[to be translated]:Output Options",
+      "prompt": {
+        "label": "[to be translated]:Additional Prompt",
+        "placeholder": "[to be translated]:Enter additional generation prompt..."
+      },
+      "style": {
+        "custom": "[to be translated]:Custom",
+        "label": "[to be translated]:Style Preset",
+        "luxury": "[to be translated]:Luxury",
+        "natural": "[to be translated]:Natural",
+        "simple": "[to be translated]:Simple Clean",
+        "tech": "[to be translated]:Tech"
+      },
+      "style_auto": "[to be translated]:Auto",
+      "style_minimal": "[to be translated]:Minimal",
+      "style_premium": "[to be translated]:Premium",
+      "title": "[to be translated]:E-commerce Image",
+      "top_image": "[to be translated]:Top Image",
+      "upload": {
+        "formats": "[to be translated]:Supports JPG, PNG, WebP",
+        "hint": "[to be translated]:Drag and drop or click to upload",
+        "label": "[to be translated]:Upload Product Image"
+      }
+    },
+    "gallery": {
+      "empty_tasks": "[to be translated]:No tasks in queue",
+      "empty_versions": "[to be translated]:No versions yet",
+      "task_queue": "[to be translated]:Task Queue",
+      "title": "[to be translated]:Gallery",
+      "version_history": "[to be translated]:Version History"
+    },
+    "image_settings": "[to be translated]:Image Settings",
+    "image_size": "[to be translated]:Image Size",
+    "model": {
+      "accessory": "[to be translated]:Accessory",
+      "add_clothes": "[to be translated]:Add Clothing",
+      "age_adult": "[to be translated]:Adult",
+      "age_big_kid": "[to be translated]:Big Kid",
+      "age_group": "[to be translated]:Age Group",
+      "age_small_kid": "[to be translated]:Small Kid",
+      "bottom_clothes": "[to be translated]:Bottom",
+      "clothes_image": "[to be translated]:Clothing Image",
+      "ethnicity": "[to be translated]:Ethnicity",
+      "ethnicity_african": "[to be translated]:African",
+      "ethnicity_asian": "[to be translated]:Asian",
+      "ethnicity_caucasian": "[to be translated]:Caucasian",
+      "ethnicity_mixed": "[to be translated]:Mixed",
+      "gender": "[to be translated]:Gender",
+      "gender_female": "[to be translated]:Female",
+      "gender_male": "[to be translated]:Male",
+      "keep_background": "[to be translated]:Keep Background",
+      "model_ref_hint": "[to be translated]:Optional, upload reference model",
+      "model_reference": "[to be translated]:Model Reference",
+      "model_settings": "[to be translated]:Model Settings",
+      "output_options": "[to be translated]:Output Options",
+      "pose": "[to be translated]:Pose",
+      "pose_commercial": "[to be translated]:Commercial",
+      "pose_dynamic": "[to be translated]:Dynamic",
+      "pose_fashion": "[to be translated]:Fashion",
+      "pose_natural": "[to be translated]:Natural",
+      "scene": "[to be translated]:Scene",
+      "scene_indoor": "[to be translated]:Indoor",
+      "scene_outdoor": "[to be translated]:Outdoor",
+      "scene_pose": "[to be translated]:Scene & Pose",
+      "scene_solid": "[to be translated]:Solid Background",
+      "scene_studio": "[to be translated]:Studio",
+      "scene_urban": "[to be translated]:Urban Street",
+      "show_full_body": "[to be translated]:Show Full Body",
+      "style_desc": "[to be translated]:Style Description",
+      "style_desc_placeholder": "[to be translated]:Describe the desired style...",
+      "top_clothes": "[to be translated]:Top",
+      "upload_model_ref": "[to be translated]:Upload Model Image"
+    },
+    "model_fitting": {
+      "age": {
+        "label": "[to be translated]:Age Range",
+        "mature": "[to be translated]:36-50",
+        "middle": "[to be translated]:26-35",
+        "young": "[to be translated]:18-25"
+      },
+      "clothes": {
+        "formats": "[to be translated]:Supports JPG, PNG, WebP",
+        "hint": "[to be translated]:Upload the clothes image to fit",
+        "label": "[to be translated]:Upload Clothes"
+      },
+      "model": {
+        "child": "[to be translated]:Child",
+        "female": "[to be translated]:Female",
+        "label": "[to be translated]:Model Type",
+        "male": "[to be translated]:Male"
+      },
+      "pose": {
+        "dynamic": "[to be translated]:Dynamic",
+        "label": "[to be translated]:Pose",
+        "sitting": "[to be translated]:Sitting",
+        "standing": "[to be translated]:Standing",
+        "walking": "[to be translated]:Walking"
+      },
+      "scene": {
+        "indoor": "[to be translated]:Indoor",
+        "label": "[to be translated]:Scene",
+        "outdoor": "[to be translated]:Outdoor",
+        "street": "[to be translated]:Street",
+        "studio": "[to be translated]:Studio"
+      },
+      "title": "[to be translated]:Model Fitting"
+    },
+    "module_list": {
+      "create_preset": "[to be translated]:Create Preset",
+      "title": "[to be translated]:Image Studio"
+    },
+    "modules": {
+      "ecom": "[to be translated]:E-commerce",
+      "ecom_desc": "[to be translated]:Smart product image generation",
+      "model": "[to be translated]:Model Fitting",
+      "model_desc": "[to be translated]:AI model styling showcase",
+      "pattern": "[to be translated]:Pattern Design",
+      "pattern_desc": "[to be translated]:Seamless patterns & textures"
+    },
+    "optional": "[to be translated]:Optional",
+    "pattern": {
+      "color_tone": {
+        "cool": "[to be translated]:Cool",
+        "label": "[to be translated]:Color Tone",
+        "neutral": "[to be translated]:Neutral",
+        "vibrant": "[to be translated]:Vibrant",
+        "warm": "[to be translated]:Warm"
+      },
+      "density": {
+        "dense": "[to be translated]:Dense",
+        "label": "[to be translated]:Pattern Density",
+        "medium": "[to be translated]:Medium",
+        "sparse": "[to be translated]:Sparse"
+      },
+      "mode": {
+        "label": "[to be translated]:Generation Mode",
+        "modeA": "[to be translated]:Mode A - Reference-based",
+        "modeB": "[to be translated]:Mode B - Description-based",
+        "modeC": "[to be translated]:Mode C - Mixed"
+      },
+      "output_type": {
+        "label": "[to be translated]:Output Type",
+        "poster": "[to be translated]:Poster",
+        "seamless": "[to be translated]:Seamless Pattern",
+        "tshirt": "[to be translated]:T-shirt Print"
+      },
+      "reference": {
+        "hint": "[to be translated]:Upload reference image (optional)",
+        "label": "[to be translated]:Reference Image"
+      },
+      "style_preset": {
+        "count": "[to be translated]:{{count}} presets available",
+        "label": "[to be translated]:Style Preset",
+        "select": "[to be translated]:Select style..."
+      },
+      "title": "[to be translated]:Pattern Design"
+    },
+    "prompt": {
+      "negative": "[to be translated]:Negative Prompt",
+      "negative_placeholder": "[to be translated]:Describe elements to avoid...",
+      "optimize": "[to be translated]:Optimize Prompt",
+      "system": "[to be translated]:System Prompt",
+      "system_placeholder": "[to be translated]:Set system instructions for image generation...",
+      "title": "[to be translated]:Prompt Settings"
+    },
+    "prompt_enhancer": {
+      "tooltip": "[to be translated]:Enhance prompts with AI for better results"
+    },
+    "seed": "[to be translated]:Seed",
+    "seed_placeholder": "[to be translated]:Leave empty for random",
+    "select_model": "[to be translated]:Select Model",
+    "select_provider": "[to be translated]:Select Provider",
+    "settings": {
+      "advanced": "[to be translated]:Advanced Settings",
+      "age_adult": "[to be translated]:Adult",
+      "age_big_kid": "[to be translated]:Big Kid",
+      "age_group": "[to be translated]:Age Group",
+      "age_small_kid": "[to be translated]:Small Kid",
+      "aspect_ratio": "[to be translated]:Aspect Ratio",
+      "basic": "[to be translated]:Basic Settings",
+      "batch_count": "[to be translated]:Batch Count",
+      "color_prompt": "[to be translated]:Color Prompt",
+      "color_prompt_placeholder": "[to be translated]:Describe color preferences...",
+      "density": "[to be translated]:Density",
+      "density_dense": "[to be translated]:Dense",
+      "density_medium": "[to be translated]:Medium",
+      "density_sparse": "[to be translated]:Sparse",
+      "design_prompt": "[to be translated]:Design Prompt",
+      "design_prompt_placeholder": "[to be translated]:Describe pattern design...",
+      "enable_back": "[to be translated]:Generate Back Image",
+      "enable_detail": "[to be translated]:Generate Detail Image",
+      "garment_description": "[to be translated]:Garment Description",
+      "garment_description_placeholder": "[to be translated]:Describe garment features...",
+      "gender": "[to be translated]:Gender",
+      "gender_female": "[to be translated]:Female",
+      "gender_male": "[to be translated]:Male",
+      "generation_model": "[to be translated]:Image Generation Model",
+      "image_size": "[to be translated]:Image Size",
+      "layout": "[to be translated]:Layout Mode",
+      "layout_flat": "[to be translated]:Flat Lay",
+      "layout_hanging": "[to be translated]:Hanging",
+      "layout_model": "[to be translated]:Model Shot",
+      "model": "[to be translated]:Model Selection",
+      "negative_prompt": "[to be translated]:Negative Prompt",
+      "negative_prompt_placeholder": "[to be translated]:Content to avoid...",
+      "pattern_brick": "[to be translated]:Brick",
+      "pattern_half_drop": "[to be translated]:Half Drop",
+      "pattern_mirror": "[to be translated]:Mirror",
+      "pattern_seamless": "[to be translated]:Seamless",
+      "pattern_type": "[to be translated]:Pattern Type",
+      "prompt": "[to be translated]:Prompt",
+      "seed": "[to be translated]:Random Seed",
+      "seed_placeholder": "[to be translated]:Leave empty for random",
+      "select_model": "[to be translated]:Select Model",
+      "style_auto": "[to be translated]:Auto",
+      "style_description": "[to be translated]:Style Description",
+      "style_description_placeholder": "[to be translated]:Describe expected style...",
+      "style_minimal": "[to be translated]:Minimal",
+      "style_premium": "[to be translated]:Premium",
+      "style_preset": "[to be translated]:Style Preset",
+      "system_prompt": "[to be translated]:System Prompt",
+      "system_prompt_placeholder": "[to be translated]:Enter system prompt...",
+      "title": "[to be translated]:Settings",
+      "use_system_prompt": "[to be translated]:Use System Prompt"
+    },
+    "sidebar": {
+      "generate": "[to be translated]:Generate",
+      "generating": "[to be translated]:Generating...",
+      "preset_market": "[to be translated]:Preset Market",
+      "title": "[to be translated]:Configuration"
+    },
+    "task": {
+      "actions": {
+        "cancel": "[to be translated]:Cancel",
+        "pause": "[to be translated]:Pause",
+        "resume": "[to be translated]:Resume",
+        "retry": "[to be translated]:Retry"
+      },
+      "batch": {
+        "cancel_all_queued": "[to be translated]:Cancel All Queued",
+        "retry_all_failed": "[to be translated]:Retry All Failed"
+      },
+      "status": {
+        "cancelled": "[to be translated]:Cancelled",
+        "completed": "[to be translated]:Completed",
+        "failed": "[to be translated]:Failed",
+        "paused": "[to be translated]:Paused",
+        "queued": "[to be translated]:Queued",
+        "running": "[to be translated]:Running"
+      },
+      "type": {
+        "generate": "[to be translated]:Generate",
+        "local_edit": "[to be translated]:Local Edit",
+        "regenerate": "[to be translated]:Regenerate"
+      }
+    },
+    "title": "[to be translated]:Image Studio",
+    "types": {
+      "ecom": "[to be translated]:E-commerce Photo",
+      "ecom_desc": "[to be translated]:Upload product images, AI generates professional e-commerce photos",
+      "generate": "[to be translated]:Image Generation",
+      "generate_desc": "[to be translated]:Generate images from text descriptions",
+      "model": "[to be translated]:Model Fitting",
+      "model_desc": "[to be translated]:Upload clothing images, AI generates model try-on effects",
+      "pattern": "[to be translated]:Pattern Design",
+      "pattern_desc": "[to be translated]:Upload pattern reference, AI generates seamless patterns"
+    },
+    "version": {
+      "compare": "[to be translated]:Compare versions",
+      "current": "[to be translated]:Current Version",
+      "rollback": "[to be translated]:Rollback to this version"
+    }
   },
   "import": {
     "chatgpt": {
@@ -1669,6 +2106,37 @@
     "add_success": "Memória adicionada com sucesso",
     "add_user": "Adicionar usuário",
     "add_user_failed": "Falha ao adicionar usuário",
+    "advanced": {
+      "backends": "[to be translated]:Memory Backends",
+      "backends_desc": "[to be translated]:Different backends for different use cases",
+      "clear_backend": "[to be translated]:Clear",
+      "clear_confirm_content": "[to be translated]:Are you sure you want to clear all memories in {{backend}} backend? This action cannot be undone.",
+      "clear_confirm_title": "[to be translated]:Clear Memory",
+      "clear_failed": "[to be translated]:Failed to clear memory",
+      "clear_success": "[to be translated]:Memory cleared",
+      "deepmemo_desc": "[to be translated]:Full-text search with Tantivy engine",
+      "diary": "[to be translated]:Diary",
+      "diary_desc": "[to be translated]:Diary-based memory storage",
+      "diary_name": "[to be translated]:Diary Name",
+      "diary_name_placeholder": "[to be translated]:Enter diary name...",
+      "lightmemo_desc": "[to be translated]:Fast BM25-based keyword search",
+      "meshmemo_desc": "[to be translated]:Vector-based semantic search with mesh connections",
+      "no_results": "[to be translated]:No results found",
+      "refresh_stats": "[to be translated]:Refresh Stats",
+      "results": "[to be translated]:Results",
+      "search": "[to be translated]:Search Test",
+      "search_btn": "[to be translated]:Search",
+      "search_desc": "[to be translated]:Test search across different backends",
+      "search_failed": "[to be translated]:Search failed",
+      "search_placeholder": "[to be translated]:Enter search query...",
+      "tag_boost": "[to be translated]:Tag Boost",
+      "tagmemo_desc": "[to be translated]:Tag-based memory organization",
+      "tagmemo_settings": "[to be translated]:TagMemo Settings",
+      "title": "[to be translated]:Advanced Memory",
+      "unified": "[to be translated]:Unified",
+      "use_rrf": "[to be translated]:Use RRF"
+    },
+    "advanced_settings": "[to be translated]:Advanced Settings",
     "all_users": "Todos os usuários",
     "cannot_delete_default_user": "Não é possível excluir o usuário padrão",
     "configure_memory_first": "Configure as configurações de memória primeiro",
@@ -1692,8 +2160,10 @@
     "edit_memory": "Editar memória",
     "embedding_dimensions": "Dimensões de incorporação",
     "embedding_model": "Modelo de incorporação",
+    "embedding_model_required": "[to be translated]:Please configure an embedding model first to enable global memory",
     "enable_global_memory_first": "Habilite primeiro a memória global",
     "end_date": "Data final",
+    "extracted_tags": "[to be translated]:Extracted tags",
     "global_memory": "Memória global",
     "global_memory_description": "É necessário ativar a memória global nas configurações do assistente para utilizá-la",
     "global_memory_disabled_desc": "Para usar a função de memória, ative primeiro a memória global nas configurações do assistente.",
@@ -1701,7 +2171,9 @@
     "global_memory_enabled": "Memória global ativada",
     "go_to_memory_page": "Ir para a página de memória",
     "initial_memory_content": "Bem-vindo! Esta é sua primeira memória.",
+    "initialized_success": "[to be translated]:Initialized successfully",
     "llm_model": "Modelo LLM",
+    "llm_model_required": "[to be translated]:Please configure a language model first to enable global memory",
     "load_failed": "Falha ao carregar memória",
     "loading": "Carregando memória...",
     "loading_memories": "Carregando memórias...",
@@ -1710,6 +2182,7 @@
     "memory": "memória(s)",
     "memory_content": "Conteúdo da memória",
     "memory_placeholder": "Digite o conteúdo da memória...",
+    "native_modules": "[to be translated]:Native Modules",
     "new_user_id": "Novo ID de usuário",
     "new_user_id_placeholder": "Insira um ID de usuário único",
     "no_matching_memories": "Nenhuma memória correspondente encontrada",
@@ -1743,6 +2216,10 @@
     "stored_memories": "Memórias armazenadas",
     "switch_user": "Alternar usuário",
     "switch_user_confirm": "Alterar o contexto do usuário para {{user}}?",
+    "tag_count": "[to be translated]:Tag count",
+    "test_features": "[to be translated]:Test Features",
+    "test_results": "[to be translated]:Test Results",
+    "testing": "[to be translated]:Testing features...",
     "time": "Tempo",
     "title": "Memória global",
     "total_memories": "memória(s)",
@@ -1764,7 +2241,25 @@
     "user_memories_reset": "Todas as memórias de {{user}} foram redefinidas",
     "user_switch_failed": "Falha ao alternar usuário",
     "user_switched": "O contexto do usuário foi alterado para {{user}}",
-    "users": "Usuários"
+    "users": "Usuários",
+    "vector_backend": {
+      "libsql": "[to be translated]:LibSQL",
+      "libsql_desc": "[to be translated]:SQLite persistent storage, good compatibility",
+      "memory": "[to be translated]:Memory",
+      "memory_desc": "[to be translated]:In-memory storage, for development/testing",
+      "performance_high": "[to be translated]:High",
+      "performance_low": "[to be translated]:Low",
+      "performance_medium": "[to be translated]:Medium",
+      "persistent": "[to be translated]:Persistent",
+      "title": "[to be translated]:Vector Backend",
+      "tooltip": "[to be translated]:Select vector database backend. Changing this will require rebuilding the index.",
+      "usearch": "[to be translated]:USearch",
+      "usearch_desc": "[to be translated]:High-performance HNSW, npm prebuilt binaries",
+      "vexus": "[to be translated]:Vexus",
+      "vexus_desc": "[to be translated]:Rust native (vexus-lite), highest performance",
+      "volatile": "[to be translated]:Volatile",
+      "warning": "[to be translated]:Switching backend will require rebuilding the index"
+    }
   },
   "message": {
     "agents": {
@@ -2003,7 +2498,8 @@
       "invoking": "Em execução",
       "pending": "Pendente",
       "preview": "Pré-visualização",
-      "raw": "Bruto"
+      "raw": "Bruto",
+      "tool_call": "[to be translated]:Tool Call"
     },
     "topic": {
       "added": "Tópico adicionado com sucesso"
@@ -2176,6 +2672,7 @@
       "rerank": "Reclassificar",
       "select": "Tipos de modelo",
       "text": "texto",
+      "video_generation": "[to be translated]:Video Generation",
       "vision": "imagem",
       "websearch": "Procurar na web"
     }
@@ -3774,6 +4271,8 @@
     "developer": {
       "enable_developer_mode": "Ativar modo de desenvolvedor",
       "help": "Após ativar o modo de programador, será possível utilizar a função de rastreamento de chamadas para visualizar o fluxo de dados durante o processo de chamada do modelo.",
+      "showvcp_debug": "[to be translated]:VCP Debug Panel",
+      "showvcp_debug_help": "[to be translated]:When enabled, a VCP debug panel will appear in the bottom left corner of the screen to monitor real-time status of VCP functions like knowledge base retrieval and Agent context injection.",
       "title": "Modo de Desenvolvedor"
     },
     "display": {
@@ -3801,6 +4300,10 @@
           "top": "Superior"
         },
         "title": "Configurações da Barra de Navegação"
+      },
+      "presets": {
+        "manage": "[to be translated]:Manage Presets",
+        "title": "[to be translated]:Theme Presets"
       },
       "sidebar": {
         "chat": {
@@ -3964,6 +4467,7 @@
         "browser": "Controla uma janela Electron headless via Chrome DevTools Protocol. Ferramentas: abrir URL, executar JS de linha única, reiniciar sessão.",
         "didi_mcp": "Servidor DiDi MCP que fornece serviços de transporte incluindo pesquisa de mapas, estimativa de preços, gestão de pedidos e rastreamento de motoristas. Disponível apenas na China Continental. Requer configuração da variável de ambiente DIDI_API_KEY",
         "dify_knowledge": "Implementação do servidor MCP do Dify, que fornece uma API simples para interagir com o Dify. Requer a configuração da chave Dify",
+        "fashion": "[to be translated]:Fashion AI Service - Provides fashion trend analysis, garment attribute extraction, knowledge base search and design suggestions. Integrates with Cherry Studio's AI providers for image analysis and generation",
         "fetch": "servidor MCP para obter o conteúdo da página web do URL",
         "filesystem": "Servidor Node.js do protocolo de contexto de modelo (MCP) para implementar operações de sistema de ficheiros. Requer configuração do diretório permitido para acesso",
         "mcp_auto_install": "Instalação automática do serviço MCP (beta)",
@@ -4058,6 +4562,7 @@
           "title": "Autenticação Bem-Sucedida"
         }
       },
+      "plugin_config": "[to be translated]:Configure",
       "prompts": {
         "arguments": "Argumentos",
         "availablePrompts": "Dicas disponíveis",
@@ -4164,7 +4669,8 @@
       "updateError": "Falha ao atualizar servidor",
       "updateSuccess": "Servidor atualizado com sucesso",
       "url": "URL",
-      "user": "Usuário"
+      "user": "Usuário",
+      "vcpPlugins": "[to be translated]:VCP Plugins"
     },
     "messages": {
       "divider": {
@@ -4407,6 +4913,9 @@
         "tip": "Controlar o nível de detalhe da saída do modelo",
         "title": "nível de detalhe"
       }
+    },
+    "pluginStore": {
+      "title": "[to be translated]:Plugin Store"
     },
     "privacy": {
       "enable_privacy_mode": "Enviar relatórios de erro e estatísticas de forma anônima",
@@ -4962,17 +5471,164 @@
       "show": "Mostrar ícone de bandeja",
       "title": "Tray"
     },
+    "vcpToolbox": {
+      "actions": {
+        "initFailed": "[to be translated]:VCPToolBox initialization failed",
+        "initSuccess": "[to be translated]:VCPToolBox initialized successfully",
+        "initialize": "[to be translated]:Initialize"
+      },
+      "badge": "[to be translated]:74+ Plugins",
+      "configUpdateFailed": "[to be translated]:Configuration update failed",
+      "debug": {
+        "debugMode": "[to be translated]:Debug Mode",
+        "debugModeHelp": "[to be translated]:Enable to output detailed debug logs",
+        "showVCPOutput": "[to be translated]:Show VCP Output",
+        "showVCPOutputHelp": "[to be translated]:Show detailed VCP tool call output in conversations",
+        "title": "[to be translated]:Debug Settings"
+      },
+      "knowledge": {
+        "diaryList": "[to be translated]:Diary List",
+        "initKnowledge": "[to be translated]:Initialize Knowledge Base",
+        "initKnowledgeFailed": "[to be translated]:Knowledge base initialization failed",
+        "initKnowledgeSuccess": "[to be translated]:Knowledge base initialized successfully",
+        "initializing": "[to be translated]:Initializing...",
+        "noData": "[to be translated]:No data available, please initialize knowledge base first",
+        "pathConfig": {
+          "browse": "[to be translated]:Browse",
+          "rootPath": "[to be translated]:Knowledge Base Root Path",
+          "rootPathHelp": "[to be translated]:Directory for diary and knowledge base files",
+          "selectDirectory": "[to be translated]:Select directory...",
+          "title": "[to be translated]:Path Configuration",
+          "vectorDimension": "[to be translated]:Vector Dimension",
+          "vectorDimensionHelp": "[to be translated]:Embedding vector dimension, depends on the embedding model",
+          "vectorStorePath": "[to be translated]:Vector Store Path",
+          "vectorStorePathHelp": "[to be translated]:Directory for vector index data"
+        },
+        "stats": {
+          "diaryCount": "[to be translated]:Diaries",
+          "totalChunks": "[to be translated]:Chunks",
+          "totalFiles": "[to be translated]:Files",
+          "totalTags": "[to be translated]:Tags"
+        },
+        "title": "[to be translated]:Knowledge Base Status"
+      },
+      "loading": "[to be translated]:Loading...",
+      "loop": {
+        "apiRetries": "[to be translated]:API Retry Count",
+        "apiRetriesHelp": "[to be translated]:Number of retries when API call fails",
+        "apiRetryDelay": "[to be translated]:API Retry Delay (ms)",
+        "apiRetryDelayHelp": "[to be translated]:Delay between retries (milliseconds)",
+        "maxNonStream": "[to be translated]:Max Non-Stream Loop Count",
+        "maxNonStreamHelp": "[to be translated]:Maximum tool call loop count for non-streaming responses",
+        "maxStream": "[to be translated]:Max Stream Loop Count",
+        "maxStreamHelp": "[to be translated]:Maximum tool call loop count for streaming responses",
+        "title": "[to be translated]:VCP Loop Settings"
+      },
+      "notAvailable": {
+        "description": "[to be translated]:VCPToolBox module not found, please ensure it is properly installed",
+        "title": "[to be translated]:VCPToolBox Not Available"
+      },
+      "plugins": {
+        "columns": {
+          "name": "[to be translated]:Name",
+          "status": "[to be translated]:Status",
+          "type": "[to be translated]:Type",
+          "version": "[to be translated]:Version"
+        },
+        "disabled": "[to be translated]:Disabled",
+        "enabled": "[to be translated]:Enabled",
+        "noPlugins": "[to be translated]:No plugins",
+        "noPluginsHelp": "[to be translated]:Please initialize VCPToolBox first",
+        "refresh": "[to be translated]:Refresh",
+        "reload": "[to be translated]:Reload Plugins",
+        "reloadFailed": "[to be translated]:Plugins reload failed",
+        "reloadSuccess": "[to be translated]:Plugins reloaded successfully",
+        "title": "[to be translated]:VCP Plugin List",
+        "types": {
+          "asynchronous": "[to be translated]:Asynchronous",
+          "hybridservice": "[to be translated]:Hybrid Service",
+          "messagePreprocessor": "[to be translated]:Preprocessor",
+          "service": "[to be translated]:Service",
+          "static": "[to be translated]:Static",
+          "synchronous": "[to be translated]:Synchronous"
+        }
+      },
+      "status": {
+        "initialized": "[to be translated]:Initialized",
+        "notAvailable": "[to be translated]:Not Available",
+        "notInitialized": "[to be translated]:Not Initialized"
+      },
+      "tabs": {
+        "general": "[to be translated]:General",
+        "knowledge": "[to be translated]:Knowledge Base",
+        "plugins": "[to be translated]:Plugins"
+      },
+      "title": "[to be translated]:VCPToolBox"
+    },
     "wallpaper": {
+      "advanced": {
+        "title": "[to be translated]:Wallpaper Advanced Settings"
+      },
       "blur": "[to be translated]:Blur",
       "brightness": "[to be translated]:Brightness",
       "builtin": {
         "gradient": "[to be translated]:Gradient Wallpapers"
       },
+      "category": {
+        "anime": "[to be translated]:Anime Wallpapers",
+        "gradient": "[to be translated]:Gradient Wallpapers"
+      },
+      "custom": "[to be translated]:Custom",
+      "customSource": {
+        "hint": "[to be translated]:Changing wallpaper source will override the preset wallpaper image",
+        "title": "[to be translated]:Custom Wallpaper Source"
+      },
+      "display": {
+        "title": "[to be translated]:Display Settings"
+      },
       "displayMode": "[to be translated]:Display Mode",
+      "effects": {
+        "chatBubble": {
+          "accentLine": "[to be translated]:Accent Line",
+          "accentLineColor": "[to be translated]:Accent Line Color",
+          "shadow": "[to be translated]:Shadow Effect",
+          "title": "[to be translated]:Chat Bubble Decoration"
+        },
+        "codeBlock": {
+          "backgroundColor": "[to be translated]:Background Color",
+          "borderColor": "[to be translated]:Border Color",
+          "title": "[to be translated]:Code Block Style"
+        },
+        "contentOverlay": {
+          "endColor": "[to be translated]:Overlay End Color",
+          "startColor": "[to be translated]:Overlay Start Color",
+          "title": "[to be translated]:Content Overlay"
+        },
+        "enabled": "[to be translated]:Enabled",
+        "inputBar": {
+          "backgroundColor": "[to be translated]:Background Color",
+          "borderColor": "[to be translated]:Border Color",
+          "focusColor": "[to be translated]:Focus Color",
+          "title": "[to be translated]:Input Bar Style"
+        },
+        "reset": "[to be translated]:Reset Effects",
+        "sidebarGlass": {
+          "blurAmount": "[to be translated]:Blur Amount",
+          "endColor": "[to be translated]:Gradient End Color",
+          "saturation": "[to be translated]:Saturation",
+          "startColor": "[to be translated]:Gradient Start Color",
+          "tintColor": "[to be translated]:Tint Color",
+          "title": "[to be translated]:Sidebar Glass Effect"
+        },
+        "title": "[to be translated]:Effect Settings"
+      },
       "enable": "[to be translated]:Enable Wallpaper",
       "excludeWorkflow": {
         "label": "[to be translated]:Exclude Wallpaper in Workflow",
         "tip": "[to be translated]:Workflow module needs a clear canvas, recommended to keep enabled"
+      },
+      "hint": {
+        "disabled": "[to be translated]:Please select a wallpaper preset in \"Preset Themes\" to enable wallpaper feature"
       },
       "local": {
         "file": "[to be translated]:Local File",
@@ -4986,6 +5642,39 @@
         "tile": "[to be translated]:Tile"
       },
       "opacity": "[to be translated]:Opacity",
+      "preset": {
+        "anime_dreamy": "[to be translated]:Dreamy Anime",
+        "anime_fantasy": "[to be translated]:Fantasy Adventure",
+        "anime_landscape": "[to be translated]:Anime Landscape",
+        "anime_ocean": "[to be translated]:Ocean Anime",
+        "anime_top": "[to be translated]:Top Anime",
+        "blue_archive": "[to be translated]:Blue Archive",
+        "chainsaw_man": "[to be translated]:Chainsaw Man",
+        "chainsaw_power": "[to be translated]:Chainsaw Man - Power",
+        "cyber_anime": "[to be translated]:Cyberpunk",
+        "fate_saber": "[to be translated]:Fate/Stay Night - Saber",
+        "fate_sakura": "[to be translated]:Fate Sakura",
+        "genshin_impact": "[to be translated]:Genshin Impact",
+        "gojo_satoru": "[to be translated]:Jujutsu Kaisen - Gojo",
+        "gradient_dark": "[to be translated]:Gradient Dark",
+        "gradient_light": "[to be translated]:Gradient Light",
+        "honkai_impact": "[to be translated]:Honkai Impact 3rd",
+        "honkai_starrail": "[to be translated]:Honkai: Star Rail",
+        "jujutsu_kaisen": "[to be translated]:Jujutsu Kaisen",
+        "makima": "[to be translated]:Chainsaw Man - Makima",
+        "my_hero_academia": "[to be translated]:My Hero Academia",
+        "nier_automata": "[to be translated]:NieR: Automata",
+        "pink_anime": "[to be translated]:Pink Anime",
+        "rain_anime": "[to be translated]:Rainy Day",
+        "spy_family": "[to be translated]:Spy x Family",
+        "starry_night": "[to be translated]:Starry Night",
+        "sunset_anime": "[to be translated]:Sunset",
+        "vocaloid": "[to be translated]:Vocaloid"
+      },
+      "presets": {
+        "none": "[to be translated]:None",
+        "title": "[to be translated]:Preset Themes"
+      },
       "reset": "[to be translated]:Reset Parameters",
       "resetToDefault": "[to be translated]:Reset to Default",
       "source": {
@@ -5007,9 +5696,11 @@
   },
   "title": {
     "apps": "Miniaplicativos",
+    "canvas": "[to be translated]:Canvas",
     "code": "Código",
     "files": "Arquivos",
     "home": "Página Inicial",
+    "image_studio": "[to be translated]:Image Studio",
     "knowledge": "Base de Conhecimento",
     "launchpad": "Plataforma de Inicialização",
     "mcp-servers": "Servidores MCP",
@@ -5176,6 +5867,353 @@
     "noReleaseNotes": "Sem notas de versão",
     "saveDataError": "Falha ao salvar os dados, tente novamente",
     "title": "Atualização"
+  },
+  "vcp": {
+    "advanced_editor": {
+      "description": "[to be translated]:Tar/Var/Sar variable management, test preview, dependency analysis, TVStxt file management",
+      "title": "[to be translated]:Advanced Variable Editor"
+    },
+    "agents": {
+      "create": "[to be translated]:Create Assistant",
+      "create_blank": "[to be translated]:Blank Assistant",
+      "create_first": "[to be translated]:Create your first assistant",
+      "delete_confirm": "[to be translated]:Are you sure to delete this assistant?",
+      "empty": "[to be translated]:No assistants",
+      "from_library": "[to be translated]:From Library",
+      "groupchat": "[to be translated]:Group Chat",
+      "groupchat_config": "[to be translated]:Group Chat Config",
+      "groupchat_enabled": "[to be translated]:Group Chat Ready",
+      "groupchat_only": "[to be translated]:Group Chat Only",
+      "has_greeting": "[to be translated]:Has Greeting",
+      "has_memory": "[to be translated]:Has Memory",
+      "has_personality": "[to be translated]:Has Personality",
+      "import": "[to be translated]:Import VCP Agent",
+      "no_description": "[to be translated]:No description",
+      "no_results": "[to be translated]:No matching assistants found",
+      "search": "[to be translated]:Search assistants...",
+      "settings": "[to be translated]:Settings",
+      "total": "[to be translated]:Total Assistants",
+      "with_memory": "[to be translated]:With Memory",
+      "with_profile": "[to be translated]:With Profile"
+    },
+    "collaboration": {
+      "allowed_agents": "[to be translated]:Allowed Agents",
+      "allowed_agents_desc": "[to be translated]:Specify which agents this agent can collaborate with",
+      "allowed_agents_placeholder": "[to be translated]:Enter agent IDs, separated by commas",
+      "blocked_agents": "[to be translated]:Blocked Agents",
+      "blocked_agents_placeholder": "[to be translated]:Enter blocked agent IDs, separated by commas",
+      "can_delegate": "[to be translated]:Can Delegate Tasks",
+      "can_delegate_desc": "[to be translated]:Allow this agent to delegate tasks to other agents",
+      "can_initiate": "[to be translated]:Can Initiate Collaboration",
+      "can_initiate_desc": "[to be translated]:Allow this agent to initiate collaboration with other agents",
+      "info": "[to be translated]:Configure how this agent collaborates with other agents in group chats",
+      "max_tasks": "[to be translated]:Max Concurrent Tasks",
+      "message_prefix": "[to be translated]:Message Prefix",
+      "message_prefix_desc": "[to be translated]:Prefix added to messages when collaborating",
+      "message_prefix_placeholder": "[to be translated]:e.g., [Agent Name]:",
+      "response_style": "[to be translated]:Response Style",
+      "style_adaptive": "[to be translated]:Adaptive",
+      "style_concise": "[to be translated]:Concise",
+      "style_detailed": "[to be translated]:Detailed",
+      "title": "[to be translated]:Collaboration Settings"
+    },
+    "dailynote": {
+      "click_to_edit": "[to be translated]:Click to edit",
+      "no_preview": "[to be translated]:No preview",
+      "note_count": "[to be translated]:{{count}} notes",
+      "notebook_name": "[to be translated]:{{name}}'s Notebook",
+      "sort_mtime_asc": "[to be translated]:Oldest modified",
+      "sort_mtime_desc": "[to be translated]:Recently modified",
+      "sort_name_asc": "[to be translated]:Name A-Z",
+      "sort_name_desc": "[to be translated]:Name Z-A",
+      "stats_count": "[to be translated]:{{count}} notes",
+      "stats_notebook": "[to be translated]:Notebook:",
+      "stats_total": "[to be translated]:Total:",
+      "time_hours_ago": "[to be translated]:{{n}} hours ago",
+      "time_just_now": "[to be translated]:Just now",
+      "time_minutes_ago": "[to be translated]:{{n}} minutes ago"
+    },
+    "dashboard": {
+      "agents": {
+        "description": "[to be translated]:Unified management of all assistants/agents with VCP persona configuration and group chat collaboration.",
+        "title": "[to be translated]:Assistant Management"
+      },
+      "coming_soon": "[to be translated]:Coming soon, stay tuned.",
+      "groupchat": {
+        "description": "[to be translated]:Manage multi-Agent group chat sessions, configure speaking modes, member tags, unified model, etc.",
+        "go_to_chat": "[to be translated]:Go to Chat",
+        "title": "[to be translated]:Group Chat",
+        "unified_entry": "[to be translated]:Unified Entry"
+      },
+      "menu": {
+        "agents": "[to be translated]:Agents",
+        "dailynote": "[to be translated]:Daily Notes",
+        "forum": "[to be translated]:Forum",
+        "groupchat": "[to be translated]:Group Chat",
+        "plugins": "[to be translated]:Plugins",
+        "settings": "[to be translated]:Settings",
+        "tavern": "[to be translated]:Tavern",
+        "templates": "[to be translated]:Templates",
+        "variables": "[to be translated]:Variables",
+        "workbench": "[to be translated]:Workbench"
+      },
+      "settings": {
+        "description": "[to be translated]:VCP global configuration, including default model, variable prefix, plugin paths, etc.",
+        "title": "[to be translated]:Settings"
+      },
+      "templates": {
+        "description": "[to be translated]:Manage VCP prompt templates with variable interpolation and template rendering.",
+        "title": "[to be translated]:Templates"
+      },
+      "title": "[to be translated]:VCP Dashboard",
+      "variables": {
+        "description": "[to be translated]:Manage VCP prompt variables with global, agent, and session scopes.",
+        "title": "[to be translated]:Variables"
+      }
+    },
+    "forum": {
+      "author": "[to be translated]:Author",
+      "author_placeholder": "[to be translated]:Enter author name",
+      "board": "[to be translated]:Board",
+      "board_all": "[to be translated]:All Boards",
+      "board_chat": "[to be translated]:Casual Chat",
+      "board_feedback": "[to be translated]:Feedback",
+      "board_tech": "[to be translated]:VCP Technical",
+      "content_placeholder": "[to be translated]:Enter post content, supports Markdown",
+      "create_post": "[to be translated]:Create Post",
+      "fill_required": "[to be translated]:Please fill in required fields",
+      "image": "[to be translated]:Image",
+      "loading": "[to be translated]:Loading...",
+      "new_post": "[to be translated]:New Post",
+      "no_posts": "[to be translated]:No posts yet",
+      "post_content": "[to be translated]:Content (Markdown)",
+      "post_created": "[to be translated]:Post created successfully",
+      "post_title": "[to be translated]:Title",
+      "replies": "[to be translated]:Replies",
+      "reply_list": "[to be translated]:Reply List",
+      "reply_placeholder": "[to be translated]:Enter your reply...",
+      "reply_sent": "[to be translated]:Reply sent successfully",
+      "search_placeholder": "[to be translated]:Search posts...",
+      "send_reply": "[to be translated]:Send Reply",
+      "title": "[to be translated]:VCP Forum",
+      "title_placeholder": "[to be translated]:Enter post title"
+    },
+    "memory": {
+      "title": "[to be translated]:Memory Settings"
+    },
+    "plugin": {
+      "author": "[to be translated]:Author",
+      "available": "[to be translated]:Available",
+      "category": {
+        "ai": "[to be translated]:AI",
+        "builtin_service": "[to be translated]:Built-in Service",
+        "code": "[to be translated]:Code",
+        "diary": "[to be translated]:Diary",
+        "file": "[to be translated]:File",
+        "image": "[to be translated]:Image",
+        "network": "[to be translated]:Network",
+        "search": "[to be translated]:Search",
+        "service": "[to be translated]:Service",
+        "utility": "[to be translated]:Utility",
+        "video": "[to be translated]:Video"
+      },
+      "commands": "[to be translated]:Commands",
+      "config_title": "[to be translated]:Plugin Configuration",
+      "configure": "[to be translated]:Configure",
+      "details": "[to be translated]:Plugin Details",
+      "disabled": "[to be translated]:Disabled",
+      "disabled_success": "[to be translated]:Plugin disabled",
+      "distributed": "[to be translated]:Distributed",
+      "enabled": "[to be translated]:Enabled",
+      "enabled_success": "[to be translated]:Plugin enabled",
+      "info_tooltip": "[to be translated]:View plugin details",
+      "install": "[to be translated]:Install",
+      "installed": "[to be translated]:Installed",
+      "load_error": "[to be translated]:Failed to load plugin list",
+      "loading": "[to be translated]:Loading...",
+      "no_commands": "[to be translated]:No commands",
+      "no_config": "[to be translated]:This plugin requires no configuration",
+      "no_description": "[to be translated]:No description",
+      "no_plugins": "[to be translated]:No plugins available",
+      "no_readme": "[to be translated]:No README",
+      "no_search_results": "[to be translated]:No matching plugins found",
+      "no_system_prompt": "[to be translated]:No system prompt",
+      "open_window": "[to be translated]:Open Window",
+      "readme": "[to be translated]:README",
+      "refresh": "[to be translated]:Refresh",
+      "requires_config": "[to be translated]:Requires configuration",
+      "search_placeholder": "[to be translated]:Search plugins...",
+      "store": "[to be translated]:Plugin Store",
+      "system_prompt": "[to be translated]:System Prompt",
+      "system_prompt_loaded": "[to be translated]:Plugin system prompt loaded",
+      "system_prompt_placeholder": "[to be translated]:Optional system prompt",
+      "tab_all": "[to be translated]:All",
+      "tab_distributed": "[to be translated]:Distributed",
+      "test": "[to be translated]:Test",
+      "test_error": "[to be translated]:Execution failed",
+      "test_success": "[to be translated]:Execution successful, took {{time}}ms",
+      "test_tooltip": "[to be translated]:Test execute this plugin",
+      "testing": "[to be translated]:Testing {{name}}...",
+      "title": "[to be translated]:VCP Plugin Manager",
+      "toggle_error": "[to be translated]:Failed to toggle status",
+      "total": "[to be translated]:Total",
+      "uninstall": "[to be translated]:Uninstall",
+      "update": "[to be translated]:Update",
+      "version": "[to be translated]:Version"
+    },
+    "profile": {
+      "add_dialogue": "[to be translated]:Add Dialogue",
+      "background": "[to be translated]:Background",
+      "background_desc": "[to be translated]:Describe the agent's background story or context",
+      "background_placeholder": "[to be translated]:Enter the agent's background story...",
+      "example_dialogues": "[to be translated]:Example Dialogues",
+      "greeting": "[to be translated]:Greeting Message",
+      "greeting_placeholder": "[to be translated]:Enter a greeting message for the agent...",
+      "info": "[to be translated]:Configure the agent's personality and communication style",
+      "no_dialogues": "[to be translated]:No example dialogues added yet",
+      "personality": "[to be translated]:Personality",
+      "personality_desc": "[to be translated]:Describe the agent's personality traits",
+      "personality_placeholder": "[to be translated]:e.g., friendly, professional, curious...",
+      "title": "[to be translated]:Profile Settings",
+      "tone": "[to be translated]:Communication Tone",
+      "tone_casual": "[to be translated]:Casual",
+      "tone_formal": "[to be translated]:Formal",
+      "tone_placeholder": "[to be translated]:Select a communication tone",
+      "tone_playful": "[to be translated]:Playful",
+      "tone_professional": "[to be translated]:Professional",
+      "traits": "[to be translated]:Character Traits",
+      "traits_placeholder": "[to be translated]:Enter character traits, separated by commas"
+    },
+    "sar": {
+      "create_failed": "[to be translated]:Failed to create",
+      "create_success": "[to be translated]:Sar configuration created successfully",
+      "delete_failed": "[to be translated]:Failed to delete",
+      "delete_success": "[to be translated]:Sar configuration deleted successfully"
+    },
+    "settings": {
+      "agent_desc": "[to be translated]:Description",
+      "agent_name": "[to be translated]:Name",
+      "agent_preview": "[to be translated]:Agent Preview",
+      "clean_failed": "[to be translated]:Failed to clean logs",
+      "debug": "[to be translated]:Debug Settings",
+      "description": "[to be translated]:Configure VCP Agent to enable intelligent context injection",
+      "info_desc": "[to be translated]:After selecting a VCP Agent, the system will automatically inject relevant context (such as knowledge base search results, diary content, etc.) into the conversation based on the Agent's configuration.",
+      "info_title": "[to be translated]:VCP Context Injection",
+      "knowledge": "[to be translated]:Knowledge Base Settings",
+      "logs": "[to be translated]:Log Settings",
+      "logs_cleaned": "[to be translated]:Logs cleaned",
+      "loop": "[to be translated]:VCP Loop Settings",
+      "no_agents": "[to be translated]:No VCP Agents available. Please create one in VCP management first.",
+      "plugins": "[to be translated]:Plugin Management",
+      "plugins_refreshed": "[to be translated]:Plugin list refreshed",
+      "preprocessor": "[to be translated]:Preprocessor Order",
+      "refresh_failed": "[to be translated]:Failed to refresh plugins",
+      "select_agent": "[to be translated]:Select VCP Agent",
+      "select_agent_first": "[to be translated]:Please select a VCP Agent first",
+      "select_placeholder": "[to be translated]:Select a VCP Agent",
+      "system_prompt": "[to be translated]:System Prompt",
+      "title": "[to be translated]:VCP Agent",
+      "variables": "[to be translated]:Variables"
+    },
+    "templates": {
+      "category": "[to be translated]:Category",
+      "category_agent": "[to be translated]:Agent Templates",
+      "category_custom": "[to be translated]:Custom Templates",
+      "category_system": "[to be translated]:System Templates",
+      "content": "[to be translated]:Content",
+      "content_required": "[to be translated]:Please enter template content",
+      "create": "[to be translated]:Create Template",
+      "create_first": "[to be translated]:Create your first template",
+      "create_success": "[to be translated]:Template created successfully",
+      "delete_confirm": "[to be translated]:Are you sure to delete this template?",
+      "delete_failed": "[to be translated]:Failed to delete",
+      "delete_success": "[to be translated]:Template deleted successfully",
+      "description": "[to be translated]:Description",
+      "edit": "[to be translated]:Edit Template",
+      "empty": "[to be translated]:No templates",
+      "list": "[to be translated]:Template List",
+      "load_failed": "[to be translated]:Failed to load templates",
+      "name": "[to be translated]:Template Name",
+      "name_required": "[to be translated]:Please enter template name",
+      "no_results": "[to be translated]:No matching templates found",
+      "preview": "[to be translated]:Preview",
+      "save_failed": "[to be translated]:Failed to save",
+      "search": "[to be translated]:Search templates...",
+      "total": "[to be translated]:Total Templates",
+      "update_success": "[to be translated]:Template updated successfully",
+      "usage_title": "[to be translated]:Template Usage Guide",
+      "variables": "[to be translated]:Variables"
+    },
+    "test": {
+      "input_required": "[to be translated]:Please enter test text"
+    },
+    "tvstxt": {
+      "create": "[to be translated]:Create TVStxt File",
+      "create_failed": "[to be translated]:Failed to create",
+      "create_success": "[to be translated]:File created successfully",
+      "must_be_txt": "[to be translated]:File name must end with .txt",
+      "name_required": "[to be translated]:Please enter file name",
+      "save_failed": "[to be translated]:Failed to save",
+      "save_success": "[to be translated]:File saved successfully"
+    },
+    "variables": {
+      "category": "[to be translated]:Type",
+      "create": "[to be translated]:Create Variable",
+      "create_success": "[to be translated]:Variable created successfully",
+      "delete_confirm": "[to be translated]:Are you sure to delete this variable?",
+      "delete_failed": "[to be translated]:Failed to delete",
+      "delete_success": "[to be translated]:Variable deleted successfully",
+      "description": "[to be translated]:Description",
+      "empty": "[to be translated]:No variables",
+      "load_failed": "[to be translated]:Failed to load variables",
+      "name": "[to be translated]:Variable Name",
+      "no_results": "[to be translated]:No matching variables found",
+      "save_failed": "[to be translated]:Failed to save",
+      "scope": "[to be translated]:Scope",
+      "search": "[to be translated]:Search variables...",
+      "tab_user": "[to be translated]:User Variables",
+      "total": "[to be translated]:Total Variables",
+      "types_title": "[to be translated]:Variable Types",
+      "update_success": "[to be translated]:Variable updated successfully",
+      "user_variables": "[to be translated]:User Variables",
+      "value": "[to be translated]:Value"
+    },
+    "workbench": {
+      "clear": "[to be translated]:Clear",
+      "columns": {
+        "actions": "[to be translated]:Actions",
+        "duration": "[to be translated]:Duration",
+        "name": "[to be translated]:Name",
+        "source": "[to be translated]:Source",
+        "status": "[to be translated]:Status",
+        "time": "[to be translated]:Time",
+        "type": "[to be translated]:Type"
+      },
+      "description": "[to be translated]:View and manage VCP tool call records",
+      "filter": {
+        "assistant": "[to be translated]:Assistant",
+        "status": "[to be translated]:Status",
+        "tool": "[to be translated]:Tool",
+        "type": "[to be translated]:Type"
+      },
+      "refresh": "[to be translated]:Refresh",
+      "search": "[to be translated]:Search tool calls...",
+      "selectCall": "[to be translated]:Select a call record to view details",
+      "stats": {
+        "avgTime": "[to be translated]:Avg Time",
+        "crew": "[to be translated]:Crew Activity",
+        "pending": "[to be translated]:Pending",
+        "successRate": "[to be translated]:Success Rate",
+        "tools": "[to be translated]:Tools",
+        "total": "[to be translated]:Total Calls"
+      },
+      "tabs": {
+        "calls": "[to be translated]:Calls",
+        "logs": "[to be translated]:Logs",
+        "tasks": "[to be translated]:Tasks"
+      },
+      "title": "[to be translated]:VCP Workbench"
+    }
   },
   "warning": {
     "missing_provider": "O fornecedor não existe; foi revertido para o fornecedor predefinido {{provider}}. Isto pode causar problemas."

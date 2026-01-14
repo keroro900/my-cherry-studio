@@ -7,7 +7,7 @@
  */
 
 import type { GarmentAnalysis } from '../modules/types'
-import { buildDimensionAnalysisPrompt, getTrendDimensionPreset } from '../presets/trendDimension'
+import { buildDimensionAnalysisPrompt } from '../presets/trendDimension'
 import { type BasePromptJson, PromptBuilder, type PromptBuilderOptions } from './PromptBuilder'
 
 /**

@@ -5,6 +5,7 @@ import { useTheme } from '@renderer/context/ThemeProvider'
 import db from '@renderer/databases'
 import i18n from '@renderer/i18n'
 import KnowledgeQueue from '@renderer/queue/KnowledgeQueue'
+import { initMCPBridgeHandler } from '@renderer/services/MCPBridgeHandler'
 import MemoryService from '@renderer/services/MemoryService'
 import { useAppDispatch } from '@renderer/store'
 import { useAppSelector } from '@renderer/store'
@@ -42,7 +43,6 @@ export function useAppInit() {
     windowStyle,
     autoCheckUpdate,
     proxyMode,
-    customCss,
     enableDataCollection
   } = useSettings()
   const { isLeftNavbar } = useNavbarPosition()
@@ -63,6 +63,9 @@ export function useAppInit() {
 
     // Initialize MemoryService after app is ready
     MemoryService.getInstance()
+
+    // Initialize MCP Bridge Handler for MCP Server communication
+    initMCPBridgeHandler()
   }, [])
 
   useEffect(() => {
@@ -162,19 +165,7 @@ export function useAppInit() {
     KnowledgeQueue.checkAllBases()
   }, [])
 
-  useEffect(() => {
-    let customCssElement = document.getElementById('user-defined-custom-css') as HTMLStyleElement
-    if (customCssElement) {
-      customCssElement.remove()
-    }
-
-    if (customCss) {
-      customCssElement = document.createElement('style')
-      customCssElement.id = 'user-defined-custom-css'
-      customCssElement.textContent = customCss
-      document.head.appendChild(customCssElement)
-    }
-  }, [customCss])
+  // 注意：customCss 现在由 GlobalStyleProvider 统一处理，这里不再需要重复注入
 
   useEffect(() => {
     if (!window.electron?.ipcRenderer) return

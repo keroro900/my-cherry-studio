@@ -6,11 +6,20 @@
 
 import type { AppDispatch, RootState } from '@renderer/store'
 import {
+  batchUpdateTaskStatus,
+  cancelAllQueued,
+  moveTaskToTop,
+  pauseAllTasks,
+  pauseTask,
+  reorderTasks,
+  resumeAllTasks,
+  resumeTask,
+  retryAllFailed,
   updateTaskProgress,
-  updateTaskStatus,
-  setQueuePaused
+  updateTaskStatus
 } from '@renderer/store/imageStudio'
-import type { ImageTask } from '../types'
+
+import type { ImageTask, TaskStatus } from '../types'
 
 export interface TaskExecutor {
   execute(
@@ -20,12 +29,43 @@ export interface TaskExecutor {
   ): Promise<{ success: boolean; result?: any; error?: string }>
 }
 
+/**
+ * 队列统计信息
+ */
+export interface QueueStats {
+  total: number
+  queued: number
+  running: number
+  paused: number
+  completed: number
+  failed: number
+  cancelled: number
+}
+
+/**
+ * 任务事件类型
+ */
+export type TaskEvent =
+  | { type: 'task_started'; taskId: string }
+  | { type: 'task_completed'; taskId: string }
+  | { type: 'task_failed'; taskId: string; error: string }
+  | { type: 'task_cancelled'; taskId: string }
+  | { type: 'queue_empty' }
+  | { type: 'queue_paused' }
+  | { type: 'queue_resumed' }
+
+/**
+ * 任务事件监听器
+ */
+export type TaskEventListener = (event: TaskEvent) => void
+
 class TaskQueueService {
   private static instance: TaskQueueService
   private isProcessing = false
   private abortControllers: Map<string, AbortController> = new Map()
   private maxConcurrency = 2
   private executor: TaskExecutor | null = null
+  private eventListeners: Set<TaskEventListener> = new Set()
 
   private constructor() {}
 
@@ -60,10 +100,7 @@ class TaskQueueService {
   /**
    * 开始处理队列
    */
-  startProcessing(
-    getState: () => RootState,
-    dispatch: AppDispatch
-  ): void {
+  startProcessing(getState: () => RootState, dispatch: AppDispatch): void {
     if (this.isProcessing) return
     this.isProcessing = true
     this.processQueue(getState, dispatch)
@@ -79,10 +116,7 @@ class TaskQueueService {
   /**
    * 处理队列
    */
-  private async processQueue(
-    getState: () => RootState,
-    dispatch: AppDispatch
-  ): Promise<void> {
+  private async processQueue(getState: () => RootState, dispatch: AppDispatch): Promise<void> {
     while (this.isProcessing) {
       const state = getState()
       const { taskQueue, isPaused } = state.imageStudio
@@ -111,6 +145,7 @@ class TaskQueueService {
         if (runningTasks.length === 0) {
           // 所有任务完成，停止处理
           this.isProcessing = false
+          this.emitEvent({ type: 'queue_empty' })
           break
         }
         await this.sleep(100)
@@ -130,14 +165,11 @@ class TaskQueueService {
   /**
    * 执行单个任务
    */
-  private async executeTask(
-    task: ImageTask,
-    getState: () => RootState,
-    dispatch: AppDispatch
-  ): Promise<void> {
+  private async executeTask(task: ImageTask, _getState: () => RootState, dispatch: AppDispatch): Promise<void> {
     if (!this.executor) {
       console.error('[TaskQueueService] No executor set')
       dispatch(updateTaskStatus({ taskId: task.id, status: 'failed' }))
+      this.emitEvent({ type: 'task_failed', taskId: task.id, error: 'No executor set' })
       return
     }
 
@@ -147,6 +179,7 @@ class TaskQueueService {
 
     // 更新状态为运行中
     dispatch(updateTaskStatus({ taskId: task.id, status: 'running' }))
+    this.emitEvent({ type: 'task_started', taskId: task.id })
 
     try {
       const result = await this.executor.execute(
@@ -159,15 +192,19 @@ class TaskQueueService {
 
       if (result.success) {
         dispatch(updateTaskStatus({ taskId: task.id, status: 'completed' }))
+        this.emitEvent({ type: 'task_completed', taskId: task.id })
       } else {
-        dispatch(updateTaskStatus({ taskId: task.id, status: 'failed' }))
+        dispatch(updateTaskStatus({ taskId: task.id, status: 'failed', error: result.error }))
+        this.emitEvent({ type: 'task_failed', taskId: task.id, error: result.error || 'Unknown error' })
       }
-    } catch (error) {
+    } catch (error: any) {
       if (abortController.signal.aborted) {
         dispatch(updateTaskStatus({ taskId: task.id, status: 'cancelled' }))
+        this.emitEvent({ type: 'task_cancelled', taskId: task.id })
       } else {
         console.error('[TaskQueueService] Task execution error:', error)
-        dispatch(updateTaskStatus({ taskId: task.id, status: 'failed' }))
+        dispatch(updateTaskStatus({ taskId: task.id, status: 'failed', error: error.message }))
+        this.emitEvent({ type: 'task_failed', taskId: task.id, error: error.message || 'Unknown error' })
       }
     } finally {
       this.abortControllers.delete(task.id)
@@ -178,14 +215,16 @@ class TaskQueueService {
    * 暂停任务
    */
   pauseQueue(dispatch: AppDispatch): void {
-    dispatch(setQueuePaused(true))
+    dispatch(pauseAllTasks())
+    this.emitEvent({ type: 'queue_paused' })
   }
 
   /**
    * 恢复任务
    */
   resumeQueue(dispatch: AppDispatch): void {
-    dispatch(setQueuePaused(false))
+    dispatch(resumeAllTasks())
+    this.emitEvent({ type: 'queue_resumed' })
   }
 
   /**
@@ -207,7 +246,7 @@ class TaskQueueService {
     const { taskQueue } = state.imageStudio
 
     // 取消所有运行中的任务
-    for (const [taskId, controller] of this.abortControllers) {
+    for (const [_taskId, controller] of this.abortControllers) {
       controller.abort()
     }
 
@@ -226,10 +265,148 @@ class TaskQueueService {
    */
   retryTask(taskId: string, dispatch: AppDispatch): void {
     dispatch(updateTaskStatus({ taskId, status: 'queued' }))
-    dispatch(updateTaskProgress({
-      taskId,
-      progress: { current: 0, total: 100, step: '' }
-    }))
+    dispatch(
+      updateTaskProgress({
+        taskId,
+        progress: { current: 0, total: 100, step: '' }
+      })
+    )
+  }
+
+  // ============================================================================
+  // 增强的任务管理方法
+  // ============================================================================
+
+  /**
+   * 暂停单个任务（仅等待中的任务可暂停）
+   */
+  pauseSingleTask(taskId: string, dispatch: AppDispatch): void {
+    dispatch(pauseTask(taskId))
+  }
+
+  /**
+   * 恢复单个任务
+   */
+  resumeSingleTask(taskId: string, dispatch: AppDispatch): void {
+    dispatch(resumeTask(taskId))
+  }
+
+  /**
+   * 重排任务顺序
+   */
+  reorderTaskQueue(fromIndex: number, toIndex: number, dispatch: AppDispatch): void {
+    dispatch(reorderTasks({ fromIndex, toIndex }))
+  }
+
+  /**
+   * 将任务移动到队列顶部（优先执行）
+   */
+  prioritizeTask(taskId: string, dispatch: AppDispatch): void {
+    dispatch(moveTaskToTop(taskId))
+  }
+
+  /**
+   * 重试所有失败的任务
+   */
+  retryAllFailedTasks(dispatch: AppDispatch): void {
+    dispatch(retryAllFailed())
+  }
+
+  /**
+   * 取消所有等待中的任务
+   */
+  cancelAllQueuedTasks(dispatch: AppDispatch): void {
+    dispatch(cancelAllQueued())
+  }
+
+  /**
+   * 批量更新任务状态
+   */
+  batchSetStatus(taskIds: string[], status: TaskStatus, dispatch: AppDispatch): void {
+    dispatch(batchUpdateTaskStatus({ taskIds, status }))
+  }
+
+  /**
+   * 获取队列统计信息
+   */
+  getQueueStats(getState: () => RootState): QueueStats {
+    const { taskQueue } = getState().imageStudio
+    return {
+      total: taskQueue.length,
+      queued: taskQueue.filter((t) => t.status === 'queued').length,
+      running: taskQueue.filter((t) => t.status === 'running').length,
+      paused: taskQueue.filter((t) => t.status === 'paused').length,
+      completed: taskQueue.filter((t) => t.status === 'completed').length,
+      failed: taskQueue.filter((t) => t.status === 'failed').length,
+      cancelled: taskQueue.filter((t) => t.status === 'cancelled').length
+    }
+  }
+
+  /**
+   * 估算剩余完成时间（毫秒）
+   */
+  getEstimatedCompletionTime(getState: () => RootState): number {
+    const { taskQueue, maxConcurrency } = getState().imageStudio
+
+    // 计算已完成任务的平均耗时
+    const completedTasks = taskQueue.filter((t) => t.status === 'completed' && t.startedAt && t.completedAt)
+
+    const avgTime =
+      completedTasks.length > 0
+        ? completedTasks.reduce((sum, t) => sum + (t.completedAt! - t.startedAt!), 0) / completedTasks.length
+        : 30000 // 默认 30 秒
+
+    const pendingCount = taskQueue.filter((t) => t.status === 'queued').length
+    const runningCount = taskQueue.filter((t) => t.status === 'running').length
+
+    // 考虑并发
+    const batchesRemaining = Math.ceil((pendingCount + runningCount) / maxConcurrency)
+    return batchesRemaining * avgTime
+  }
+
+  /**
+   * 检查是否有正在处理的任务
+   */
+  isQueueActive(): boolean {
+    return this.isProcessing
+  }
+
+  /**
+   * 获取正在运行的任务数量
+   */
+  getRunningTaskCount(getState: () => RootState): number {
+    return getState().imageStudio.taskQueue.filter((t) => t.status === 'running').length
+  }
+
+  // ============================================================================
+  // 事件监听
+  // ============================================================================
+
+  /**
+   * 添加事件监听器
+   */
+  addEventListener(listener: TaskEventListener): void {
+    this.eventListeners.add(listener)
+  }
+
+  /**
+   * 移除事件监听器
+   */
+  removeEventListener(listener: TaskEventListener): void {
+    this.eventListeners.delete(listener)
+  }
+
+  /**
+   * 触发事件
+   */
+  private emitEvent(event: TaskEvent): void {
+    this.eventListeners.forEach((listener) => {
+      try {
+        listener(event)
+      } catch (error) {
+        console.error('[TaskQueueService] Event listener error:', error)
+      }
+    })
   }
 
   /**

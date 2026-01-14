@@ -45,7 +45,9 @@ const CATEGORY_COLORS: Record<NodeDefinition['category'], string> = {
   output: 'var(--workflow-theme-info, #13c2c2)',
   external: 'var(--ant-color-orange, #fa8c16)',
   custom: 'var(--workflow-theme-geekblue, #2f54eb)',
-  text: 'var(--ant-color-cyan, #13c2c2)'
+  text: 'var(--ant-color-cyan, #13c2c2)',
+  fashion: 'var(--ant-color-pink, #eb2f96)',
+  quality: 'var(--ant-color-lime, #a0d911)'
 }
 
 function getCategoryColor(category: NodeDefinition['category']): string {
@@ -533,16 +535,31 @@ function ConfigPanel({ onCollapse }: ConfigPanelProps) {
     }
 
     // 2. 收集单图输出
-    if (outputs.image && typeof outputs.image === 'string' && isImageString(outputs.image) && !allImages.includes(outputs.image)) {
+    if (
+      outputs.image &&
+      typeof outputs.image === 'string' &&
+      isImageString(outputs.image) &&
+      !allImages.includes(outputs.image)
+    ) {
       allImages.push(outputs.image)
     }
-    if (outputs.output_image && typeof outputs.output_image === 'string' && isImageString(outputs.output_image) && !allImages.includes(outputs.output_image)) {
+    if (
+      outputs.output_image &&
+      typeof outputs.output_image === 'string' &&
+      isImageString(outputs.output_image) &&
+      !allImages.includes(outputs.output_image)
+    ) {
       allImages.push(outputs.output_image)
     }
 
     // 3. 收集动态端口的图片输出 (image_1, image_2, ...)
     Object.keys(outputs).forEach((key) => {
-      if (key.match(/^image_\d+$/) && typeof outputs[key] === 'string' && isImageString(outputs[key]) && !allImages.includes(outputs[key])) {
+      if (
+        key.match(/^image_\d+$/) &&
+        typeof outputs[key] === 'string' &&
+        isImageString(outputs[key]) &&
+        !allImages.includes(outputs[key])
+      ) {
         allImages.push(outputs[key])
       }
     })

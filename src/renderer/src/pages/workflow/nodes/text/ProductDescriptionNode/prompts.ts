@@ -49,11 +49,15 @@ ${getToneDescription(config.toneStyle)}
    - Address target audience needs
    - Create emotional connection
 
-${config.includeSEO ? `4. **SEO Keywords**:
+${
+  config.includeSEO
+    ? `4. **SEO Keywords**:
    - Extract relevant search terms
    - Include long-tail keywords
    - Consider buyer intent
-   - Prioritize by search volume potential` : ''}
+   - Prioritize by search volume potential`
+    : ''
+}
 
 [Output Format]
 Respond ONLY in valid JSON format with this structure:

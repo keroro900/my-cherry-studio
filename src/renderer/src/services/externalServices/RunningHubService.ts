@@ -184,7 +184,7 @@ class RunningHubService {
       throw new Error(result.msg || '文件上传失败')
     }
 
-    logger.info('文件上传成功:', result.data.fileName)
+    logger.info('文件上传成功', { value: result.data.fileName })
     return result.data.fileName
   }
 
@@ -220,10 +220,12 @@ class RunningHubService {
       payload.instanceType = instanceType
     }
 
-    logger.info('提交任务:', {
-      webappId,
-      instanceType,
-      nodeCount: nodeInfoList.length
+    logger.info('提交任务', {
+      value: {
+        webappId,
+        instanceType,
+        nodeCount: nodeInfoList.length
+      }
     })
 
     const response = await fetch(url, {
@@ -244,7 +246,7 @@ class RunningHubService {
       throw new Error(result.msg || '任务提交失败')
     }
 
-    logger.info('任务提交成功:', result.data.taskId)
+    logger.info('任务提交成功', { value: result.data.taskId })
     return result.data.taskId
   }
 
@@ -309,7 +311,7 @@ class RunningHubService {
         const outputs = Array.isArray(result.data) ? result.data : [result.data]
         const urls = outputs.map((output) => output.fileUrl || output.url).filter((url): url is string => !!url)
 
-        logger.info('任务完成:', urls)
+        logger.info('任务完成', { value: urls })
         onProgress?.('任务完成', 100)
         return urls
       }

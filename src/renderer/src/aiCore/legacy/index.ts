@@ -4,7 +4,7 @@ import type { BaseApiClient } from '@renderer/aiCore/legacy/clients/BaseApiClien
 import { isDedicatedImageGenerationModel, isFunctionCallingModel } from '@renderer/config/models'
 import { withSpanResult } from '@renderer/services/SpanManagerService'
 import type { StartSpanParams } from '@renderer/trace/types/ModelSpanEntity'
-import type { GenerateImageParams, Model, Provider } from '@renderer/types'
+import { type GenerateImageParams, isImageAssistant, type Model, type Provider } from '@renderer/types'
 import type { RequestOptions, SdkModel } from '@renderer/types/sdk'
 import { isSupportedToolUse } from '@renderer/utils/mcp-tools'
 
@@ -19,6 +19,10 @@ import { MIDDLEWARE_NAME as FinalChunkConsumerMiddlewareName } from './middlewar
 import { applyCompletionsMiddlewares } from './middleware/composer'
 import { MIDDLEWARE_NAME as McpToolChunkMiddlewareName } from './middleware/core/McpToolChunkMiddleware'
 import { MIDDLEWARE_NAME as RawStreamListenerMiddlewareName } from './middleware/core/RawStreamListenerMiddleware'
+import { MIDDLEWARE_NAME as ResponseTransformMiddlewareName } from './middleware/core/ResponseTransformMiddleware'
+import { MIDDLEWARE_NAME as StreamAdapterMiddlewareName } from './middleware/core/StreamAdapterMiddleware'
+import { MIDDLEWARE_NAME as TextChunkMiddlewareName } from './middleware/core/TextChunkMiddleware'
+import { MIDDLEWARE_NAME as TransformCoreToSdkParamsMiddlewareName } from './middleware/core/TransformCoreToSdkParamsMiddleware'
 import { MIDDLEWARE_NAME as WebSearchMiddlewareName } from './middleware/core/WebSearchMiddleware'
 import { MIDDLEWARE_NAME as ImageGenerationMiddlewareName } from './middleware/feat/ImageGenerationMiddleware'
 import { MIDDLEWARE_NAME as ThinkingTagExtractionMiddlewareName } from './middleware/feat/ThinkingTagExtractionMiddleware'
@@ -69,14 +73,33 @@ export default class AiProvider {
 
     // 2. 构建中间件链
     const builder = CompletionsMiddlewareBuilder.withDefaults()
+    // 检查是否需要图片生成中间件：专用图片模型或图片助手类型
+    const needsImageGeneration = isDedicatedImageGenerationModel(model) || isImageAssistant(params.assistant)
+
     // images api
-    if (isDedicatedImageGenerationModel(model)) {
+    if (needsImageGeneration) {
+      // 检查 messages 是否为字符串（群聊场景）
+      // 如果是字符串，需要完整的中间件链来转换参数
+      const messagesIsString = typeof params.messages === 'string'
+
       builder.clear()
       builder
         .add(MiddlewareRegistry[FinalChunkConsumerMiddlewareName])
         .add(MiddlewareRegistry[ErrorHandlerMiddlewareName])
         .add(MiddlewareRegistry[AbortHandlerMiddlewareName])
-        .add(MiddlewareRegistry[ImageGenerationMiddlewareName])
+
+      if (messagesIsString) {
+        // 群聊场景：ImageGenerationMiddleware 会 fallthrough 到 next()
+        // 需要完整的中间件链来处理普通对话
+        logger.debug('Image assistant with string messages (group chat), adding full middleware chain')
+        builder
+          .add(MiddlewareRegistry[TransformCoreToSdkParamsMiddlewareName])
+          .add(MiddlewareRegistry[TextChunkMiddlewareName])
+          .add(MiddlewareRegistry[ResponseTransformMiddlewareName])
+          .add(MiddlewareRegistry[StreamAdapterMiddlewareName])
+      }
+
+      builder.add(MiddlewareRegistry[ImageGenerationMiddlewareName])
     } else {
       // Existing logic for other models
       logger.silly('Builder Params', params)

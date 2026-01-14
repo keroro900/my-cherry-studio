@@ -10,7 +10,7 @@
  * 6. 支持动态图片输入端口
  */
 
-import { type NodeProps,NodeResizer } from '@xyflow/react'
+import { type NodeProps, NodeResizer } from '@xyflow/react'
 import { memo, useMemo } from 'react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -175,7 +175,9 @@ function CherryWorkflowNode({ data, selected }: NodeProps) {
   const imageInputCount = nodeData.config?.imageInputCount ?? 0
   // 获取自定义输入端口配置（优先级高于默认生成）
   // RunningHub 使用 inputPorts，其他节点使用 imageInputPorts
-  const customImageInputPorts = (nodeData.config?.imageInputPorts || nodeData.config?.inputPorts) as NodeHandle[] | undefined
+  const customImageInputPorts = (nodeData.config?.imageInputPorts || nodeData.config?.inputPorts) as
+    | NodeHandle[]
+    | undefined
   const supportsDynamicImageInputs = DYNAMIC_IMAGE_INPUT_NODES.includes(nodeType)
 
   // 合并静态输入端口和动态图片输入端口
@@ -319,23 +321,10 @@ function CherryWorkflowNode({ data, selected }: NodeProps) {
               const imgUrl = toDisplayableUrl(firstImage)
               const vidUrl = toDisplayableUrl(firstVideo)
               if (!previewError && imgUrl) {
-                return (
-                  <img
-                    src={imgUrl}
-                    alt="preview"
-                    onError={() => setPreviewError(true)}
-                    title={imgUrl}
-                  />
-                )
+                return <img src={imgUrl} alt="preview" onError={() => setPreviewError(true)} title={imgUrl} />
               }
               if (!previewError && vidUrl) {
-                return (
-                  <video
-                    src={vidUrl}
-                    controls
-                    onError={() => setPreviewError(true)}
-                  />
-                )
+                return <video src={vidUrl} controls onError={() => setPreviewError(true)} />
               }
               if (text) {
                 return (

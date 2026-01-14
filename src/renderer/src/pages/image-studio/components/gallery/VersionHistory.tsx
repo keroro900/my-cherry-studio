@@ -4,14 +4,10 @@
  * 显示项目的所有版本，支持版本切换和回滚
  */
 
-import { RollbackOutlined, EyeOutlined } from '@ant-design/icons'
+import { EyeOutlined, RollbackOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import {
-  selectCurrentProject,
-  setCurrentVersion,
-  rollbackToVersion
-} from '@renderer/store/imageStudio'
-import { Tooltip, message } from 'antd'
+import { rollbackToVersion, selectCurrentProject, setCurrentVersion } from '@renderer/store/imageStudio'
+import { message, Tooltip } from 'antd'
 import { CheckCircle, Clock, Loader2, XCircle } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback } from 'react'
@@ -67,9 +63,7 @@ const VersionHistory: FC<VersionHistoryProps> = ({ maxHeight = 300 }) => {
     const date = new Date(timestamp)
     const now = new Date()
     const isToday =
-      date.getDate() === now.getDate() &&
-      date.getMonth() === now.getMonth() &&
-      date.getFullYear() === now.getFullYear()
+      date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
 
     if (isToday) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -86,9 +80,7 @@ const VersionHistory: FC<VersionHistoryProps> = ({ maxHeight = 300 }) => {
   }
 
   // 按版本号倒序排列
-  const sortedVersions = [...currentProject.versions].sort(
-    (a, b) => b.versionNumber - a.versionNumber
-  )
+  const sortedVersions = [...currentProject.versions].sort((a, b) => b.versionNumber - a.versionNumber)
 
   return (
     <Container $maxHeight={maxHeight}>
@@ -102,8 +94,7 @@ const VersionHistory: FC<VersionHistoryProps> = ({ maxHeight = 300 }) => {
             key={version.id}
             $active={isActive}
             $status={version.status}
-            onClick={() => handleSelectVersion(version.id)}
-          >
+            onClick={() => handleSelectVersion(version.id)}>
             <VersionMain>
               <VersionHeader>
                 <VersionNumber $active={isActive}>
@@ -118,9 +109,7 @@ const VersionHistory: FC<VersionHistoryProps> = ({ maxHeight = 300 }) => {
                   <Clock size={12} />
                   <span>{formatTime(version.createdAt)}</span>
                 </MetaItem>
-                {version.mask && (
-                  <EditTag>{t('image_studio.task.type.local_edit')}</EditTag>
-                )}
+                {version.mask && <EditTag>{t('image_studio.task.type.local_edit')}</EditTag>}
               </VersionMeta>
             </VersionMain>
 
@@ -189,16 +178,12 @@ const VersionItem = styled.div<{ $active: boolean; $status: string }>`
   cursor: pointer;
   transition: all 0.2s ease;
 
-  background-color: ${(props) =>
-    props.$active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)'};
+  background-color: ${(props) => (props.$active ? 'var(--color-primary-soft)' : 'var(--color-background-soft)')};
   border: 1px solid
     ${(props) => (props.$active ? 'var(--color-primary)' : 'transparent')};
 
   &:hover {
-    background-color: ${(props) =>
-      props.$active
-        ? 'var(--color-primary-soft)'
-        : 'var(--color-background-mute)'};
+    background-color: ${(props) => (props.$active ? 'var(--color-primary-soft)' : 'var(--color-background-mute)')};
   }
 
   .spin {
@@ -235,8 +220,7 @@ const VersionNumber = styled.span<{ $active: boolean }>`
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: ${(props) =>
-    props.$active ? 'var(--color-primary)' : 'var(--color-text-1)'};
+  color: ${(props) => (props.$active ? 'var(--color-primary)' : 'var(--color-text-1)')};
 `
 
 const LatestTag = styled.span`

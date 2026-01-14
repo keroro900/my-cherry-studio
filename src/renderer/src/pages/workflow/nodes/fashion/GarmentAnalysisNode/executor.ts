@@ -5,14 +5,14 @@
  * 分析服装图片，提取结构化属性
  */
 
-import { WorkflowAiService } from '../../../services/WorkflowAiService'
-import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
-import type { NodeExecutionContext, NodeExecutionResult } from '../../../types/core'
 import {
-  GarmentAnalysisPromptBuilder,
-  type GarmentAnalysisConfig
+  type GarmentAnalysisConfig,
+  GarmentAnalysisPromptBuilder
 } from '../../../prompts/builders/GarmentAnalysisPromptBuilder'
 import { extractAndParseJson } from '../../../prompts/utils/jsonExtractor'
+import { WorkflowAiService } from '../../../services/WorkflowAiService'
+import type { NodeExecutionContext, NodeExecutionResult } from '../../../types/core'
+import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
 
 /**
  * 服装分析节点配置

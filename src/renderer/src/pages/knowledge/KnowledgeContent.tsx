@@ -7,7 +7,7 @@ import { NavbarIcon } from '@renderer/pages/home/ChatNavbar'
 import { getProviderName } from '@renderer/services/ProviderService'
 import type { KnowledgeBase } from '@renderer/types'
 import { Button, Empty, Tabs, Tag, Tooltip } from 'antd'
-import { Book, Folder, Globe, Link, Notebook, Search, Settings, Video } from 'lucide-react'
+import { Book, BookOpen, Folder, Globe, Link, Notebook, Search, Settings, Video } from 'lucide-react'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,6 +16,7 @@ import styled from 'styled-components'
 import EditKnowledgeBasePopup from './components/EditKnowledgeBasePopup'
 import KnowledgeSearchPopup from './components/KnowledgeSearchPopup'
 import QuotaTag from './components/QuotaTag'
+import KnowledgeDiary from './items/KnowledgeDiary'
 import KnowledgeDirectories from './items/KnowledgeDirectories'
 import KnowledgeFiles from './items/KnowledgeFiles'
 import KnowledgeNotes from './items/KnowledgeNotes'
@@ -83,6 +84,14 @@ const KnowledgeContent: FC<KnowledgeContentProps> = ({ selectedBase }) => {
       icon: activeKey === 'notes' ? <Notebook size={16} color="var(--color-primary)" /> : <Notebook size={16} />,
       items: noteItems,
       content: <KnowledgeNotes selectedBase={selectedBase} />,
+      show: true
+    },
+    {
+      key: 'diary',
+      title: 'VCP 日记',
+      icon: activeKey === 'diary' ? <BookOpen size={16} color="var(--color-primary)" /> : <BookOpen size={16} />,
+      items: [],
+      content: <KnowledgeDiary selectedBase={selectedBase} />,
       show: true
     },
     {

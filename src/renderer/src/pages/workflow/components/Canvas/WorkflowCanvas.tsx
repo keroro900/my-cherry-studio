@@ -44,7 +44,7 @@ import {
 } from '@xyflow/react'
 import { throttle } from 'lodash'
 import type { DragEvent } from 'react'
-import { memo,useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useClipboard } from '../../hooks/useClipboard'
 import { NodeRegistryAdapter } from '../../nodes/base/NodeRegistryAdapter'
@@ -492,7 +492,7 @@ const WorkflowCanvasInner = memo(function WorkflowCanvasInner() {
       setNodes((nds) => {
         // 检查节点是否存在，避免重复删除
         if (!nds.some((n) => n.id === nodeId)) {
-          logger.debug('Node already deleted, skipping:', nodeId)
+          logger.debug('Node already deleted, skipping', { nodeId })
           return nds
         }
 

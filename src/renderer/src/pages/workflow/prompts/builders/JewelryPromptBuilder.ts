@@ -66,7 +66,8 @@ export class JewelryPromptBuilder extends PromptBuilder<JewelryConfig, JewelryPr
     const { lightingSetup, metalType, stoneType } = this.config
 
     const metalLightingTips = this.getMetalLightingTips(metalType)
-    const stoneTips = stoneType !== 'none' ? this.getStoneTips(stoneType) : 'No gemstone, focus on metalwork craftsmanship'
+    const stoneTips =
+      stoneType !== 'none' ? this.getStoneTips(stoneType) : 'No gemstone, focus on metalwork craftsmanship'
     const lightingDescription = this.getLightingDescription(lightingSetup)
 
     return `[Role: Master Jewelry Photographer]
@@ -203,7 +204,8 @@ Return as JSON with fields: jewelry_type, metal_type, stone_type, design_feature
 
   private getStoneTips(stone: string): string {
     const tips: Record<string, string> = {
-      diamond: 'Capture brilliance (white light return), fire (spectral colors), and scintillation (sparkle). Use multiple light sources',
+      diamond:
+        'Capture brilliance (white light return), fire (spectral colors), and scintillation (sparkle). Use multiple light sources',
       ruby: 'Deep red saturation, internal glow. Avoid washing out the color with too much light',
       sapphire: 'Rich blue depth. Show color zoning if present. Capture velvety appearance',
       emerald: 'Lush green color. Jardín (inclusions) are acceptable and add character',

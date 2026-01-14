@@ -20,10 +20,90 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { DEFAULT_ASSISTANT_SETTINGS, getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import type { Assistant, AssistantPreset, AssistantSettings, Model, Topic } from '@renderer/types'
+import type {
+  Assistant,
+  AssistantPreset,
+  AssistantSettings,
+  ImageAssistant,
+  ImageAssistantConfig,
+  ImageAssistantPreset,
+  Model,
+  Topic
+} from '@renderer/types'
+import { isImageAssistant } from '@renderer/types'
 import { isEmpty, uniqBy } from 'lodash'
 
 import type { RootState } from '.'
+
+// 内置图片助手预设
+const BUILTIN_IMAGE_ASSISTANT_PRESETS: ImageAssistantPreset[] = [
+  {
+    id: 'image-ecom-default',
+    name: '电商图片助手',
+    emoji: '🛍️',
+    type: 'image',
+    imageType: 'ecom',
+    prompt: '你是一位专业的电商产品摄影专家。帮助用户生成高质量的产品展示图片，包括主图、细节图和场景图。',
+    imageConfig: {
+      imageSize: '2K',
+      aspectRatio: '3:4',
+      batchCount: 1,
+      moduleConfig: {
+        layout: 'model_shot',
+        stylePreset: 'auto',
+        enableBack: false,
+        enableDetail: false
+      }
+    },
+    group: ['图片生成'],
+    settings: DEFAULT_ASSISTANT_SETTINGS
+  },
+  {
+    id: 'image-model-default',
+    name: '模特换装助手',
+    emoji: '👗',
+    type: 'image',
+    imageType: 'model',
+    prompt: '你是一位时尚摄影专家，帮助用户生成专业的模特穿搭图片。根据用户上传的服装图片，生成穿着该服装的模特照片。',
+    imageConfig: {
+      imageSize: '2K',
+      aspectRatio: '3:4',
+      batchCount: 1,
+      moduleConfig: {
+        ageGroup: 'adult',
+        gender: 'female',
+        scenePreset: 'studio',
+        poseStyle: 'natural'
+      }
+    },
+    group: ['图片生成'],
+    settings: DEFAULT_ASSISTANT_SETTINGS
+  },
+  {
+    id: 'image-pattern-default',
+    name: '图案设计助手',
+    emoji: '🎨',
+    type: 'image',
+    imageType: 'pattern',
+    prompt:
+      '你是一位图案设计专家，帮助用户生成精美的无缝图案和纹理。可以根据用户的描述或参考图创建各种风格的图案设计。',
+    imageConfig: {
+      imageSize: '2K',
+      aspectRatio: '1:1',
+      batchCount: 1,
+      moduleConfig: {
+        generationMode: 'mode_a',
+        outputType: 'set',
+        patternType: 'seamless',
+        density: 'medium',
+        colorTone: 'auto',
+        batchSize: 1
+      }
+    },
+    group: ['图片生成'],
+    settings: DEFAULT_ASSISTANT_SETTINGS
+  }
+]
 
 export interface AssistantsState {
   defaultAssistant: Assistant
@@ -31,6 +111,7 @@ export interface AssistantsState {
   tagsOrder: string[]
   collapsedTags: Record<string, boolean>
   presets: AssistantPreset[]
+  imageAssistantPresets: ImageAssistantPreset[]
   unifiedListOrder: Array<{ type: 'agent' | 'assistant'; id: string }>
 }
 
@@ -40,6 +121,7 @@ const initialState: AssistantsState = {
   tagsOrder: [],
   collapsedTags: {},
   presets: [],
+  imageAssistantPresets: BUILTIN_IMAGE_ASSISTANT_PRESETS,
   unifiedListOrder: []
 }
 
@@ -238,6 +320,34 @@ const assistantsSlice = createSlice({
           }
         }
       }
+    },
+    // Image Assistant Actions
+    updateImageAssistantConfig: (
+      state,
+      action: PayloadAction<{ assistantId: string; config: Partial<ImageAssistantConfig> }>
+    ) => {
+      const { assistantId, config } = action.payload
+      state.assistants = state.assistants.map((assistant) => {
+        if (assistant.id === assistantId && isImageAssistant(assistant)) {
+          return {
+            ...assistant,
+            imageConfig: {
+              ...assistant.imageConfig,
+              ...config
+            }
+          }
+        }
+        return assistant
+      })
+    },
+    setImageAssistantPresets: (state, action: PayloadAction<ImageAssistantPreset[]>) => {
+      state.imageAssistantPresets = action.payload
+    },
+    addImageAssistantPreset: (state, action: PayloadAction<ImageAssistantPreset>) => {
+      state.imageAssistantPresets.push(action.payload)
+    },
+    removeImageAssistantPreset: (state, action: PayloadAction<{ id: string }>) => {
+      state.imageAssistantPresets = state.imageAssistantPresets.filter((p) => p.id !== action.payload.id)
     }
   }
 })
@@ -264,7 +374,12 @@ export const {
   addAssistantPreset,
   removeAssistantPreset,
   updateAssistantPreset,
-  updateAssistantPresetSettings
+  updateAssistantPresetSettings,
+  // Image Assistant Actions
+  updateImageAssistantConfig,
+  setImageAssistantPresets,
+  addImageAssistantPreset,
+  removeImageAssistantPreset
 } = assistantsSlice.actions
 
 export const selectAllTopics = createSelector([(state: RootState) => state.assistants.assistants], (assistants) =>
@@ -277,5 +392,13 @@ export const selectTopicsMap = createSelector([selectAllTopics], (topics) => {
     return map
   }, new Map())
 })
+
+// Image Assistant Selectors
+export const selectImageAssistants = createSelector(
+  [(state: RootState) => state.assistants.assistants],
+  (assistants) => assistants.filter(isImageAssistant) as ImageAssistant[]
+)
+
+export const selectImageAssistantPresets = (state: RootState) => state.assistants.imageAssistantPresets
 
 export default assistantsSlice.reducer

@@ -652,7 +652,7 @@ export function buildModelUserPrompt(config: UnifiedPromptNodeConfig): string {
     home: 'indoor home scene',
     outdoor: 'outdoor natural scene',
     studio: 'professional studio',
-    playground: 'colorful children\'s playground',
+    playground: "colorful children's playground",
     nature: 'natural forest setting',
     beach: 'beach vacation scene',
     urban: 'modern city street scene',

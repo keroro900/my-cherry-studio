@@ -119,9 +119,7 @@ export function getVideoModelDurationOptions(model: Model): number[] {
 /**
  * Get default resolution options for a model
  */
-export function getVideoModelResolutionOptions(
-  model: Model
-): { label: string; value: string; aspectRatio: string }[] {
+export function getVideoModelResolutionOptions(model: Model): { label: string; value: string; aspectRatio: string }[] {
   if (!model) {
     return [{ label: '1080p (16:9)', value: '1920x1080', aspectRatio: '16:9' }]
   }

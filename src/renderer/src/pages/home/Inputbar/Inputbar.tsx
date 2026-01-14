@@ -32,7 +32,16 @@ import { estimateTextTokens as estimateTxtTokens, estimateUserPromptUsage } from
 import WebSearchService from '@renderer/services/WebSearchService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { sendMessage as _sendMessage } from '@renderer/store/thunk/messageThunk'
-import { type Assistant, type FileType, type KnowledgeBase, type Model, type Topic, TopicType } from '@renderer/types'
+import {
+  type Assistant,
+  type FileType,
+  isImageAssistant,
+  type KnowledgeBase,
+  type Model,
+  type Topic,
+  TopicType,
+  type WebSearchProviderId
+} from '@renderer/types'
 import type { MessageInputBaseParams } from '@renderer/types/newMessage'
 import { delay } from '@renderer/utils'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
@@ -162,6 +171,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   const dispatch = useAppDispatch()
   const isVisionAssistant = useMemo(() => isVisionModel(model), [model])
   const isGenerateImageAssistant = useMemo(() => isGenerateImageModel(model), [model])
+  const isImageTypeAssistant = useMemo(() => isImageAssistant(assistant), [assistant])
   const { setTimeoutTimer } = useTimer()
   const isMultiSelectMode = useAppSelector((state) => state.runtime.chat.isMultiSelectMode)
 
@@ -180,8 +190,9 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   )
 
   const canAddImageFile = useMemo(() => {
-    return isVisionSupported || isGenerateImageSupported
-  }, [isGenerateImageSupported, isVisionSupported])
+    // 图片助手总是支持图片上传
+    return isImageTypeAssistant || isVisionSupported || isGenerateImageSupported
+  }, [isImageTypeAssistant, isGenerateImageSupported, isVisionSupported])
 
   const canAddTextFile = useMemo(() => {
     return isVisionSupported || (!isVisionSupported && !isGenerateImageSupported)
@@ -421,7 +432,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     // Clear web search provider if disabled or model has mandatory search
     if (
       assistant.webSearchProviderId &&
-      (!WebSearchService.isWebSearchEnabled(assistant.webSearchProviderId) || isMandatoryWebSearchModel(model))
+      (!WebSearchService.isWebSearchEnabled(assistant.webSearchProviderId as WebSearchProviderId) ||
+        isMandatoryWebSearchModel(model))
     ) {
       updateAssistant({ ...assistant, webSearchProviderId: undefined })
     }

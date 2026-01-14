@@ -38,8 +38,13 @@ import type {
   OpenAIVerbosity
 } from '@renderer/types/aiCoreTypes'
 import type { ThemePreset } from '@renderer/types/theme'
-import type { WallpaperSettings } from '@renderer/types/wallpaper'
-import { DEFAULT_WALLPAPER_SETTINGS } from '@renderer/types/wallpaper'
+import type { WallpaperEffects, WallpaperSettings } from '@renderer/types/wallpaper'
+import {
+  DEFAULT_WALLPAPER_EFFECTS_DARK,
+  DEFAULT_WALLPAPER_EFFECTS_LIGHT,
+  DEFAULT_WALLPAPER_SETTINGS,
+  WALLPAPER_PRESETS
+} from '@renderer/types/wallpaper'
 import { uuid } from '@renderer/utils'
 import { API_SERVER_DEFAULTS, UpgradeChannel } from '@shared/config/constant'
 
@@ -253,6 +258,19 @@ export interface SettingsState {
   wallpaper: WallpaperSettings
   // Workflow Theme
   workflowThemeId: string
+  // Image Collaboration Settings
+  imageCollaboration: {
+    enabled: boolean
+    template: 'gemini_all' | 'multi_model' | 'premium' | 'custom'
+    maxRetries: number
+    showThinking: boolean
+    roleModels: {
+      analyst: { providerId: string; modelId: string } | null
+      planner: { providerId: string; modelId: string } | null
+      generator: { providerId: string; modelId: string } | null
+      quality_checker: { providerId: string; modelId: string } | null
+    }
+  }
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -458,7 +476,20 @@ export const initialState: SettingsState = {
   // Wallpaper
   wallpaper: DEFAULT_WALLPAPER_SETTINGS,
   // Workflow Theme
-  workflowThemeId: 'cherry-default'
+  workflowThemeId: 'cherry-default',
+  // Image Collaboration Settings
+  imageCollaboration: {
+    enabled: true,
+    template: 'gemini_all',
+    maxRetries: 2,
+    showThinking: true,
+    roleModels: {
+      analyst: null,
+      planner: null,
+      generator: null,
+      quality_checker: null
+    }
+  }
 }
 
 const settingsSlice = createSlice({
@@ -923,9 +954,158 @@ const settingsSlice = createSlice({
     setWallpaper: (state, action: PayloadAction<Partial<WallpaperSettings>>) => {
       state.wallpaper = { ...state.wallpaper, ...action.payload }
     },
+    // Update all wallpaper effects
+    setWallpaperEffects: (state, action: PayloadAction<Partial<WallpaperEffects>>) => {
+      state.wallpaper.effects = { ...state.wallpaper.effects, ...action.payload }
+    },
+    // Update a specific effect category
+    setWallpaperEffect: <K extends keyof WallpaperEffects>(
+      state: SettingsState,
+      action: PayloadAction<{ key: K; value: Partial<WallpaperEffects[K]> }>
+    ) => {
+      const { key, value } = action.payload
+      state.wallpaper.effects[key] = { ...state.wallpaper.effects[key], ...value }
+    },
+    // Reset wallpaper effects to defaults based on theme mode
+    resetWallpaperEffects: (state, action: PayloadAction<'light' | 'dark'>) => {
+      const defaults = action.payload === 'light' ? DEFAULT_WALLPAPER_EFFECTS_LIGHT : DEFAULT_WALLPAPER_EFFECTS_DARK
+      state.wallpaper.effects = { ...defaults }
+      state.wallpaper.activePresetId = undefined
+    },
+    // Apply a wallpaper preset
+    applyWallpaperPreset: (state, action: PayloadAction<string>) => {
+      const preset = WALLPAPER_PRESETS.find((p) => p.id === action.payload)
+      if (!preset) return
+
+      // Apply preset effects
+      if (preset.effects) {
+        // Merge preset effects with current effects
+        const newEffects = { ...state.wallpaper.effects }
+        if (preset.effects.sidebarGlass) {
+          newEffects.sidebarGlass = { ...newEffects.sidebarGlass, ...preset.effects.sidebarGlass }
+        }
+        if (preset.effects.chatBubble) {
+          newEffects.chatBubble = { ...newEffects.chatBubble, ...preset.effects.chatBubble }
+        }
+        if (preset.effects.contentOverlay) {
+          newEffects.contentOverlay = { ...newEffects.contentOverlay, ...preset.effects.contentOverlay }
+        }
+        if (preset.effects.inputBar) {
+          newEffects.inputBar = { ...newEffects.inputBar, ...preset.effects.inputBar }
+        }
+        if (preset.effects.codeBlock) {
+          newEffects.codeBlock = { ...newEffects.codeBlock, ...preset.effects.codeBlock }
+        }
+        state.wallpaper.effects = newEffects
+      }
+
+      // Apply preset wallpaper if provided
+      if (preset.wallpaperUrl) {
+        state.wallpaper.source = 'url'
+        state.wallpaper.url = preset.wallpaperUrl
+        state.wallpaper.enabled = true
+      } else if (preset.wallpaperGradient) {
+        state.wallpaper.source = 'builtin'
+        // For gradients, we use a special ID format
+        state.wallpaper.builtInId = `preset-gradient:${preset.id}`
+        state.wallpaper.enabled = true
+      }
+
+      state.wallpaper.activePresetId = preset.id
+    },
+    // Clear active preset (when user manually changes settings)
+    clearWallpaperPreset: (state) => {
+      state.wallpaper.activePresetId = undefined
+    },
+    // Set wallpaper active preset ID (for new preset CSS system)
+    setWallpaperActivePresetId: (state, action: PayloadAction<string | undefined>) => {
+      state.wallpaper.activePresetId = action.payload
+    },
     // Workflow Theme
     setWorkflowThemeId: (state, action: PayloadAction<string>) => {
       state.workflowThemeId = action.payload
+    },
+    // Image Collaboration Settings
+    setImageCollaborationEnabled: (state, action: PayloadAction<boolean>) => {
+      if (!state.imageCollaboration) {
+        state.imageCollaboration = {
+          enabled: true,
+          template: 'gemini_all',
+          maxRetries: 2,
+          showThinking: true,
+          roleModels: { analyst: null, planner: null, generator: null, quality_checker: null }
+        }
+      }
+      state.imageCollaboration.enabled = action.payload
+    },
+    setImageCollaborationTemplate: (
+      state,
+      action: PayloadAction<'gemini_all' | 'multi_model' | 'premium' | 'custom'>
+    ) => {
+      if (!state.imageCollaboration) {
+        state.imageCollaboration = {
+          enabled: true,
+          template: 'gemini_all',
+          maxRetries: 2,
+          showThinking: true,
+          roleModels: { analyst: null, planner: null, generator: null, quality_checker: null }
+        }
+      }
+      state.imageCollaboration.template = action.payload
+    },
+    setImageCollaborationMaxRetries: (state, action: PayloadAction<number>) => {
+      if (!state.imageCollaboration) {
+        state.imageCollaboration = {
+          enabled: true,
+          template: 'gemini_all',
+          maxRetries: 2,
+          showThinking: true,
+          roleModels: { analyst: null, planner: null, generator: null, quality_checker: null }
+        }
+      }
+      state.imageCollaboration.maxRetries = action.payload
+    },
+    setImageCollaborationShowThinking: (state, action: PayloadAction<boolean>) => {
+      if (!state.imageCollaboration) {
+        state.imageCollaboration = {
+          enabled: true,
+          template: 'gemini_all',
+          maxRetries: 2,
+          showThinking: true,
+          roleModels: { analyst: null, planner: null, generator: null, quality_checker: null }
+        }
+      }
+      state.imageCollaboration.showThinking = action.payload
+    },
+    setImageCollaborationRoleModel: (
+      state,
+      action: PayloadAction<{
+        role: 'analyst' | 'planner' | 'generator' | 'quality_checker'
+        model: { providerId: string; modelId: string } | null
+      }>
+    ) => {
+      if (!state.imageCollaboration) {
+        state.imageCollaboration = {
+          enabled: true,
+          template: 'gemini_all',
+          maxRetries: 2,
+          showThinking: true,
+          roleModels: { analyst: null, planner: null, generator: null, quality_checker: null }
+        }
+      }
+      state.imageCollaboration.roleModels[action.payload.role] = action.payload.model
+    },
+    setImageCollaboration: (state, action: PayloadAction<Partial<SettingsState['imageCollaboration']>>) => {
+      if (!state.imageCollaboration) {
+        state.imageCollaboration = {
+          enabled: true,
+          template: 'gemini_all',
+          maxRetries: 2,
+          showThinking: true,
+          roleModels: { analyst: null, planner: null, generator: null, quality_checker: null }
+        }
+      }
+      state.imageCollaboration = { ...state.imageCollaboration, ...action.payload }
     }
   }
 })
@@ -1066,8 +1246,21 @@ export const {
   removeCustomThemePreset,
   // Wallpaper
   setWallpaper,
+  setWallpaperEffects,
+  setWallpaperEffect,
+  resetWallpaperEffects,
+  applyWallpaperPreset,
+  clearWallpaperPreset,
+  setWallpaperActivePresetId,
   // Workflow Theme
-  setWorkflowThemeId
+  setWorkflowThemeId,
+  // Image Collaboration
+  setImageCollaborationEnabled,
+  setImageCollaborationTemplate,
+  setImageCollaborationMaxRetries,
+  setImageCollaborationShowThinking,
+  setImageCollaborationRoleModel,
+  setImageCollaboration
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

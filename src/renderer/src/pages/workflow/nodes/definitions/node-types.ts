@@ -273,7 +273,7 @@ export interface LegacyNodeDefinition {
   type: WorkflowNodeType
   label: string
   icon: string
-  category: 'input' | 'ai' | 'image' | 'video' | 'flow' | 'output' | 'external' | 'custom' | 'text'
+  category: 'input' | 'ai' | 'image' | 'video' | 'flow' | 'output' | 'external' | 'custom' | 'text' | 'fashion'
   description: string
   defaultInputs: NodeHandle[]
   defaultOutputs: NodeHandle[]

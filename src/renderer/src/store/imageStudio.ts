@@ -5,13 +5,8 @@
  */
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-
 import type {
-  DEFAULT_ECOM_CONFIG,
-  DEFAULT_MODEL_CONFIG,
-  DEFAULT_PATTERN_CONFIG,
   EcomModuleConfig,
-  ImageOutputs,
   ImageProject,
   ImageStudioState,
   ImageTask,
@@ -302,6 +297,95 @@ const imageStudioSlice = createSlice({
     },
 
     // ========================================================================
+    // 增强的任务管理
+    // ========================================================================
+
+    /** 暂停单个任务 */
+    pauseTask: (state, action: PayloadAction<string>) => {
+      const task = state.taskQueue.find((t) => t.id === action.payload)
+      if (task && task.status === 'queued') {
+        task.status = 'paused'
+      }
+    },
+
+    /** 恢复单个任务 */
+    resumeTask: (state, action: PayloadAction<string>) => {
+      const task = state.taskQueue.find((t) => t.id === action.payload)
+      if (task && task.status === 'paused') {
+        task.status = 'queued'
+      }
+    },
+
+    /** 重排任务顺序 */
+    reorderTasks: (state, action: PayloadAction<{ fromIndex: number; toIndex: number }>) => {
+      const { fromIndex, toIndex } = action.payload
+      if (
+        fromIndex >= 0 &&
+        fromIndex < state.taskQueue.length &&
+        toIndex >= 0 &&
+        toIndex < state.taskQueue.length &&
+        fromIndex !== toIndex
+      ) {
+        const [task] = state.taskQueue.splice(fromIndex, 1)
+        state.taskQueue.splice(toIndex, 0, task)
+      }
+    },
+
+    /** 移动任务到队列顶部 */
+    moveTaskToTop: (state, action: PayloadAction<string>) => {
+      const index = state.taskQueue.findIndex((t) => t.id === action.payload)
+      if (index > 0) {
+        const [task] = state.taskQueue.splice(index, 1)
+        // 找到第一个 queued 或 paused 任务的位置
+        const firstQueuedIndex = state.taskQueue.findIndex((t) => t.status === 'queued' || t.status === 'paused')
+        if (firstQueuedIndex >= 0) {
+          state.taskQueue.splice(firstQueuedIndex, 0, task)
+        } else {
+          state.taskQueue.push(task)
+        }
+      }
+    },
+
+    /** 重试所有失败的任务 */
+    retryAllFailed: (state) => {
+      state.taskQueue.forEach((task) => {
+        if (task.status === 'failed') {
+          task.status = 'queued'
+          task.error = undefined
+          task.startedAt = undefined
+          task.completedAt = undefined
+          task.progress = { current: 0, total: 100, step: '' }
+        }
+      })
+    },
+
+    /** 取消所有等待中的任务 */
+    cancelAllQueued: (state) => {
+      state.taskQueue.forEach((task) => {
+        if (task.status === 'queued' || task.status === 'paused') {
+          task.status = 'cancelled'
+          task.completedAt = Date.now()
+        }
+      })
+    },
+
+    /** 批量设置任务状态 */
+    batchUpdateTaskStatus: (state, action: PayloadAction<{ taskIds: string[]; status: TaskStatus }>) => {
+      const { taskIds, status } = action.payload
+      state.taskQueue.forEach((task) => {
+        if (taskIds.includes(task.id)) {
+          task.status = status
+          if (status === 'running') {
+            task.startedAt = Date.now()
+          }
+          if (['completed', 'failed', 'cancelled'].includes(status)) {
+            task.completedAt = Date.now()
+          }
+        }
+      })
+    },
+
+    // ========================================================================
     // 模块配置更新
     // ========================================================================
 
@@ -366,6 +450,15 @@ export const {
   pauseAllTasks,
   resumeAllTasks,
   setMaxConcurrency,
+  // 新增的任务管理 actions
+  pauseTask,
+  resumeTask,
+  reorderTasks,
+  moveTaskToTop,
+  retryAllFailed,
+  cancelAllQueued,
+  batchUpdateTaskStatus,
+  // 模块配置
   updateEcomConfig,
   updateModelConfig,
   updatePatternConfig,
@@ -420,3 +513,66 @@ export const selectProviderConfig = (state: { imageStudio: ImageStudioState }) =
   providerId: state.imageStudio.providerId,
   modelId: state.imageStudio.modelId
 })
+
+// ============================================================================
+// 增强的任务队列 Selectors
+// ============================================================================
+
+/** 获取队列统计信息 */
+export const selectQueueStats = (state: { imageStudio: ImageStudioState }) => {
+  const { taskQueue } = state.imageStudio
+  return {
+    total: taskQueue.length,
+    queued: taskQueue.filter((t) => t.status === 'queued').length,
+    running: taskQueue.filter((t) => t.status === 'running').length,
+    paused: taskQueue.filter((t) => t.status === 'paused').length,
+    completed: taskQueue.filter((t) => t.status === 'completed').length,
+    failed: taskQueue.filter((t) => t.status === 'failed').length,
+    cancelled: taskQueue.filter((t) => t.status === 'cancelled').length
+  }
+}
+
+/** 获取失败的任务 */
+export const selectFailedTasks = (state: { imageStudio: ImageStudioState }) =>
+  state.imageStudio.taskQueue.filter((t) => t.status === 'failed')
+
+/** 获取暂停的任务 */
+export const selectPausedTasks = (state: { imageStudio: ImageStudioState }) =>
+  state.imageStudio.taskQueue.filter((t) => t.status === 'paused')
+
+/** 获取已完成的任务 */
+export const selectCompletedTasks = (state: { imageStudio: ImageStudioState }) =>
+  state.imageStudio.taskQueue.filter((t) => t.status === 'completed')
+
+/** 检查是否有正在运行的任务 */
+export const selectHasRunningTasks = (state: { imageStudio: ImageStudioState }) =>
+  state.imageStudio.taskQueue.some((t) => t.status === 'running')
+
+/** 检查是否有等待中的任务 */
+export const selectHasPendingTasks = (state: { imageStudio: ImageStudioState }) =>
+  state.imageStudio.taskQueue.some((t) => t.status === 'queued' || t.status === 'paused')
+
+/** 估算完成时间（基于历史平均时间） */
+export const selectEstimatedCompletionTime = (state: { imageStudio: ImageStudioState }) => {
+  const { taskQueue, maxConcurrency } = state.imageStudio
+
+  // 计算已完成任务的平均耗时
+  const completedTasks = taskQueue.filter((t) => t.status === 'completed' && t.startedAt && t.completedAt)
+
+  if (completedTasks.length === 0) {
+    // 如果没有历史数据，假设每个任务 30 秒
+    const pendingCount = taskQueue.filter((t) => t.status === 'queued').length
+    const runningCount = taskQueue.filter((t) => t.status === 'running').length
+    const totalPending = pendingCount + runningCount
+    return Math.ceil(totalPending / maxConcurrency) * 30 * 1000
+  }
+
+  const avgTime = completedTasks.reduce((sum, t) => sum + (t.completedAt! - t.startedAt!), 0) / completedTasks.length
+
+  const pendingCount = taskQueue.filter((t) => t.status === 'queued').length
+  const runningCount = taskQueue.filter((t) => t.status === 'running').length
+
+  // 考虑并发
+  const batchesRemaining = Math.ceil((pendingCount + runningCount) / maxConcurrency)
+  return batchesRemaining * avgTime
+}

@@ -108,7 +108,7 @@ export class CustomNodeExecutor extends BaseNodeExecutor {
       stringify: (obj: any, indent = 2) => JSON.stringify(obj, null, indent),
       delay: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
       get: (obj: any, path: string, defaultValue?: any) => {
-        const parts = path.split(/[.\[\]]/).filter(Boolean)
+        const parts = path.split(/[.[\]]/).filter(Boolean)
         let result = obj
         for (const part of parts) {
           if (result === undefined || result === null) return defaultValue
@@ -117,7 +117,7 @@ export class CustomNodeExecutor extends BaseNodeExecutor {
         return result !== undefined ? result : defaultValue
       },
       set: (obj: any, path: string, value: any) => {
-        const parts = path.split(/[.\[\]]/).filter(Boolean)
+        const parts = path.split(/[.[\]]/).filter(Boolean)
         let current = obj
         for (let i = 0; i < parts.length - 1; i++) {
           const part = parts[i]
@@ -141,9 +141,7 @@ export class CustomNodeExecutor extends BaseNodeExecutor {
     const isAsync = this.definition.executionMode === 'async'
 
     // 包装代码
-    const wrappedCode = isAsync
-      ? `return (async () => { ${code} })();`
-      : `return (() => { ${code} })();`
+    const wrappedCode = isAsync ? `return (async () => { ${code} })();` : `return (() => { ${code} })();`
 
     // 创建函数
     const fn = new Function('inputs', 'config', 'outputs', 'console', 'utils', 'fetch', wrappedCode)

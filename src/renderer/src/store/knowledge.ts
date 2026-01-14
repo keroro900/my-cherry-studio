@@ -234,6 +234,27 @@ const knowledgeSlice = createSlice({
           item.isPreprocessed = action.payload.isPreprocessed
         }
       }
+    },
+
+    /**
+     * Reset items stuck in 'processing' state to 'pending' after app restart.
+     * This should be called after redux-persist rehydration to handle interrupted processing.
+     */
+    resetStuckProcessingItems(state) {
+      let resetCount = 0
+      state.bases.forEach((base) => {
+        base.items.forEach((item) => {
+          if (item.processingStatus === 'processing') {
+            item.processingStatus = 'pending'
+            item.processingProgress = undefined
+            // Keep the error if any was set
+            resetCount++
+          }
+        })
+      })
+      if (resetCount > 0) {
+        logger.info(`Reset ${resetCount} stuck processing items to pending after app restart`)
+      }
     }
   }
 })
@@ -254,7 +275,8 @@ export const {
   clearAllProcessing,
   updateBaseItemUniqueId,
   updateBaseItemIsPreprocessed,
-  syncPreprocessProvider
+  syncPreprocessProvider,
+  resetStuckProcessingItems
 } = knowledgeSlice.actions
 
 export default knowledgeSlice.reducer

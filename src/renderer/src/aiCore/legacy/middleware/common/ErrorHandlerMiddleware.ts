@@ -67,6 +67,45 @@ export const ErrorHandlerMiddleware =
   }
 
 function handleError(error: any, params: CompletionsParams): any {
+  const errorMessage = error?.message || String(error)
+
+  // 处理 API 返回 HTML 而非 JSON 的情况
+  if (
+    errorMessage.includes('<!doctype') ||
+    errorMessage.includes('<!DOCTYPE') ||
+    errorMessage.includes('<html') ||
+    (errorMessage.includes('Unexpected token') && errorMessage.includes('<'))
+  ) {
+    const providerHost = params.assistant?.model?.provider
+    const providerName = params.assistant?.model?.provider || '未知'
+
+    // 检查是否是 API Host 配置错误
+    const hostConfig = providerHost || ''
+    if (hostConfig.includes('/models') || hostConfig.includes('/v1/')) {
+      return {
+        ...error,
+        message: `API 代理配置错误: API Host 不应包含路径后缀。请检查 Provider "${providerName}" 的配置`,
+        i18nKey: 'chat.api_config_error'
+      }
+    }
+
+    return {
+      ...error,
+      message: `API 服务返回了 HTML 页面而非 JSON。请检查 Provider "${providerName}" 的 API 地址配置`,
+      i18nKey: 'chat.html_response_error'
+    }
+  }
+
+  // 处理通用 JSON 解析错误
+  if (errorMessage.includes('Unexpected token') || errorMessage.includes('is not valid JSON')) {
+    const providerName = params.assistant?.model?.provider || '未知'
+    return {
+      ...error,
+      message: `服务器返回了非 JSON 格式的响应。请检查 Provider "${providerName}" 的 API 地址配置`,
+      i18nKey: 'chat.json_parse_error'
+    }
+  }
+
   if (isZhipuModel(params.assistant.model || getDefaultModel()) && error.status && !params.enableGenerateImage) {
     return handleZhipuError(error)
   }

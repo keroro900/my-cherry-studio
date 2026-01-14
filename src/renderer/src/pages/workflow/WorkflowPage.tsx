@@ -136,151 +136,151 @@ export default function WorkflowPage() {
             {/* 工具栏 */}
             <WorkflowToolbar />
 
-          {/* 主要内容区域 */}
-          <MainContent>
-            {/* 左侧：节点面板 - 可折叠 */}
-            {showNodePanel && (
-              <div
-                className="workflow-node-panel"
-                style={{
-                  width: isNodePanelCollapsed ? '40px' : '260px',
-                  flexShrink: 0,
-                  borderRight: '1px solid var(--ant-color-border)',
-                  overflow: 'hidden',
-                  backgroundColor: 'var(--ant-color-bg-container)',
-                  transition: 'width 0.3s ease',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                {isNodePanelCollapsed ? (
-                  <div
-                    style={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      paddingTop: '12px',
-                      gap: '8px'
-                    }}>
-                    <button
-                      onClick={() => setIsNodePanelCollapsed(false)}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '6px',
-                        border: '1px solid var(--ant-color-border)',
-                        backgroundColor: 'var(--ant-color-bg-elevated)',
-                        cursor: 'pointer',
-                        color: 'var(--ant-color-text-secondary)'
-                      }}
-                      title="展开节点库">
-                      <ChevronRight size={16} />
-                    </button>
+            {/* 主要内容区域 */}
+            <MainContent>
+              {/* 左侧：节点面板 - 可折叠 */}
+              {showNodePanel && (
+                <div
+                  className="workflow-node-panel"
+                  style={{
+                    width: isNodePanelCollapsed ? '40px' : '260px',
+                    flexShrink: 0,
+                    borderRight: '1px solid var(--ant-color-border)',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--ant-color-bg-container)',
+                    transition: 'width 0.3s ease',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                  {isNodePanelCollapsed ? (
                     <div
                       style={{
-                        writingMode: 'vertical-rl',
-                        fontSize: '12px',
-                        color: 'var(--ant-color-text-tertiary)',
-                        marginTop: '8px'
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        paddingTop: '12px',
+                        gap: '8px'
                       }}>
-                      <Layers size={14} style={{ marginBottom: '4px' }} />
-                      节点库
+                      <button
+                        onClick={() => setIsNodePanelCollapsed(false)}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '6px',
+                          border: '1px solid var(--ant-color-border)',
+                          backgroundColor: 'var(--ant-color-bg-elevated)',
+                          cursor: 'pointer',
+                          color: 'var(--ant-color-text-secondary)'
+                        }}
+                        title="展开节点库">
+                        <ChevronRight size={16} />
+                      </button>
+                      <div
+                        style={{
+                          writingMode: 'vertical-rl',
+                          fontSize: '12px',
+                          color: 'var(--ant-color-text-tertiary)',
+                          marginTop: '8px'
+                        }}>
+                        <Layers size={14} style={{ marginBottom: '4px' }} />
+                        节点库
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <NodePanel onCollapse={() => setIsNodePanelCollapsed(true)} />
-                )}
-              </div>
-            )}
+                  ) : (
+                    <NodePanel onCollapse={() => setIsNodePanelCollapsed(true)} />
+                  )}
+                </div>
+              )}
 
-            {/* 中间：画布和状态面板 */}
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-                minWidth: 0,
-                minHeight: 0
-              }}>
-              {/* 画布区域 */}
+              {/* 中间：画布和状态面板 */}
               <div
                 style={{
-                  flex: '1 1 0',
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
                   position: 'relative',
-                  overflow: 'hidden',
+                  minWidth: 0,
                   minHeight: 0
                 }}>
-                <WorkflowCanvas />
+                {/* 画布区域 */}
+                <div
+                  style={{
+                    flex: '1 1 0',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    minHeight: 0
+                  }}>
+                  <WorkflowCanvas />
+                </div>
+
+                {/* 底部：状态面板 */}
+                <StatusPanel />
               </div>
 
-              {/* 底部：状态面板 */}
-              <StatusPanel />
-            </div>
-
-            {/* 右侧：配置面板 - 可折叠 */}
-            {showConfigPanel && (
-              <div
-                className="workflow-config-panel"
-                style={{
-                  width: isConfigCollapsed ? '40px' : '320px',
-                  flexShrink: 0,
-                  borderLeft: '1px solid var(--ant-color-border)',
-                  overflow: 'hidden',
-                  backgroundColor: 'var(--ant-color-bg-container)',
-                  transition: 'width 0.3s ease',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                {/* 折叠时只显示切换按钮 */}
-                {isConfigCollapsed ? (
-                  <div
-                    style={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      paddingTop: '12px',
-                      gap: '8px'
-                    }}>
-                    <button
-                      onClick={() => setIsConfigCollapsed(false)}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '6px',
-                        border: '1px solid var(--ant-color-border)',
-                        backgroundColor: 'var(--ant-color-bg-elevated)',
-                        cursor: 'pointer',
-                        color: 'var(--ant-color-text-secondary)'
-                      }}
-                      title="展开配置面板">
-                      <ChevronLeft size={16} />
-                    </button>
+              {/* 右侧：配置面板 - 可折叠 */}
+              {showConfigPanel && (
+                <div
+                  className="workflow-config-panel"
+                  style={{
+                    width: isConfigCollapsed ? '40px' : '320px',
+                    flexShrink: 0,
+                    borderLeft: '1px solid var(--ant-color-border)',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--ant-color-bg-container)',
+                    transition: 'width 0.3s ease',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                  {/* 折叠时只显示切换按钮 */}
+                  {isConfigCollapsed ? (
                     <div
                       style={{
-                        writingMode: 'vertical-rl',
-                        fontSize: '12px',
-                        color: 'var(--ant-color-text-tertiary)',
-                        marginTop: '8px'
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        paddingTop: '12px',
+                        gap: '8px'
                       }}>
-                      <Settings2 size={14} style={{ marginBottom: '4px' }} />
-                      节点配置
+                      <button
+                        onClick={() => setIsConfigCollapsed(false)}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '6px',
+                          border: '1px solid var(--ant-color-border)',
+                          backgroundColor: 'var(--ant-color-bg-elevated)',
+                          cursor: 'pointer',
+                          color: 'var(--ant-color-text-secondary)'
+                        }}
+                        title="展开配置面板">
+                        <ChevronLeft size={16} />
+                      </button>
+                      <div
+                        style={{
+                          writingMode: 'vertical-rl',
+                          fontSize: '12px',
+                          color: 'var(--ant-color-text-tertiary)',
+                          marginTop: '8px'
+                        }}>
+                        <Settings2 size={14} style={{ marginBottom: '4px' }} />
+                        节点配置
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <ConfigPanel onCollapse={() => setIsConfigCollapsed(true)} />
-                )}
-              </div>
-            )}
-          </MainContent>
-        </PageContainer>
+                  ) : (
+                    <ConfigPanel onCollapse={() => setIsConfigCollapsed(true)} />
+                  )}
+                </div>
+              )}
+            </MainContent>
+          </PageContainer>
         </Container>
       </WorkflowThemeProvider>
     </ErrorBoundary>

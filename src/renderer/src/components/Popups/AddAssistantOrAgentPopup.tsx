@@ -1,11 +1,11 @@
 import { TopView } from '@renderer/components/TopView'
 import { cn } from '@renderer/utils'
 import { Modal } from 'antd'
-import { Bot, MessageSquare } from 'lucide-react'
+import { Bot, ImageIcon, MessageSquare } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-type OptionType = 'assistant' | 'agent'
+type OptionType = 'assistant' | 'agent' | 'image'
 
 interface ShowParams {
   onSelect: (type: OptionType) => void
@@ -45,18 +45,18 @@ const PopupContainer: React.FC<Props> = ({ onSelect, resolve }) => {
       transitionName="animation-move-down"
       centered
       footer={null}
-      width={560}>
-      <div className="grid grid-cols-2 gap-4 py-4">
+      width={700}>
+      <div className="grid grid-cols-3 gap-4 py-4">
         {/* Assistant Option */}
         <button
           type="button"
           onClick={() => handleSelect('assistant')}
-          className="group flex cursor-pointer flex-col items-center gap-3 rounded-lg bg-[var(--color-background-soft)] p-6 transition-all hover:bg-[var(--color-hover)]"
+          className="group flex cursor-pointer flex-col items-center gap-3 rounded-lg bg-[var(--color-background-soft)] p-5 transition-all hover:bg-[var(--color-hover)]"
           onMouseEnter={() => setHoveredOption('assistant')}
           onMouseLeave={() => setHoveredOption(null)}>
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-list-item)] transition-colors">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-list-item)] transition-colors">
             <MessageSquare
-              size={24}
+              size={22}
               className={cn(
                 'transition-colors',
                 hoveredOption === 'assistant' ? 'text-[var(--color-primary)]' : 'text-[var(--color-icon-white)]'
@@ -64,8 +64,34 @@ const PopupContainer: React.FC<Props> = ({ onSelect, resolve }) => {
             />
           </div>
           <div className="text-center">
-            <h3 className="mb-1 font-semibold text-[var(--color-text-1)] text-base">{t('chat.add.assistant.title')}</h3>
-            <p className="text-[var(--color-text-2)] text-sm">{t('chat.add.assistant.description')}</p>
+            <h3 className="mb-1 font-semibold text-[var(--color-text-1)] text-sm">{t('chat.add.assistant.title')}</h3>
+            <p className="text-[var(--color-text-2)] text-xs">{t('chat.add.assistant.description')}</p>
+          </div>
+        </button>
+
+        {/* Image Assistant Option */}
+        <button
+          type="button"
+          onClick={() => handleSelect('image')}
+          className="group flex cursor-pointer flex-col items-center gap-3 rounded-lg bg-[var(--color-background-soft)] p-5 transition-all hover:bg-[var(--color-hover)]"
+          onMouseEnter={() => setHoveredOption('image')}
+          onMouseLeave={() => setHoveredOption(null)}>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-list-item)] transition-colors">
+            <ImageIcon
+              size={22}
+              className={cn(
+                'transition-colors',
+                hoveredOption === 'image' ? 'text-[#10B981]' : 'text-[var(--color-icon-white)]'
+              )}
+            />
+          </div>
+          <div className="text-center">
+            <h3 className="mb-1 font-semibold text-[var(--color-text-1)] text-sm">
+              {t('chat.add.image_assistant.title', '图片助手')}
+            </h3>
+            <p className="text-[var(--color-text-2)] text-xs">
+              {t('chat.add.image_assistant.description', '生成电商、模特、图案等图片')}
+            </p>
           </div>
         </button>
 
@@ -73,12 +99,12 @@ const PopupContainer: React.FC<Props> = ({ onSelect, resolve }) => {
         <button
           onClick={() => handleSelect('agent')}
           type="button"
-          className="group flex cursor-pointer flex-col items-center gap-3 rounded-lg bg-[var(--color-background-soft)] p-6 transition-all hover:bg-[var(--color-hover)]"
+          className="group flex cursor-pointer flex-col items-center gap-3 rounded-lg bg-[var(--color-background-soft)] p-5 transition-all hover:bg-[var(--color-hover)]"
           onMouseEnter={() => setHoveredOption('agent')}
           onMouseLeave={() => setHoveredOption(null)}>
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-list-item)] transition-colors">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-list-item)] transition-colors">
             <Bot
-              size={24}
+              size={22}
               className={cn(
                 'transition-colors',
                 hoveredOption === 'agent' ? 'text-[var(--color-primary)]' : 'text-[var(--color-icon-white)]'
@@ -86,8 +112,8 @@ const PopupContainer: React.FC<Props> = ({ onSelect, resolve }) => {
             />
           </div>
           <div className="text-center">
-            <h3 className="mb-1 font-semibold text-[var(--color-text-1)] text-base">{t('agent.add.title')}</h3>
-            <p className="text-[var(--color-text-2)] text-sm">{t('agent.add.description')}</p>
+            <h3 className="mb-1 font-semibold text-[var(--color-text-1)] text-sm">{t('agent.add.title')}</h3>
+            <p className="text-[var(--color-text-2)] text-xs">{t('agent.add.description')}</p>
           </div>
         </button>
       </div>

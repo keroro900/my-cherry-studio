@@ -9,14 +9,8 @@ const logger = loggerService.withContext('ProviderConfigs')
  * 定义了需要动态注册的AI Providers
  */
 export const NEW_PROVIDER_CONFIGS: ProviderConfig[] = [
-  {
-    id: 'openrouter',
-    name: 'OpenRouter',
-    import: () => import('@openrouter/ai-sdk-provider'),
-    creatorFunctionName: 'createOpenRouter',
-    supportsImageGeneration: true,
-    aliases: ['openrouter']
-  },
+  // NOTE: 'openrouter' 已经在 @cherrystudio/ai-core 的 baseProviders 中定义
+  // 所以这里不再重复注册，避免 "ProviderConfig already exists" 警告
   {
     id: 'google-vertex',
     name: 'Google Vertex AI',

@@ -160,6 +160,10 @@ export const autoRenameTopic = async (assistant: Assistant, topicId: string) => 
           topic.id === _activeTopic.id && _setActiveTopic(data)
           store.dispatch(updateTopic({ assistantId: assistant.id, topic: data }))
         }
+      } catch (error) {
+        // Silently ignore errors from topic renaming to prevent app crashes
+        // Topic will keep its default name if summarization fails
+        console.warn('[autoRenameTopic] Failed to generate topic summary:', error)
       } finally {
         finishTopicRenaming(topicId)
       }

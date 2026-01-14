@@ -126,6 +126,11 @@ export enum WorkflowNodeType {
   LOOP_INDEX = 'loop_index',
   LOOP_LIST = 'loop_list',
 
+  // 质量守护节点
+  QUALITY_CHECK = 'quality_check',
+  AUTO_OPTIMIZE = 'auto_optimize',
+  PROMPT_OPTIMIZER = 'prompt_optimizer',
+
   // 输出
   OUTPUT = 'output'
 }
@@ -315,7 +320,18 @@ export interface NodeDefinition {
   type: WorkflowNodeType
   label: string
   icon: string
-  category: 'input' | 'ai' | 'image' | 'video' | 'flow' | 'output' | 'external' | 'custom' | 'text' | 'fashion'
+  category:
+    | 'input'
+    | 'ai'
+    | 'image'
+    | 'video'
+    | 'flow'
+    | 'output'
+    | 'external'
+    | 'custom'
+    | 'text'
+    | 'fashion'
+    | 'quality'
   description: string
   defaultInputs: NodeHandle[]
   defaultOutputs: NodeHandle[]
@@ -1336,6 +1352,62 @@ export const NODE_REGISTRY: Record<WorkflowNodeType, NodeDefinition> = {
       maxIterations: 1000,
       iterationDelay: 0
     } as LoopNodeConfig
+  },
+
+  // ===== 质量优化节点 =====
+  [WorkflowNodeType.QUALITY_CHECK]: {
+    type: WorkflowNodeType.QUALITY_CHECK,
+    label: '质量检查',
+    icon: '✅',
+    category: 'quality',
+    description: '对内容进行质量检查和评分',
+    defaultInputs: [{ id: 'content', label: '待检查内容', dataType: 'any', required: true }],
+    defaultOutputs: [
+      { id: 'passed', label: '通过', dataType: 'boolean' },
+      { id: 'score', label: '评分', dataType: 'number' },
+      { id: 'report', label: '报告', dataType: 'json' }
+    ],
+    defaultConfig: {
+      checkType: 'general',
+      minScore: 0.7
+    }
+  },
+
+  [WorkflowNodeType.AUTO_OPTIMIZE]: {
+    type: WorkflowNodeType.AUTO_OPTIMIZE,
+    label: '自动优化',
+    icon: '🔧',
+    category: 'quality',
+    description: '自动优化内容质量',
+    defaultInputs: [
+      { id: 'content', label: '待优化内容', dataType: 'any', required: true },
+      { id: 'report', label: '质量报告', dataType: 'json' }
+    ],
+    defaultOutputs: [
+      { id: 'optimized', label: '优化后内容', dataType: 'any' },
+      { id: 'changes', label: '变更记录', dataType: 'json' }
+    ],
+    defaultConfig: {
+      strategy: 'balanced',
+      maxIterations: 3
+    }
+  },
+
+  [WorkflowNodeType.PROMPT_OPTIMIZER]: {
+    type: WorkflowNodeType.PROMPT_OPTIMIZER,
+    label: '提示词优化',
+    icon: '💡',
+    category: 'quality',
+    description: '使用AI优化提示词',
+    defaultInputs: [{ id: 'prompt', label: '原始提示词', dataType: 'text', required: true }],
+    defaultOutputs: [
+      { id: 'optimized', label: '优化后提示词', dataType: 'text' },
+      { id: 'suggestions', label: '优化建议', dataType: 'json' }
+    ],
+    defaultConfig: {
+      optimizationType: 'general',
+      preserveIntent: true
+    }
   },
 
   // ===== 输出节点 =====

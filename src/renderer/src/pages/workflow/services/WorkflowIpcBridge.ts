@@ -2,17 +2,20 @@
  * 工作流 IPC 桥接服务
  * Workflow IPC Bridge Service
  *
- * 处理 Main 进程 MCP Server 发来的图片生成请求
- * 调用 WorkflowAiService 执行实际生成
+ * 处理 Main 进程 MCP Server 和 VCP 插件发来的请求
+ * - 图片生成请求
+ * - 节点执行请求（VCP 工具调用）
  *
- * @version 1.0.0
+ * @version 2.0.0
  * @created 2024-12-19
- *
- * **Feature: workflow-ipc-bridge, Phase 7.2**
+ * @updated 2025-01-02
  */
 
 import { loggerService } from '@logger'
 import { IpcChannel } from '@shared/IpcChannel'
+
+import { getNodeExecutor } from '../nodes'
+import type { NodeExecutionContext, NodeExecutionResult } from '../nodes/base/types'
 
 const logger = loggerService.withContext('WorkflowIpcBridge')
 
@@ -114,6 +117,7 @@ class WorkflowIpcBridgeService {
 
   /**
    * 注册节点执行处理器
+   * 处理来自 VCP WorkflowBridge 的节点执行请求
    */
   private registerExecuteNodeHandler(): void {
     const { ipcRenderer } = window.require?.('electron') || {}
@@ -122,27 +126,127 @@ class WorkflowIpcBridgeService {
       return
     }
 
+    // 监听来自 VCP 的节点执行请求
+    ipcRenderer.on(
+      'workflow:execute-node',
+      async (
+        _event: unknown,
+        request: {
+          requestId: string
+          nodeType: string
+          inputs: Record<string, unknown>
+          config: Record<string, unknown>
+        }
+      ) => {
+        logger.info('Received VCP node execution request', {
+          requestId: request.requestId,
+          nodeType: request.nodeType
+        })
+
+        try {
+          const result = await this.executeNode(request.nodeType, request.inputs, request.config)
+
+          // 发送结果回 Main 进程
+          ipcRenderer.invoke(`workflow:node-result:${request.requestId}`, result)
+        } catch (error) {
+          logger.error('Node execution failed', { error, nodeType: request.nodeType })
+          ipcRenderer.invoke(`workflow:node-result:${request.requestId}`, {
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          })
+        }
+      }
+    )
+
+    // 保持原有的 IPC Channel 处理
     ipcRenderer.on(
       IpcChannel.Workflow_ExecuteNode,
-      async (_event: unknown, request: { requestId: string; nodeType: string; inputs: any; config: any }) => {
+      async (_event: unknown, request: { requestId: string; nodeType: string; inputs: unknown; config: unknown }) => {
         logger.info('Received execute_node request', {
           requestId: request.requestId,
           nodeType: request.nodeType
         })
 
-        // TODO: 实现节点执行逻辑
-        // 需要调用 NodeRegistry 获取执行器并执行
+        try {
+          const result = await this.executeNode(
+            request.nodeType,
+            request.inputs as Record<string, unknown>,
+            request.config as Record<string, unknown>
+          )
 
-        const responseChannel = `${IpcChannel.Workflow_ExecuteNode}:response:${request.requestId}`
-        ipcRenderer.send(responseChannel, {
-          success: true,
-          requestId: request.requestId,
-          message: '节点执行功能开发中'
-        })
+          const responseChannel = `${IpcChannel.Workflow_ExecuteNode}:response:${request.requestId}`
+          ipcRenderer.send(responseChannel, {
+            success: result.status === 'success',
+            requestId: request.requestId,
+            outputs: result.outputs,
+            error: result.errorMessage
+          })
+        } catch (error) {
+          const responseChannel = `${IpcChannel.Workflow_ExecuteNode}:response:${request.requestId}`
+          ipcRenderer.send(responseChannel, {
+            success: false,
+            requestId: request.requestId,
+            error: error instanceof Error ? error.message : String(error)
+          })
+        }
       }
     )
 
-    logger.debug('Registered Workflow_ExecuteNode handler')
+    logger.debug('Registered Workflow node execution handlers')
+  }
+
+  /**
+   * 执行指定类型的节点
+   */
+  private async executeNode(
+    nodeType: string,
+    inputs: Record<string, unknown>,
+    config: Record<string, unknown>
+  ): Promise<NodeExecutionResult> {
+    logger.debug('Executing node', { nodeType, inputs, config })
+
+    // 获取节点执行器
+    const executor = getNodeExecutor(nodeType)
+
+    if (!executor) {
+      logger.error('Node executor not found', { nodeType })
+      return {
+        status: 'error',
+        outputs: {},
+        errorMessage: `未找到节点执行器: ${nodeType}`
+      }
+    }
+
+    // 创建执行上下文
+    const context: NodeExecutionContext = {
+      nodeId: `vcp-${Date.now()}`,
+      workflowId: 'vcp-execution',
+      log: (message: string, data?: Record<string, unknown>) => {
+        logger.info(`[${nodeType}] ${message}`, data)
+      },
+      onProgress: () => {},
+      abortSignal: undefined
+    }
+
+    try {
+      // 执行节点
+      const result = await executor.execute(inputs, config, context)
+
+      logger.info('Node execution completed', {
+        nodeType,
+        status: result.status,
+        duration: result.duration
+      })
+
+      return result
+    } catch (error) {
+      logger.error('Node execution error', { nodeType, error })
+      return {
+        status: 'error',
+        outputs: {},
+        errorMessage: error instanceof Error ? error.message : String(error)
+      }
+    }
   }
 
   /**
@@ -274,6 +378,7 @@ class WorkflowIpcBridgeService {
     if (ipcRenderer) {
       ipcRenderer.removeAllListeners(IpcChannel.Workflow_GenerateImage)
       ipcRenderer.removeAllListeners(IpcChannel.Workflow_ExecuteNode)
+      ipcRenderer.removeAllListeners('workflow:execute-node')
     }
 
     this.initialized = false

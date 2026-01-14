@@ -5,6 +5,8 @@ import TextBadge from '@renderer/components/TextBadge'
 import { isMac, THEME_COLOR_PRESETS } from '@renderer/config/constant'
 import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import { useTheme } from '@renderer/context/ThemeProvider'
+import { useThemePreset } from '@renderer/hooks/useThemePreset'
+import { useWallpaper } from '@renderer/hooks/useWallpaper'
 import { useNavbarPosition, useSettings } from '@renderer/hooks/useSettings'
 import useUserTheme from '@renderer/hooks/useUserTheme'
 import { useAppDispatch } from '@renderer/store'
@@ -19,7 +21,7 @@ import {
 } from '@renderer/store/settings'
 import { ThemeMode } from '@renderer/types'
 import { Button, ColorPicker, Segmented, Select, Switch, Tooltip } from 'antd'
-import { Minus, Monitor, Moon, Plus, Sun } from 'lucide-react'
+import { Image, Minus, Monitor, Moon, Palette, Plus, Settings2, Sun } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +29,7 @@ import styled from 'styled-components'
 
 import { SettingContainer, SettingDivider, SettingGroup, SettingRow, SettingRowTitle, SettingTitle } from '..'
 import SidebarIconsManager from './SidebarIconsManager'
-import ThemePresetSelector from './ThemePresetSelector'
+import UnifiedPresetModal from './UnifiedPresetModal'
 import WallpaperSettingsComponent from './WallpaperSettings'
 
 const ColorCircleWrapper = styled.div`
@@ -82,6 +84,14 @@ const DisplaySettings: FC = () => {
   const [visibleIcons, setVisibleIcons] = useState(sidebarIcons?.visible || DEFAULT_SIDEBAR_ICONS)
   const [disabledIcons, setDisabledIcons] = useState(sidebarIcons?.disabled || [])
   const [fontList, setFontList] = useState<string[]>([])
+
+  // 预设模态框状态
+  const [presetModalOpen, setPresetModalOpen] = useState(false)
+
+  // 获取当前预设信息
+  const { activePresetId: activeThemePresetId } = useThemePreset()
+  const { settings: wallpaperSettings, isEnabled: isWallpaperEnabled } = useWallpaper()
+  const activeWallpaperPresetId = wallpaperSettings.activePresetId
 
   const handleWindowStyleChange = useCallback(
     (checked: boolean) => {
@@ -263,22 +273,58 @@ const DisplaySettings: FC = () => {
           </>
         )}
       </SettingGroup>
-      {/* 主题预设 */}
+      {/* 主题与壁纸预设（合并） */}
       <SettingGroup theme={theme}>
         <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
-          {t('settings.theme.presets.title', '主题预设')} <TextBadge text="New" />
+          {t('settings.display.presets.title', '预设主题')} <TextBadge text="New" />
         </SettingTitle>
         <SettingDivider />
-        <ThemePresetSelector />
+        <PresetSummaryContainer>
+          <PresetSummaryRow>
+            <PresetSummaryItem>
+              <PresetIcon>
+                <Palette size={16} />
+              </PresetIcon>
+              <PresetInfo>
+                <PresetLabel>{t('settings.theme.presets.title', '主题预设')}</PresetLabel>
+                <PresetValue>
+                  {activeThemePresetId
+                    ? t(`settings.theme.preset.${activeThemePresetId.replace(/-/g, '_')}.name`, activeThemePresetId)
+                    : t('settings.theme.presets.none', '自定义颜色')}
+                </PresetValue>
+              </PresetInfo>
+            </PresetSummaryItem>
+            <PresetSummaryItem>
+              <PresetIcon>
+                <Image size={16} />
+              </PresetIcon>
+              <PresetInfo>
+                <PresetLabel>{t('settings.wallpaper.presets.title', '壁纸预设')}</PresetLabel>
+                <PresetValue>
+                  {activeWallpaperPresetId
+                    ? t(`wallpaper.preset.${activeWallpaperPresetId.replace('preset-', '').replace(/-/g, '_')}`, activeWallpaperPresetId)
+                    : isWallpaperEnabled
+                      ? t('settings.wallpaper.custom', '自定义壁纸')
+                      : t('settings.wallpaper.presets.none', '未启用')}
+                </PresetValue>
+              </PresetInfo>
+            </PresetSummaryItem>
+          </PresetSummaryRow>
+          <Button type="primary" icon={<Settings2 size={14} />} onClick={() => setPresetModalOpen(true)}>
+            {t('settings.display.presets.manage', '管理预设')}
+          </Button>
+        </PresetSummaryContainer>
       </SettingGroup>
-      {/* 壁纸设置 */}
+      {/* 壁纸高级设置（仅在壁纸启用时显示详细选项） */}
       <SettingGroup theme={theme}>
         <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
-          {t('settings.wallpaper.title', '壁纸')} <TextBadge text="New" />
+          {t('settings.wallpaper.advanced.title', '壁纸高级设置')}
         </SettingTitle>
         <SettingDivider />
         <WallpaperSettingsComponent />
       </SettingGroup>
+      {/* 预设选择模态框 */}
+      <UnifiedPresetModal open={presetModalOpen} onClose={() => setPresetModalOpen(false)} />
       <SettingGroup theme={theme}>
         <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
           {t('settings.display.navbar.title')} <TextBadge text="New" />
@@ -514,6 +560,60 @@ const SelectRow = styled.div`
   align-items: center;
   justify-content: flex-end;
   width: 380px;
+`
+
+// ==================== 预设摘要样式 ====================
+
+const PresetSummaryContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`
+
+const PresetSummaryRow = styled.div`
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+`
+
+const PresetSummaryItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  background: var(--color-background-soft);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+`
+
+const PresetIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-primary-bg);
+  border-radius: 8px;
+  color: var(--color-primary);
+`
+
+const PresetInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`
+
+const PresetLabel = styled.div`
+  font-size: 12px;
+  color: var(--color-text-3);
+`
+
+const PresetValue = styled.div`
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
 `
 
 export default DisplaySettings

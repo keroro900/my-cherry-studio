@@ -70,7 +70,9 @@ export { UnifiedVideoGenerationExecutor, UnifiedVideoGenerationNode } from './vi
 
 // 导出外部服务节点
 export { HttpRequestExecutor, HttpRequestNode } from './external/HttpRequestNode'
+export { MusicGenerationExecutor, MusicGenerationNode } from './external/MusicGenerationNode'
 export { RunningHubExecutor, RunningHubNode } from './external/RunningHubNode'
+export { WebSearchExecutor, WebSearchNode } from './external/WebSearchNode'
 
 // 导出流程控制节点（包含高级节点）
 export {
@@ -126,14 +128,17 @@ export {
   TrendAnalysisNode
 } from './fashion'
 
-// 导出自定义节点模块
+// 导出质量守护节点
 export {
-  BUILTIN_TEMPLATES,
-  createDefaultCustomNodeDefinition,
-  CustomNodeExecutor,
-  customNodeRegistry,
-  validateCustomNodeDefinition
-} from './custom'
+  AutoOptimizeExecutor,
+  AutoOptimizeNode,
+  PromptOptimizerExecutor,
+  PromptOptimizerNode,
+  QualityCheckExecutor,
+  QualityCheckNode
+} from './quality'
+
+// 导出自定义节点模块
 export type {
   CodeExecutionMode,
   CustomConfigField,
@@ -143,13 +148,24 @@ export type {
   CustomPortConfig,
   ErrorHandlingStrategy
 } from './custom'
+export {
+  BUILTIN_TEMPLATES,
+  createDefaultCustomNodeDefinition,
+  CustomNodeExecutor,
+  customNodeRegistry,
+  validateCustomNodeDefinition
+} from './custom'
 
 // 节点注册函数
 import { UnifiedPromptNode } from './ai/UnifiedPromptNode'
 import { VideoPromptNode } from './ai/VideoPromptNode'
 import { nodeRegistry } from './base'
 import { HttpRequestNode } from './external/HttpRequestNode'
+import { MusicGenerationNode } from './external/MusicGenerationNode'
 import { RunningHubNode } from './external/RunningHubNode'
+import { WebSearchNode } from './external/WebSearchNode'
+// Fashion 节点导入
+import { FashionKnowledgeNode, GarmentAnalysisNode, TrendAnalysisNode } from './fashion'
 import {
   CodeExecutorNode,
   ConditionNode,
@@ -191,9 +207,8 @@ import { AplusContentNode } from './text/AplusContentNode'
 import { ProductDescriptionNode } from './text/ProductDescriptionNode'
 import { KlingImage2VideoNode } from './video/KlingImage2VideoNode'
 import { UnifiedVideoGenerationNode } from './video/UnifiedVideoGenerationNode'
-
-// Fashion 节点导入
-import { FashionKnowledgeNode, GarmentAnalysisNode, TrendAnalysisNode } from './fashion'
+// 质量守护节点导入
+import { AutoOptimizeNode, PromptOptimizerNode, QualityCheckNode } from './quality'
 
 // 初始化标记，防止 HMR 时重复注册
 let _nodeSystemInitialized = false
@@ -248,6 +263,8 @@ export async function registerBuiltinNodes(): Promise<void> {
   // 外部服务节点
   nodeRegistry.register(RunningHubNode, 'builtin')
   nodeRegistry.register(HttpRequestNode, 'builtin')
+  nodeRegistry.register(WebSearchNode, 'builtin')
+  nodeRegistry.register(MusicGenerationNode, 'builtin')
 
   // 流程控制节点
   nodeRegistry.register(ConditionNode, 'builtin')
@@ -278,6 +295,11 @@ export async function registerBuiltinNodes(): Promise<void> {
   nodeRegistry.register(GarmentAnalysisNode, 'builtin')
   nodeRegistry.register(FashionKnowledgeNode, 'builtin')
   nodeRegistry.register(TrendAnalysisNode, 'builtin')
+
+  // 质量守护节点
+  nodeRegistry.register(QualityCheckNode, 'builtin')
+  nodeRegistry.register(AutoOptimizeNode, 'builtin')
+  nodeRegistry.register(PromptOptimizerNode, 'builtin')
 
   // 输出节点
   nodeRegistry.register(OutputNode, 'builtin')

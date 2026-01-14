@@ -30,9 +30,7 @@ export const JewelryPhotoNode: NodeDefinition = {
     // 图片输入端口通过 imageInputPorts 动态配置
   ],
 
-  outputs: [
-    { id: 'image', label: '图片', dataType: 'image', description: '生成的珠宝产品图' }
-  ],
+  outputs: [{ id: 'image', label: '图片', dataType: 'image', description: '生成的珠宝产品图' }],
 
   configSchema: {
     fields: [

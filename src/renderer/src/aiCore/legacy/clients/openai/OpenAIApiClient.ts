@@ -827,7 +827,9 @@ export class OpenAIAPIClient extends OpenAIBaseClient<
       return null
     }
 
-    const toolCalls: OpenAI.Chat.Completions.ChatCompletionMessageToolCall[] = []
+    // Use Map to avoid sparse array issues when tool_calls have non-sequential indices
+    const toolCallsMap: Map<number, OpenAI.Chat.Completions.ChatCompletionMessageToolCall> = new Map()
+    let nextAutoIndex = 0 // For tool calls without an index (index === -1)
     let isFinished = false
     let lastUsageInfo: any = null
     let hasFinishReason = false // Track if we've seen a finish_reason
@@ -840,7 +842,12 @@ export class OpenAIAPIClient extends OpenAIBaseClient<
     const emitCompletionSignals = (controller: TransformStreamDefaultController<GenericChunk>) => {
       if (isFinished) return
 
-      if (toolCalls.length > 0) {
+      if (toolCallsMap.size > 0) {
+        // Convert Map to sorted array by index for consistent ordering
+        const toolCalls = Array.from(toolCallsMap.entries())
+          .sort(([a], [b]) => a - b)
+          .map(([, call]) => call)
+
         controller.enqueue({
           type: ChunkType.MCP_TOOL_CREATED,
           tool_calls: toolCalls
@@ -1031,6 +1038,9 @@ export class OpenAIAPIClient extends OpenAIBaseClient<
               for (const toolCall of contentSource.tool_calls) {
                 if ('index' in toolCall) {
                   const { id, index, function: fun } = toolCall
+                  // Use nextAutoIndex for tool calls without a specific index
+                  const effectiveIndex = index === -1 ? nextAutoIndex++ : index
+
                   if (fun?.name) {
                     const toolCallObject = {
                       id: id || '',
@@ -1040,19 +1050,17 @@ export class OpenAIAPIClient extends OpenAIBaseClient<
                       },
                       type: 'function' as const
                     }
-
-                    if (index === -1) {
-                      toolCalls.push(toolCallObject)
-                    } else {
-                      toolCalls[index] = toolCallObject
-                    }
+                    toolCallsMap.set(effectiveIndex, toolCallObject)
                   } else if (fun?.arguments) {
-                    if (toolCalls[index] && toolCalls[index].type === 'function' && 'function' in toolCalls[index]) {
-                      toolCalls[index].function.arguments += fun.arguments
+                    // Append arguments to existing tool call
+                    const existing = toolCallsMap.get(effectiveIndex)
+                    if (existing && existing.type === 'function' && 'function' in existing) {
+                      existing.function.arguments += fun.arguments
                     }
                   }
                 } else {
-                  toolCalls.push(toolCall)
+                  // Tool call without index property - use auto index
+                  toolCallsMap.set(nextAutoIndex++, toolCall)
                 }
               }
             }

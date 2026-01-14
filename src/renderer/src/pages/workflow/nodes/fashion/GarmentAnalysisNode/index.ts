@@ -5,9 +5,9 @@
  * 分析服装图片，提取颜色、图案、款式等结构化属性
  */
 
+import { getFashionCategoryOptions } from '../../../prompts/presets/fashionCategory'
 import type { NodeDefinition } from '../../base/types'
 import { GarmentAnalysisExecutor } from './executor'
-import { getFashionCategoryOptions } from '../../../prompts/presets/fashionCategory'
 
 // 分析粒度选项
 const DETAIL_LEVEL_OPTIONS = [

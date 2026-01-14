@@ -218,8 +218,7 @@ Return as JSON with fields: food_category, style_preset, mood_preset, presentati
         'Capture liquid clarity, ice textures, condensation. Use backlight for transparent drinks. Show refreshing appeal.',
       dessert:
         'Highlight sweetness through color and texture. Capture frosting details, chocolate sheen, fruit freshness.',
-      main_dish:
-        'Show steam from hot dishes. Emphasize protein textures, sauce glossiness, vegetable colors.',
+      main_dish: 'Show steam from hot dishes. Emphasize protein textures, sauce glossiness, vegetable colors.',
       snack: 'Capture crunch and texture. Show crispy edges, seasoning details, bite-sized appeal.',
       ingredient:
         'Showcase natural beauty and freshness. Highlight organic textures, color gradients, natural imperfections.'
@@ -229,12 +228,9 @@ Return as JSON with fields: food_category, style_preset, mood_preset, presentati
 
   private getStyleTips(style: string): string {
     const tips: Record<string, string> = {
-      minimalist:
-        'Clean, simple composition. Minimal props. Focus on the food itself. White space is essential.',
-      rustic:
-        'Wooden surfaces, natural textures. Imperfect, artisanal feel. Earth tones and organic materials.',
-      modern:
-        'Sleek, contemporary aesthetic. Geometric compositions. Bold colors and clean lines.',
+      minimalist: 'Clean, simple composition. Minimal props. Focus on the food itself. White space is essential.',
+      rustic: 'Wooden surfaces, natural textures. Imperfect, artisanal feel. Earth tones and organic materials.',
+      modern: 'Sleek, contemporary aesthetic. Geometric compositions. Bold colors and clean lines.',
       traditional: 'Classic food photography. Rich, warm tones. Abundant, generous presentation.'
     }
     return tips[style] || tips.modern
@@ -243,8 +239,7 @@ Return as JSON with fields: food_category, style_preset, mood_preset, presentati
   private getMoodTips(mood: string): string {
     const tips: Record<string, string> = {
       warm: 'Golden lighting, cozy atmosphere. Comfort food feeling. Inviting and homey.',
-      fresh:
-        'Bright, airy lighting. Crisp colors. Clean and healthy vibe. Morning light quality.',
+      fresh: 'Bright, airy lighting. Crisp colors. Clean and healthy vibe. Morning light quality.',
       cozy: 'Soft, intimate lighting. Comfort and nostalgia. Steam and warmth.',
       elegant: 'Sophisticated lighting. Refined presentation. Restaurant-quality plating.'
     }

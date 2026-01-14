@@ -4,7 +4,10 @@
  * 包含 LRU 配额管理策略，避免配额超限时丢失所有数据
  */
 
+import { loggerService } from '@logger'
 import localforage from 'localforage'
+
+const logger = loggerService.withContext('IndexedDBStorage')
 
 // 配置 localforage 使用 IndexedDB
 const storage = localforage.createInstance({
@@ -40,10 +43,7 @@ let initPromise: Promise<void> | null = null
  * 带超时的 Promise 包装器
  */
 function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))
-  ])
+  return Promise.race([promise, new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms))])
 }
 
 /**
@@ -58,7 +58,7 @@ async function updateMetadata(key: string, size: number): Promise<void> {
     }
     await metadataStorage.setItem(key, metadata)
   } catch (error) {
-    console.warn('[indexedDBStorage] Failed to update metadata:', error)
+    logger.warn('Failed to update metadata:', { error })
   }
 }
 
@@ -74,7 +74,7 @@ async function getAllMetadata(): Promise<StorageMetadata[]> {
       }
     })
   } catch (error) {
-    console.warn('[indexedDBStorage] Failed to get metadata:', error)
+    logger.warn('Failed to get metadata:', { error })
   }
   return metadata
 }
@@ -112,16 +112,16 @@ async function evictLRUEntries(targetBytes: number): Promise<number> {
     for (const key of keysToEvict) {
       await storage.removeItem(key)
       await metadataStorage.removeItem(key)
-      console.info(`[indexedDBStorage] LRU evicted: ${key}`)
+      logger.info('LRU evicted:', { key })
     }
 
     if (freedBytes > 0) {
-      console.info(`[indexedDBStorage] LRU eviction freed ${Math.round(freedBytes / 1024)}KB`)
+      logger.info('LRU eviction freed', { freedKB: Math.round(freedBytes / 1024) })
     }
 
     return freedBytes
   } catch (error) {
-    console.error('[indexedDBStorage] LRU eviction error:', error)
+    logger.error('LRU eviction error:', error instanceof Error ? error : new Error(String(error)))
     return 0
   }
 }
@@ -141,9 +141,9 @@ async function initStorage(): Promise<void> {
     await withTimeout(migrateFromLocalStorage(), 3000, undefined)
 
     isReady = true
-    console.info('[indexedDBStorage] Storage initialized successfully')
+    logger.info('Storage initialized successfully')
   } catch (error) {
-    console.error('[indexedDBStorage] Storage initialization error:', error)
+    logger.error('Storage initialization error:', error instanceof Error ? error : new Error(String(error)))
     // 即使初始化失败，也标记为就绪，让应用继续运行
     isReady = true
   }
@@ -162,14 +162,14 @@ async function migrateFromLocalStorage(): Promise<void> {
 
     // 如果 IndexedDB 没有数据，但 localStorage 有，执行迁移
     if (!existingData && oldData) {
-      console.info('[indexedDBStorage] Migrating data from localStorage to IndexedDB...')
+      logger.info('Migrating data from localStorage to IndexedDB...')
       await storage.setItem('persist:cherry-studio', oldData)
       // 更新元数据
       await updateMetadata('persist:cherry-studio', new Blob([oldData]).size)
-      console.info('[indexedDBStorage] Migration completed successfully')
+      logger.info('Migration completed successfully')
     }
   } catch (error) {
-    console.error('[indexedDBStorage] Migration error:', error)
+    logger.error('Migration error:', error instanceof Error ? error : new Error(String(error)))
   }
 }
 
@@ -188,15 +188,21 @@ function ensureReady(): Promise<void> {
 const indexedDBStorage = {
   getItem: async (key: string): Promise<string | null> => {
     try {
+      logger.info('getItem called:', { key })
+
       // 确保存储已初始化
       await ensureReady()
+      logger.info('Storage ready, reading data...')
 
-      // 读取数据 - 不设超时，宁愿等待也不能丢失用户数据
-      // IndexedDB 读取通常很快，只有数据量极大时才会慢
-      const value = await storage.getItem<string>(key)
+      // 读取数据 - 设置 30 秒超时作为安全网
+      // 正常情况下 IndexedDB 读取很快，但如果卡住了不能让应用永远白屏
+      const value = await withTimeout(storage.getItem<string>(key), 30000, null)
 
-      // 更新 LRU 访问时间
-      if (value !== null) {
+      if (value === null) {
+        logger.warn('getItem returned null (timeout or no data)')
+      } else {
+        logger.info('Data loaded', { size: new Blob([value]).size })
+        // 更新 LRU 访问时间
         const size = new Blob([value]).size
         // 异步更新元数据，不阻塞读取
         updateMetadata(key, size).catch(() => {})
@@ -204,9 +210,8 @@ const indexedDBStorage = {
 
       return value
     } catch (error) {
-      console.error('[indexedDBStorage] getItem error:', error)
+      logger.error('getItem error:', error instanceof Error ? error : new Error(String(error)))
       // 出错时返回 null，让应用可以启动（使用默认状态）
-      // 但这只应该在真正的错误情况下发生，不是超时
       return null
     }
   },
@@ -220,11 +225,11 @@ const indexedDBStorage = {
       // 更新元数据
       await updateMetadata(key, valueSize)
     } catch (error) {
-      console.error('[indexedDBStorage] setItem error:', error)
+      logger.error('setItem error:', error instanceof Error ? error : new Error(String(error)))
 
       // 如果存储失败（可能是配额超出），尝试 LRU 清理
       if (error instanceof Error && error.name === 'QuotaExceededError') {
-        console.warn('[indexedDBStorage] Quota exceeded, attempting LRU eviction')
+        logger.warn('Quota exceeded, attempting LRU eviction')
 
         // 尝试清理至少 2 倍于当前值大小的空间
         const targetEviction = valueSize * 2
@@ -235,15 +240,18 @@ const indexedDBStorage = {
           try {
             await storage.setItem(key, value)
             await updateMetadata(key, valueSize)
-            console.info('[indexedDBStorage] Write succeeded after LRU eviction')
+            logger.info('Write succeeded after LRU eviction')
             return
           } catch (retryError) {
-            console.error('[indexedDBStorage] Retry after eviction failed:', retryError)
+            logger.error(
+              'Retry after eviction failed:',
+              retryError instanceof Error ? retryError : new Error(String(retryError))
+            )
           }
         }
 
         // 如果 LRU 清理后仍然失败，发送警告事件
-        console.error('[indexedDBStorage] Could not free enough space, storage write failed')
+        logger.error('Could not free enough space, storage write failed')
 
         // 发送自定义事件通知 UI
         if (typeof window !== 'undefined') {
@@ -262,7 +270,7 @@ const indexedDBStorage = {
       await storage.removeItem(key)
       await metadataStorage.removeItem(key)
     } catch (error) {
-      console.error('[indexedDBStorage] removeItem error:', error)
+      logger.error('removeItem error:', error instanceof Error ? error : new Error(String(error)))
     }
   }
 }

@@ -92,7 +92,7 @@ async function ensureDirectory(dirPath: string): Promise<void> {
     await window.api?.file?.mkdir?.(dirPath)
   } catch (error) {
     // 目录可能已存在，忽略错误
-    logger.debug('mkdir error (may already exist):', error)
+    logger.debug('mkdir error (may already exist)', { value: error })
   }
 }
 

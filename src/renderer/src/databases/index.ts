@@ -25,6 +25,41 @@ import type {
 import type { Message as NewMessage, MessageBlock } from '@renderer/types/newMessage'
 import { Dexie, type EntityTable } from 'dexie'
 
+/**
+ * 群聊会话 (持久化存储)
+ */
+export interface GroupSessionRecord {
+  id: string
+  name: string
+  speakingMode: 'sequential' | 'random' | 'naturerandom' | 'invitation' | 'mention' | 'keyword' | 'consensus'
+  hostAgentId?: string
+  topic?: string
+  agentIds: string[]
+  isActive: boolean
+  currentRound: number
+  createdAt: number
+  updatedAt: number
+  config?: Record<string, unknown>
+}
+
+/**
+ * 群聊消息 (持久化存储)
+ */
+export interface GroupMessageRecord {
+  id: string
+  sessionId: string
+  agentId: string
+  agentName: string
+  content: string
+  timestamp: number
+  type: 'chat' | 'system' | 'action' | 'thought' | 'summary'
+  mentions: string[]
+  replyTo?: string
+  isPublic: boolean
+  visibleTo?: string[]
+  metadata?: Record<string, unknown>
+}
+
 import { upgradeToV5, upgradeToV7, upgradeToV8 } from './upgrades'
 
 // Database declaration (move this to its own module also)
@@ -39,6 +74,8 @@ export const db = new Dexie('CherryStudio', {
   quick_phrases: EntityTable<QuickPhrase, 'id'>
   message_blocks: EntityTable<MessageBlock, 'id'> // Correct type for message_blocks
   translate_languages: EntityTable<CustomTranslateLanguage, 'id'>
+  group_sessions: EntityTable<GroupSessionRecord, 'id'>
+  group_messages: EntityTable<GroupMessageRecord, 'id'>
 }
 
 db.version(1).stores({
@@ -133,6 +170,22 @@ db.version(10).stores({
   translate_languages: '&id, langCode',
   quick_phrases: 'id',
   message_blocks: 'id, messageId, file.id'
+})
+
+// --- VERSION 11: 群聊持久化 ---
+db.version(11).stores({
+  files: 'id, name, origin_name, path, size, ext, type, created_at, count',
+  topics: '&id',
+  settings: '&id, value',
+  knowledge_notes: '&id, baseId, type, content, created_at, updated_at',
+  translate_history: '&id, sourceText, targetText, sourceLanguage, targetLanguage, createdAt',
+  translate_languages: '&id, langCode',
+  quick_phrases: 'id',
+  message_blocks: 'id, messageId, file.id',
+  // 群聊会话表
+  group_sessions: '&id, name, createdAt, updatedAt, isActive',
+  // 群聊消息表 - 复合索引 [sessionId+timestamp] 用于按会话查询消息
+  group_messages: '&id, sessionId, agentId, timestamp, [sessionId+timestamp]'
 })
 
 export default db

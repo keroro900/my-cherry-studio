@@ -1,5 +1,6 @@
 import AddAssistantOrAgentPopup from '@renderer/components/Popups/AddAssistantOrAgentPopup'
 import AgentModalPopup from '@renderer/components/Popups/agent/AgentModal'
+import ImageAssistantSelectPopup from '@renderer/components/Popups/ImageAssistantSelectPopup'
 import { useApiServer } from '@renderer/hooks/useApiServer'
 import { useAppDispatch } from '@renderer/store'
 import { setActiveTopicOrSessionAction } from '@renderer/store/runtime'
@@ -51,6 +52,15 @@ const UnifiedAddButton: FC<UnifiedAddButtonProps> = ({ onCreateAssistant, setAct
       onSelect: (type) => {
         if (type === 'assistant') {
           onCreateAssistant()
+        }
+
+        if (type === 'image') {
+          ImageAssistantSelectPopup.show({
+            onSelect: (imageAssistant) => {
+              setActiveAssistant(imageAssistant)
+              setActiveAgentId('')
+            }
+          })
         }
 
         if (type === 'agent') {

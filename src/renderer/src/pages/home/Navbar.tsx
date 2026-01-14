@@ -26,7 +26,7 @@ interface Props {
   setActiveTopic: (topic: Topic) => void
   setActiveAssistant: (assistant: Assistant) => void
   position: 'left' | 'right'
-  activeTopicOrSession?: 'topic' | 'session'
+  activeTopicOrSession?: 'topic' | 'session' | 'groupchat'
 }
 
 const HeaderNavbar: FC<Props> = ({

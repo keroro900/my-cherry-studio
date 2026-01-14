@@ -168,7 +168,6 @@ function RunningHubConfigForm({ config, onUpdateConfig, onOutputsChange }: Runni
   // 配置变化时清除错误状态
   useEffect(() => {
     setFetchError(null)
-     
   }, [runningHubConfig])
 
   // 组件卸载时取消正在进行的请求
@@ -332,7 +331,9 @@ function RunningHubConfigForm({ config, onUpdateConfig, onOutputsChange }: Runni
         onUpdateConfig(batchUpdates as any, undefined)
 
         const listCount = nodeList.filter((n: RunningHubNodeInfo) => n.fieldType === 'LIST').length
-        message.success(`成功获取 ${nodeList.length} 个节点配置，${inputs.length} 个输入端口${listCount > 0 ? `，${listCount} 个下拉配置` : ''}`)
+        message.success(
+          `成功获取 ${nodeList.length} 个节点配置，${inputs.length} 个输入端口${listCount > 0 ? `，${listCount} 个下拉配置` : ''}`
+        )
       } else {
         throw new Error('获取配置失败，返回数据为空')
       }
@@ -423,13 +424,7 @@ function RunningHubConfigForm({ config, onUpdateConfig, onOutputsChange }: Runni
             />
           )}
           {fetchError && (
-            <Alert
-              message={fetchError}
-              type="error"
-              icon={<WarningOutlined />}
-              showIcon
-              style={{ fontSize: '12px' }}
-            />
+            <Alert message={fetchError} type="error" icon={<WarningOutlined />} showIcon style={{ fontSize: '12px' }} />
           )}
         </div>
       </FormSection>
@@ -461,7 +456,8 @@ function RunningHubConfigForm({ config, onUpdateConfig, onOutputsChange }: Runni
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                       <span>{FIELD_TYPE_ICONS[node.fieldType] || '📦'}</span>
                       <span style={{ fontWeight: 500, fontSize: '13px' }}>{node.description || node.fieldName}</span>
-                      <Tag color={node.fieldType === 'IMAGE' ? 'purple' : node.fieldType === 'VIDEO' ? 'magenta' : 'blue'}>
+                      <Tag
+                        color={node.fieldType === 'IMAGE' ? 'purple' : node.fieldType === 'VIDEO' ? 'magenta' : 'blue'}>
                         {node.fieldType}
                       </Tag>
                     </div>

@@ -57,7 +57,7 @@ function loadRecent(storageKey: string): string[] {
       }
     }
   } catch (error) {
-    logger.warn(`Failed to load recent presets from localStorage (${storageKey}):`, error)
+    logger.warn(`Failed to load recent presets from localStorage (${storageKey})`, error as Error)
   }
   return []
 }
@@ -69,7 +69,7 @@ function saveRecent(storageKey: string, recent: string[]): void {
   try {
     localStorage.setItem(storageKey, JSON.stringify(recent))
   } catch (error) {
-    logger.warn(`Failed to save recent presets to localStorage (${storageKey}):`, error)
+    logger.warn(`Failed to save recent presets to localStorage (${storageKey})`, error as Error)
   }
 }
 

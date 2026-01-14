@@ -61,7 +61,7 @@ function loadFavorites(storageKey: string): string[] {
       }
     }
   } catch (error) {
-    logger.warn(`Failed to load favorites from localStorage (${storageKey}):`, error)
+    logger.warn(`Failed to load favorites from localStorage (${storageKey})`, error as Error)
   }
   return []
 }
@@ -73,7 +73,7 @@ function saveFavorites(storageKey: string, favorites: string[]): void {
   try {
     localStorage.setItem(storageKey, JSON.stringify(favorites))
   } catch (error) {
-    logger.warn(`Failed to save favorites to localStorage (${storageKey}):`, error)
+    logger.warn(`Failed to save favorites to localStorage (${storageKey})`, error as Error)
   }
 }
 

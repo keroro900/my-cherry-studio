@@ -213,6 +213,7 @@ export class AiSdkToChunkAdapter {
           finalText = processedText
         }
 
+        // Accumulate for internal tracking (used in text-end event)
         if (this.accumulate) {
           final.text += finalText
         } else {
@@ -220,11 +221,13 @@ export class AiSdkToChunkAdapter {
         }
 
         // Only emit chunk if there's text to send
+        // IMPORTANT: Always emit delta (incremental) text, not accumulated text
+        // Downstream consumers (like GroupAgentRunner) expect deltas and accumulate themselves
         if (finalText) {
           this.markFirstTokenIfNeeded()
           this.onChunk({
             type: ChunkType.TEXT_DELTA,
-            text: this.accumulate ? final.text : finalText
+            text: finalText // Always send delta, not accumulated content
           })
         }
         break

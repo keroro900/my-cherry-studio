@@ -19,6 +19,9 @@
   "css": {
     "formatter": {
       "quoteStyle": "single"
+    },
+    "parser": {
+      "cssModules": true
     }
   },
   "files": {

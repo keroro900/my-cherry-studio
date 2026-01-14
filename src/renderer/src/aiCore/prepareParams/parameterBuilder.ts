@@ -39,7 +39,7 @@ import type { ModelMessage, Tool } from 'ai'
 import { stepCountIs } from 'ai'
 
 import { getAiSdkProviderId } from '../provider/factory'
-import { setupToolsConfig } from '../utils/mcp'
+import { convertMcpToolsToVCPDescription, generateVCPProtocolGuide } from '../utils/mcp'
 import { buildProviderOptions } from '../utils/options'
 import { buildProviderBuiltinWebSearchConfig } from '../utils/websearch'
 import { addAnthropicHeaders } from './header'
@@ -129,7 +129,10 @@ export async function buildStreamTextParams(
 
   const enableGenerateImage = !!(isGenerateImageModel(model) && assistant.enableGenerateImage)
 
-  let tools = setupToolsConfig(mcpTools)
+  // VCP 统一协议：不再使用 AI SDK 原生工具调用 MCP 工具
+  // MCP 工具将通过 VCP 协议格式注入到系统提示词中
+  // 只保留 Provider 内置工具（搜索、URL 上下文等）
+  let providerBuiltinTools: Record<string, Tool<any, any>> | undefined = undefined
 
   // 构建真正的 providerOptions
   const webSearchConfig: CherryWebSearchConfig = {
@@ -154,19 +157,19 @@ export async function buildStreamTextParams(
         webSearchPluginConfig = buildProviderBuiltinWebSearchConfig(aiSdkProviderId, webSearchConfig, model)
       }
     }
-    if (!tools) {
-      tools = {}
+    if (!providerBuiltinTools) {
+      providerBuiltinTools = {}
     }
     if (aiSdkProviderId === 'google-vertex') {
-      tools.google_search = vertex.tools.googleSearch({}) as ProviderDefinedTool
+      providerBuiltinTools.google_search = vertex.tools.googleSearch({}) as ProviderDefinedTool
     } else if (aiSdkProviderId === 'google-vertex-anthropic') {
       const blockedDomains = mapRegexToPatterns(webSearchConfig.excludeDomains)
-      tools.web_search = vertexAnthropic.tools.webSearch_20250305({
+      providerBuiltinTools.web_search = vertexAnthropic.tools.webSearch_20250305({
         maxUses: webSearchConfig.maxResults,
         blockedDomains: blockedDomains.length > 0 ? blockedDomains : undefined
       }) as ProviderDefinedTool
     } else if (aiSdkProviderId === 'azure-responses') {
-      tools.web_search_preview = azure.tools.webSearchPreview({
+      providerBuiltinTools.web_search_preview = azure.tools.webSearchPreview({
         searchContextSize: webSearchPluginConfig?.openai!.searchContextSize
       }) as ProviderDefinedTool
     } else if (aiSdkProviderId === 'azure-anthropic') {
@@ -175,27 +178,29 @@ export async function buildStreamTextParams(
         maxUses: webSearchConfig.maxResults,
         blockedDomains: blockedDomains.length > 0 ? blockedDomains : undefined
       }
-      tools.web_search = anthropic.tools.webSearch_20250305(anthropicSearchOptions) as ProviderDefinedTool
+      providerBuiltinTools.web_search = anthropic.tools.webSearch_20250305(
+        anthropicSearchOptions
+      ) as ProviderDefinedTool
     }
   }
 
   if (enableUrlContext) {
-    if (!tools) {
-      tools = {}
+    if (!providerBuiltinTools) {
+      providerBuiltinTools = {}
     }
     const blockedDomains = mapRegexToPatterns(webSearchConfig.excludeDomains)
 
     switch (aiSdkProviderId) {
       case 'google-vertex':
-        tools.url_context = vertex.tools.urlContext({}) as ProviderDefinedTool
+        providerBuiltinTools.url_context = vertex.tools.urlContext({}) as ProviderDefinedTool
         break
       case 'google':
-        tools.url_context = google.tools.urlContext({}) as ProviderDefinedTool
+        providerBuiltinTools.url_context = google.tools.urlContext({}) as ProviderDefinedTool
         break
       case 'anthropic':
       case 'azure-anthropic':
       case 'google-vertex-anthropic':
-        tools.web_fetch = (
+        providerBuiltinTools.web_fetch = (
           ['anthropic', 'azure-anthropic'].includes(aiSdkProviderId)
             ? anthropic.tools.webFetch_20250910({
                 maxUses: webSearchConfig.maxResults,
@@ -239,12 +244,93 @@ export async function buildStreamTextParams(
     maxRetries: 0
   }
 
-  if (tools) {
-    params.tools = tools
+  // 只添加 Provider 内置工具（搜索、URL 上下文等）
+  // MCP 工具通过 VCP 协议格式注入到系统提示词中
+  if (providerBuiltinTools && Object.keys(providerBuiltinTools).length > 0) {
+    params.tools = providerBuiltinTools
   }
 
+  // 构建系统提示词
+  let systemPrompt = ''
   if (assistant.prompt) {
-    params.system = await replacePromptVariables(assistant.prompt, model.name)
+    systemPrompt = await replacePromptVariables(assistant.prompt, model.name)
+  }
+
+  // VCP 统一协议：工具注入遵循原始设计
+  // 1. MCP 工具：显式配置的 MCP 工具会自动注入
+  // 2. VCP 内置工具：只有当 prompt 明确包含 {{VCPAllTools}} 占位符时才注入
+  //    不再默认注入所有工具，让用户通过占位符显式控制
+  const hasMcpTools = mcpTools && mcpTools.length > 0
+
+  // 检查原始 prompt 是否包含 VCP 占位符（在变量替换之前）
+  const originalPrompt = assistant.prompt || ''
+  const hasVcpPlaceholder = originalPrompt.includes('{{VCPAllTools}}') || originalPrompt.includes('{{VCPTools}}')
+
+  // 只在有 MCP 工具或明确使用 VCP 占位符时才处理工具注入
+  if (hasMcpTools || hasVcpPlaceholder) {
+    const vcpGuide = generateVCPProtocolGuide()
+    let toolsDescription = ''
+
+    // 1. 添加 MCP 工具描述
+    if (hasMcpTools) {
+      toolsDescription += convertMcpToolsToVCPDescription(mcpTools)
+    }
+
+    // 2. 如果 prompt 包含 VCP 占位符，解析并获取工具描述
+    if (hasVcpPlaceholder) {
+      try {
+        // 解析 {{VCPAllTools}} 占位符
+        const vcpToolsResult = await window.api.vcpPlaceholder?.resolve('{{VCPAllTools}}')
+        if (vcpToolsResult?.success && vcpToolsResult.result && vcpToolsResult.result !== '{{VCPAllTools}}') {
+          // 构建完整的工具描述（包含协议指南）
+          const fullToolDescription = `${vcpGuide}
+
+---
+
+${vcpToolsResult.result}`
+          // 将占位符替换为完整的工具描述（包含协议指南）
+          systemPrompt = systemPrompt.replace(/\{\{VCPAllTools\}\}/g, fullToolDescription)
+          systemPrompt = systemPrompt.replace(/\{\{VCPTools\}\}/g, fullToolDescription)
+          // 如果还没有 MCP 工具描述，记录 VCP 工具被使用
+          if (!hasMcpTools) {
+            toolsDescription = vcpToolsResult.result
+          }
+          logger.debug('VCP placeholder replaced with tools and protocol guide', {
+            toolsLength: vcpToolsResult.result.length
+          })
+        }
+      } catch (err) {
+        logger.debug('Failed to resolve VCP placeholder', { error: err })
+      }
+    }
+
+    // 只有当有 MCP 工具时才额外注入 VCP 协议指南到末尾
+    // VCP 占位符已经在上面处理（包含协议指南）
+    if (hasMcpTools && toolsDescription.trim()) {
+      const vcpSection = `
+
+---
+
+# 可用工具
+
+${vcpGuide}
+
+---
+
+${toolsDescription}
+
+---
+`
+      systemPrompt = systemPrompt + vcpSection
+      logger.debug('VCP unified protocol: Injected MCP tools into system prompt', {
+        mcpToolCount: mcpTools.length,
+        systemPromptLength: systemPrompt.length
+      })
+    }
+  }
+
+  if (systemPrompt) {
+    params.system = systemPrompt
   }
 
   logger.debug('params', params)

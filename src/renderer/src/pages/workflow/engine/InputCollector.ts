@@ -64,9 +64,7 @@ export class InputCollector {
     const nodeInputs = node.data.inputs || []
     // 查找连接到此输入端口的边
     const connectedEdges = edges.filter(
-      (e) =>
-        e.target === node.id &&
-        (e.targetHandle === inputHandle.id || (!e.targetHandle && nodeInputs.length === 1))
+      (e) => e.target === node.id && (e.targetHandle === inputHandle.id || (!e.targetHandle && nodeInputs.length === 1))
     )
 
     if (connectedEdges.length === 0) {

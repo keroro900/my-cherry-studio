@@ -4,7 +4,7 @@ import Selector from '@renderer/components/Selector'
 import { InfoTooltip } from '@renderer/components/TooltipIcons'
 import { isMac } from '@renderer/config/constant'
 import { useTheme } from '@renderer/context/ThemeProvider'
-import { useEnableDeveloperMode, useSettings } from '@renderer/hooks/useSettings'
+import { useEnableDeveloperMode, useSettings, useShowVCPDebug } from '@renderer/hooks/useSettings'
 import { useTimer } from '@renderer/hooks/useTimer'
 import i18n from '@renderer/i18n'
 import type { RootState } from '@renderer/store'
@@ -70,6 +70,7 @@ const GeneralSettings: FC = () => {
   const [proxyBypassRules, setProxyBypassRules] = useState<string | undefined>(storeProxyBypassRules)
   const { theme } = useTheme()
   const { enableDeveloperMode, setEnableDeveloperMode } = useEnableDeveloperMode()
+  const { showVCPEnabled, setShowVCPEnabled, isLoading: isShowVCPLoading } = useShowVCPDebug()
   const { setTimeoutTimer } = useTimer()
 
   const updateTray = (isShowTray: boolean) => {
@@ -363,6 +364,14 @@ const GeneralSettings: FC = () => {
             <InfoTooltip title={t('settings.developer.help')} />
           </Flex>
           <Switch checked={enableDeveloperMode} onChange={setEnableDeveloperMode} />
+        </SettingRow>
+        <SettingDivider />
+        <SettingRow>
+          <Flex align="center" gap={4}>
+            <SettingRowTitle>{t('settings.developer.showvcp_debug')}</SettingRowTitle>
+            <InfoTooltip title={t('settings.developer.showvcp_debug_help')} />
+          </Flex>
+          <Switch checked={showVCPEnabled} onChange={setShowVCPEnabled} loading={isShowVCPLoading} />
         </SettingRow>
       </SettingGroup>
     </SettingContainer>

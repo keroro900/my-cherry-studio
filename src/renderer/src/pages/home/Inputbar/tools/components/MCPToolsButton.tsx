@@ -1,3 +1,14 @@
+/**
+ * VCP 统一协议 - MCP 服务器工具选择按钮
+ *
+ * 该组件允许用户选择 MCP 服务器提供的工具、提示和资源：
+ * - 选中的 MCP 工具会通过 MCPOBridge 转换为 VCP 格式
+ * - 工具调用统一使用 VCP 协议: <<<[TOOL_REQUEST]>>>
+ * - 用户界面保持 "MCP 服务器" 术语（因为实际配置的是 MCP 服务器）
+ *
+ * @see src/main/knowledge/vcp/MCPOBridge.ts
+ * @see src/renderer/src/aiCore/utils/mcp.ts - convertMcpToolsToVCPDescription
+ */
 import { ActionIconButton } from '@renderer/components/Buttons'
 import type { QuickPanelListItem } from '@renderer/components/QuickPanel'
 import { QuickPanelReservedSymbol, useQuickPanel } from '@renderer/components/QuickPanel'
@@ -130,7 +141,7 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
     }
   }, [])
 
-  const mcpServers = useMemo(() => assistant.mcpServers || [], [assistant.mcpServers])
+  const mcpServers = useMemo(() => (assistant.mcpServers || []) as MCPServer[], [assistant.mcpServers])
   const assistantMcpServers = useMemo(
     () => activedMcpServers.filter((server) => mcpServers.some((s) => s.id === server.id)),
     [activedMcpServers, mcpServers]
@@ -195,7 +206,8 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
   const menuItems = useMemo(() => {
     const newList: QuickPanelListItem[] = activedMcpServers.map((server) => ({
       label: server.name,
-      description: server.description || server.baseUrl,
+      // VCP 统一协议：显示服务器描述和协议提示
+      description: server.description || server.baseUrl || t('vcp.protocol.unified_hint', '通过 VCP 协议调用'),
       icon: <Hammer />,
       action: () => EventEmitter.emit('mcp-server-select', server),
       isSelected: assistantMcpServers.some((s) => s.id === server.id)
@@ -352,28 +364,56 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
     [activedMcpServers, form, t, insertPromptIntoTextArea]
   )
 
-  const promptList = useMemo(async () => {
-    const prompts: MCPPrompt[] = []
+  // 优化：使用 useEffect + useState 替代 async useMemo
+  const [promptList, setPromptList] = useState<QuickPanelListItem[]>([])
+  const fetchPromptsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    for (const server of activedMcpServers) {
-      const serverPrompts = await window.api.mcp.listPrompts(server)
-      prompts.push(...serverPrompts)
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchPrompts = async () => {
+      const prompts: MCPPrompt[] = []
+
+      for (const server of activedMcpServers) {
+        try {
+          const serverPrompts = await window.api.mcp.listPrompts(server)
+          prompts.push(...serverPrompts)
+        } catch (error: any) {
+          console.warn(`Failed to fetch prompts from ${server.name}:`, error.message)
+        }
+      }
+
+      if (isMounted) {
+        setPromptList(
+          prompts.map((prompt) => ({
+            label: prompt.name,
+            description: prompt.description,
+            icon: <Hammer />,
+            action: () => handlePromptSelect(prompt as MCPPromptWithArgs)
+          }))
+        )
+      }
     }
 
-    return prompts.map((prompt) => ({
-      label: prompt.name,
-      description: prompt.description,
-      icon: <Hammer />,
-      action: () => handlePromptSelect(prompt as MCPPromptWithArgs)
-    }))
+    // 使用防抖避免频繁请求
+    if (fetchPromptsTimeoutRef.current) {
+      clearTimeout(fetchPromptsTimeoutRef.current)
+    }
+    fetchPromptsTimeoutRef.current = setTimeout(fetchPrompts, 500)
+
+    return () => {
+      isMounted = false
+      if (fetchPromptsTimeoutRef.current) {
+        clearTimeout(fetchPromptsTimeoutRef.current)
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activedMcpServers])
 
-  const openPromptList = useCallback(async () => {
-    const prompts = await promptList
+  const openPromptList = useCallback(() => {
     quickPanelHook.open({
       title: t('settings.mcp.title'),
-      list: prompts,
+      list: promptList,
       symbol: QuickPanelReservedSymbol.McpPrompt,
       multiple: true
     })
@@ -426,6 +466,7 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
 
   // 优化 resourcesList 的状态更新
   const [resourcesList, setResourcesList] = useState<QuickPanelListItem[]>([])
+  const fetchResourcesTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -434,8 +475,13 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
       const resources: MCPResource[] = []
 
       for (const server of activedMcpServers) {
-        const serverResources = await window.api.mcp.listResources(server)
-        resources.push(...serverResources)
+        try {
+          const serverResources = await window.api.mcp.listResources(server)
+          resources.push(...serverResources)
+        } catch (error: any) {
+          // 静默处理 429 等错误，避免中断其他服务器的资源获取
+          console.warn(`Failed to fetch resources from ${server.name}:`, error.message)
+        }
       }
 
       if (isMounted) {
@@ -450,10 +496,17 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
       }
     }
 
-    fetchResources()
+    // 使用防抖避免频繁请求触发 rate limit
+    if (fetchResourcesTimeoutRef.current) {
+      clearTimeout(fetchResourcesTimeoutRef.current)
+    }
+    fetchResourcesTimeoutRef.current = setTimeout(fetchResources, 500)
 
     return () => {
       isMounted = false
+      if (fetchResourcesTimeoutRef.current) {
+        clearTimeout(fetchResourcesTimeoutRef.current)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activedMcpServers])
@@ -514,8 +567,17 @@ const MCPToolsButton: FC<Props> = ({ quickPanel, setInputValue, resizeTextArea, 
     }
   }, [openPromptList, openQuickPanel, openResourcesList, quickPanel, t])
 
+  // VCP 统一协议：生成带服务器数量的 Tooltip 提示
+  const tooltipTitle = useMemo(() => {
+    const serverCount = assistantMcpServers.length
+    if (serverCount === 0) {
+      return t('settings.mcp.title')
+    }
+    return `${t('settings.mcp.title')} (${serverCount})`
+  }, [assistantMcpServers.length, t])
+
   return (
-    <Tooltip placement="top" title={t('settings.mcp.title')} mouseLeaveDelay={0} arrow>
+    <Tooltip placement="top" title={tooltipTitle} mouseLeaveDelay={0} arrow>
       <ActionIconButton
         onClick={handleOpenQuickPanel}
         active={assistant.mcpServers && assistant.mcpServers.length > 0}

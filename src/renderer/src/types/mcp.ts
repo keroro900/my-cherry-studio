@@ -2,6 +2,22 @@ import * as z from 'zod'
 
 import { isBuiltinMCPServerName } from '.'
 
+// ==================== 辅助验证函数 ====================
+
+/**
+ * URL 验证器
+ * 支持 http/https/ws/wss 协议
+ */
+const urlPattern = /^(https?|wss?):\/\/[^\s/$.?#].[^\s]*$/i
+
+/**
+ * 环境变量键名验证器
+ * 仅允许大写字母、数字和下划线
+ */
+const envKeyPattern = /^[A-Z_][A-Z0-9_]*$/i
+
+// ==================== Schema 定义 ====================
+
 export const MCPConfigSampleSchema = z.object({
   command: z.string(),
   args: z.array(z.string()),
@@ -60,13 +76,26 @@ export const McpServerConfigSchema = z
     /**
      * 服务器的URL地址
      * 可选。用于指定服务器的访问地址。
+     * 支持 http/https/ws/wss 协议
      */
-    url: z.string().optional().describe('Server URL address'),
+    url: z
+      .string()
+      .optional()
+      .refine((val) => !val || urlPattern.test(val), {
+        message: 'Invalid URL format. Must start with http://, https://, ws://, or wss://'
+      })
+      .describe('Server URL address'),
     /**
      * url 的内部别名，优先使用 baseUrl 字段。
      * 可选。用于指定服务器的访问地址。
      */
-    baseUrl: z.string().optional().describe('Server URL address'),
+    baseUrl: z
+      .string()
+      .optional()
+      .refine((val) => !val || urlPattern.test(val), {
+        message: 'Invalid URL format. Must start with http://, https://, ws://, or wss://'
+      })
+      .describe('Server URL address'),
     /**
      * 启动服务器的命令 (如 "uvx", "npx")。
      * 可选。
@@ -85,10 +114,18 @@ export const McpServerConfigSchema = z
     args: z.array(z.string()).optional().describe('The arguments to pass to the command'),
     /**
      * 启动时注入的环境变量对象。
-     * 键为变量名，值为字符串。
+     * 键为变量名（仅允许字母、数字、下划线），值为字符串。
      * 可选。
      */
-    env: z.record(z.string(), z.string()).optional().describe('Environment variables for the server process'),
+    env: z
+      .record(
+        z.string().refine((key) => envKeyPattern.test(key), {
+          message: 'Environment variable key must only contain letters, numbers, and underscores'
+        }),
+        z.string()
+      )
+      .optional()
+      .describe('Environment variables for the server process'),
     /**
      * 请求头配置
      * 可选。用于设置请求时的自定义headers。
@@ -121,9 +158,14 @@ export const McpServerConfigSchema = z
     longRunning: z.boolean().optional().describe('Whether the server is long running'),
     /**
      * 请求超时时间
-     * 可选。单位为秒，默认为60秒。
+     * 可选。单位为秒，范围 1-600 秒，默认为60秒。
      */
-    timeout: z.number().optional().describe('Timeout in seconds for requests to this server'),
+    timeout: z
+      .number()
+      .min(1, { message: 'Timeout must be at least 1 second' })
+      .max(600, { message: 'Timeout must not exceed 600 seconds (10 minutes)' })
+      .optional()
+      .describe('Timeout in seconds for requests to this server'),
     /**
      * DXT包版本号
      * 可选。用于标识DXT包的版本。

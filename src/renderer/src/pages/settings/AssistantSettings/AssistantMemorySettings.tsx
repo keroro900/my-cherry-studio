@@ -5,9 +5,9 @@ import MemoriesSettingsModal from '@renderer/pages/settings/MemorySettings/Memor
 import MemoryService from '@renderer/services/MemoryService'
 import { selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
 import type { Assistant, AssistantSettings } from '@renderer/types'
-import { Alert, Button, Card, Space, Switch, Tooltip, Typography } from 'antd'
+import { Alert, Button, Card, Checkbox, Divider, Space, Switch, Tooltip, Typography } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import { Settings2 } from 'lucide-react'
+import { Brain, Settings2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -24,6 +24,17 @@ interface Props {
   onClose?: () => void // Add optional close callback
 }
 
+// 记忆后端类型
+type MemoryBackend = 'diary' | 'memory' | 'lightmemo' | 'deepmemo' | 'meshmemo' | 'unified'
+
+// 助手统一记忆配置
+interface AssistantMemoryConfig {
+  unifiedMemoryEnabled?: boolean
+  includeInSearch?: boolean
+  applyLearning?: boolean
+  backends?: MemoryBackend[]
+}
+
 const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, onClose }) => {
   const { t } = useTranslation()
   const memoryConfig = useSelector(selectMemoryConfig)
@@ -35,6 +46,25 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const [settingsModalVisible, setSettingsModalVisible] = useState(false)
   const memoryService = MemoryService.getInstance()
   const form = useForm()
+
+  // 获取助手的统一记忆配置
+  const unifiedMemoryConfig: AssistantMemoryConfig = (assistant as any).unifiedMemoryConfig || {
+    unifiedMemoryEnabled: false,
+    includeInSearch: true,
+    applyLearning: true,
+    backends: ['diary', 'memory', 'lightmemo', 'deepmemo']
+  }
+
+  // 更新统一记忆配置
+  const updateUnifiedMemoryConfig = (updates: Partial<AssistantMemoryConfig>) => {
+    updateAssistant({
+      ...assistant,
+      unifiedMemoryConfig: {
+        ...unifiedMemoryConfig,
+        ...updates
+      }
+    } as Assistant)
+  }
 
   // Load memory statistics for this assistant
   const loadMemoryStats = useCallback(async () => {
@@ -70,6 +100,16 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
 
   const isMemoryConfigured = memoryConfig.embeddingModel && memoryConfig.llmModel
   const isMemoryEnabled = globalMemoryEnabled && isMemoryConfigured
+
+  // 后端标签
+  const backendLabels: Record<MemoryBackend, string> = {
+    diary: t('memory.backend.diary', '日记'),
+    memory: t('memory.backend.memory', '全局记忆'),
+    lightmemo: t('memory.backend.lightmemo', '轻量记忆'),
+    deepmemo: t('memory.backend.deepmemo', '深度记忆'),
+    meshmemo: t('memory.backend.meshmemo', '网格记忆'),
+    unified: t('memory.backend.unified', '统一存储')
+  }
 
   return (
     <Container>
@@ -145,6 +185,65 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
         </Space>
       </Card>
 
+      {/* 统一记忆协调器配置 */}
+      <Divider style={{ margin: '12px 0' }} />
+
+      <SectionHeader>
+        <Brain size={16} />
+        <Text strong>{t('memory.unified.title', '统一记忆检索')}</Text>
+        <Tooltip title={t('memory.unified.description', '启用后，助手将自动搜索日记、轻量记忆等多个后端')}>
+          <InfoIcon style={{ marginLeft: 4 }} />
+        </Tooltip>
+      </SectionHeader>
+
+      <SettingRow>
+        <Text>{t('memory.unified.enable', '启用统一记忆')}</Text>
+        <Switch
+          size="small"
+          checked={unifiedMemoryConfig.unifiedMemoryEnabled}
+          onChange={(checked) => updateUnifiedMemoryConfig({ unifiedMemoryEnabled: checked })}
+        />
+      </SettingRow>
+
+      {unifiedMemoryConfig.unifiedMemoryEnabled && (
+        <>
+          <SettingRow>
+            <Text>{t('memory.unified.include_in_search', '合并知识库搜索')}</Text>
+            <Switch
+              size="small"
+              checked={unifiedMemoryConfig.includeInSearch}
+              onChange={(checked) => updateUnifiedMemoryConfig({ includeInSearch: checked })}
+            />
+          </SettingRow>
+
+          <SettingRow>
+            <Text>{t('memory.unified.apply_learning', '应用学习权重')}</Text>
+            <Tooltip title={t('memory.unified.apply_learning_tip', '基于用户反馈自动优化搜索结果')}>
+              <Switch
+                size="small"
+                checked={unifiedMemoryConfig.applyLearning}
+                onChange={(checked) => updateUnifiedMemoryConfig({ applyLearning: checked })}
+              />
+            </Tooltip>
+          </SettingRow>
+
+          <SettingRow style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+            <Text>{t('memory.unified.backends', '记忆来源')}</Text>
+            <Checkbox.Group
+              value={unifiedMemoryConfig.backends || []}
+              onChange={(values) => updateUnifiedMemoryConfig({ backends: values as MemoryBackend[] })}>
+              <Space wrap>
+                {(Object.keys(backendLabels) as MemoryBackend[]).map((backend) => (
+                  <Checkbox key={backend} value={backend}>
+                    {backendLabels[backend]}
+                  </Checkbox>
+                ))}
+              </Space>
+            </Checkbox.Group>
+          </SettingRow>
+        </>
+      )}
+
       <MemoriesSettingsModal
         visible={settingsModalVisible}
         onSubmit={() => setSettingsModalVisible(false)}
@@ -174,6 +273,20 @@ const InfoIcon = styled(InfoCircleOutlined)`
   font-size: 14px;
   color: var(--color-text-2);
   cursor: help;
+`
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+`
+
+const SettingRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
 `
 
 export default AssistantMemorySettings

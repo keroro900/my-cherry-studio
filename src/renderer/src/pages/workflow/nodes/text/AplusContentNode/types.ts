@@ -17,13 +17,13 @@ import type { PortDefinition } from '../../base/types'
  * 电商平台类型
  */
 export type EcommercePlatform =
-  | 'amazon'     // 亚马逊 A+
-  | 'taobao'     // 淘宝/天猫
-  | 'shopify'    // Shopify 独立站
-  | 'shein'      // SHEIN
-  | 'temu'       // Temu
+  | 'amazon' // 亚马逊 A+
+  | 'taobao' // 淘宝/天猫
+  | 'shopify' // Shopify 独立站
+  | 'shein' // SHEIN
+  | 'temu' // Temu
   | 'aliexpress' // 速卖通
-  | 'general'    // 通用格式
+  | 'general' // 通用格式
 
 /**
  * A+ 模块类型

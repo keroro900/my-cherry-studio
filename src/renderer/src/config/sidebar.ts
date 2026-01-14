@@ -15,7 +15,9 @@ export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
   'code_tools',
   'notes',
   'workflow',
-  'image_studio'
+  'image_studio',
+  'canvas',
+  'vcp_dashboard'
 ]
 
 /**

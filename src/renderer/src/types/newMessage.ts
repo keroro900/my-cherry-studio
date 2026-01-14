@@ -1,3 +1,14 @@
+/**
+ * VCP 统一协议消息类型定义
+ *
+ * 所有工具调用都通过 VCP 协议统一处理：
+ * - MCP 服务器工具自动转换为 VCP 格式
+ * - 工具调用格式: <<<[TOOL_REQUEST]>>> ... <<<[END_TOOL_REQUEST]>>>
+ * - ToolMessageBlock 是统一的工具消息块类型
+ *
+ * @see src/renderer/src/aiCore/legacy/middleware/VCPToolExecutorMiddleware.ts
+ * @see src/main/knowledge/vcp/MCPOBridge.ts
+ */
 import type { CompletionUsage } from '@cherrystudio/openai/resources'
 import type { ProviderMetadata } from 'ai'
 
@@ -109,6 +120,7 @@ export interface ImageMessageBlock extends BaseMessageBlock {
 }
 
 // Added unified ToolBlock
+// VCP 统一协议：所有工具（MCP/VCP/内置）的统一消息块类型
 export interface ToolMessageBlock extends BaseMessageBlock {
   type: MessageBlockType.TOOL
   toolId: string
@@ -116,9 +128,13 @@ export interface ToolMessageBlock extends BaseMessageBlock {
   arguments?: Record<string, any>
   content?: string | object
   metadata?: BaseMessageBlock['metadata'] & {
+    // VCP 统一协议：rawMcpToolResponse 同时支持 MCP 和 VCP 工具响应
     rawMcpToolResponse?: MCPToolResponse | NormalToolResponse
   }
 }
+
+// VCP 统一协议：类型别名，便于未来完全迁移
+export type VCPToolMessageBlock = ToolMessageBlock
 
 // Consolidated and Enhanced Citation Block
 export interface CitationMessageBlock extends BaseMessageBlock {

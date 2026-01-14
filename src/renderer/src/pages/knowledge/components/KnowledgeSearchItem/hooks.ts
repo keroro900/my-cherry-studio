@@ -62,9 +62,12 @@ export const useKnowledgeItemMetadata = () => {
       }
     } else {
       // 处理预处理后的文件source
+      // 不生成 file:// URL，因为文件可能不存在或存储在数据库中
+      // 只显示文件名作为文本，不作为可点击链接
+      const fileName = item.metadata.source.split(/[/\\]/).pop() || item.metadata.source
       return {
-        href: `file://${item.metadata.source}`,
-        text: item.metadata.source.split('/').pop() || item.metadata.source
+        href: '', // 空href表示不可点击
+        text: fileName
       }
     }
   }

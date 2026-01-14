@@ -120,6 +120,9 @@ async function convertMessageToUserModelMessage(
       if (filePart) {
         // 判断filePart是否为string
         if (typeof filePart.data === 'string' && filePart.data.startsWith('fileid://')) {
+          // Ensure user content is never empty - use placeholder if needed
+          const userContent =
+            parts.length > 0 ? parts : ([{ type: 'text', text: 'Process the file above.' }] as TextPart[])
           return [
             {
               role: 'system',
@@ -127,7 +130,7 @@ async function convertMessageToUserModelMessage(
             },
             {
               role: 'user',
-              content: parts.length > 0 ? parts : ''
+              content: userContent
             }
           ]
         }
@@ -230,6 +233,18 @@ export async function convertMessagesToSdkMessages(messages: Message[], model: M
     const sdkMessage = await convertMessageToSdkParam(message, isVision, model)
     sdkMessages.push(...(Array.isArray(sdkMessage) ? sdkMessage : [sdkMessage]))
   }
+
+  // Filter out messages with empty content to prevent "text content blocks must be non-empty" errors
+  const filteredMessages = sdkMessages.filter((msg) => {
+    if (typeof msg.content === 'string') {
+      return msg.content.length > 0
+    }
+    if (Array.isArray(msg.content)) {
+      return msg.content.length > 0
+    }
+    return true
+  })
+
   // Special handling for image enhancement models
   // Target behavior: Collapse the conversation into [system?, user(image)].
   // Explanation of why we don't simply use slice:
@@ -245,17 +260,17 @@ export async function convertMessagesToSdkMessages(messages: Message[], model: M
   // which still require reassembly; constructing directly according to the target structure is clearer and more reliable.
   if (isImageEnhancementModel(model)) {
     // Collect all system messages (including ones generated from file uploads)
-    const systemMessages = sdkMessages.filter((m): m is SystemModelMessage => m.role === 'system')
+    const systemMessages = filteredMessages.filter((m): m is SystemModelMessage => m.role === 'system')
 
     // Find the last user message (SDK converted)
     const lastUserSdkIndex = (() => {
-      for (let i = sdkMessages.length - 1; i >= 0; i--) {
-        if (sdkMessages[i].role === 'user') return i
+      for (let i = filteredMessages.length - 1; i >= 0; i--) {
+        if (filteredMessages[i].role === 'user') return i
       }
       return -1
     })()
 
-    const lastUserSdk = lastUserSdkIndex >= 0 ? (sdkMessages[lastUserSdkIndex] as UserModelMessage) : null
+    const lastUserSdk = lastUserSdkIndex >= 0 ? (filteredMessages[lastUserSdkIndex] as UserModelMessage) : null
 
     // Find the nearest preceding assistant message in original messages
     let prevAssistant: Message | null = null
@@ -293,5 +308,5 @@ export async function convertMessagesToSdkMessages(messages: Message[], model: M
     return [...systemMessages, { role: 'user', content: finalUserParts }]
   }
 
-  return sdkMessages
+  return filteredMessages
 }

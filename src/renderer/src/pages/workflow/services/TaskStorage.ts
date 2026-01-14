@@ -95,14 +95,29 @@ class TaskStorageService {
   private history: TaskHistory[] = []
   private recoverableTasks: Map<string, RecoverableTask> = new Map()
   private config: StorageConfig
-  private autoSaveTimer?: NodeJS.Timeout
+  private autoSaveTimer?: ReturnType<typeof setInterval>
   private isDirty = false
   private db: IDBDatabase | null = null
   private isInitialized = false
+  private isDisposed = false
+  private boundBeforeUnload: () => void
 
   constructor(config?: Partial<StorageConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config }
+    // 绑定 beforeunload 处理器
+    this.boundBeforeUnload = this.handleBeforeUnload.bind(this)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', this.boundBeforeUnload)
+    }
     this.initialize()
+  }
+
+  /**
+   * 窗口关闭前处理
+   */
+  private handleBeforeUnload(): void {
+    // 同步保存并清理资源
+    this.dispose()
   }
 
   /**
@@ -321,6 +336,30 @@ class TaskStorageService {
       clearInterval(this.autoSaveTimer)
       this.autoSaveTimer = undefined
     }
+  }
+
+  /**
+   * 释放资源
+   */
+  dispose(): void {
+    if (this.isDisposed) return
+    this.isDisposed = true
+
+    // 停止自动保存
+    this.stopAutoSave()
+
+    // 移除事件监听器
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('beforeunload', this.boundBeforeUnload)
+    }
+
+    // 关闭 IndexedDB 连接
+    if (this.db) {
+      this.db.close()
+      this.db = null
+    }
+
+    logger.info('TaskStorage disposed')
   }
 
   /**

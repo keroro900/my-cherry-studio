@@ -4,17 +4,16 @@
  * 提供工作流管理和执行相关的 MCP 工具
  * 移植自旧后端 Python 实现
  *
- * @version 1.1.0
- * @updated 2024-12-19 添加 generate_image 工具和 IPC 桥接
+ * @version 1.2.0
+ * @updated 2024-12-25 使用 MCPBridge 进行 AI 调用
  */
 
 import { loggerService } from '@logger'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import type { Tool } from '@modelcontextprotocol/sdk/types.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
-import { IpcChannel } from '@shared/IpcChannel'
 
-import { windowService } from '../services/WindowService'
+import { mcpBridge } from './shared/MCPBridge'
 
 const logger = loggerService.withContext('MCPServer:Workflow')
 
@@ -449,6 +448,153 @@ AI 助手分析用户需求，自动选择合适的节点组合生成图片或�
       },
       required: ['prompt']
     }
+  },
+
+  // 13. 自主图片生成（AI Agent）
+  {
+    name: 'autonomous_generate',
+    description: `AI 自主图片生成 Agent。
+用户只需发送一句话描述 + 图片，AI 自动完成：
+1. 意图分析：识别任务类型（电商图、模特图、图案等）
+2. 图片分析：提取服装特征（颜色、材质、风格）
+3. 任务规划：制定多步骤生成计划
+4. 自动执行：并行/串行执行生成步骤
+5. 返回成品：主图、背面图、细节图等
+
+使用示例:
+- "帮我生成一整套电商图"（自动生成主图+背面+细节）
+- "给这件衣服配个模特"（生成模特穿搭图）
+- "从这件衣服提取图案"（生成无缝图案）
+
+支持的任务类型:
+- ecom: 电商产品图（平铺、挂拍、主图+背面+细节）
+- model: 模特展示图（多角度、多场景）
+- pattern: 图案设计（无缝、可平铺）
+- video: 展示视频
+- auto: AI 自动判断最合适的类型`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        userMessage: {
+          type: 'string',
+          description: '用户需求描述'
+        },
+        images: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              base64: { type: 'string', description: 'Base64 编码的图片数据' },
+              path: { type: 'string', description: '本地文件路径' },
+              url: { type: 'string', description: '网络图片 URL' }
+            }
+          },
+          description: '输入图片列表'
+        },
+        taskType: {
+          type: 'string',
+          enum: ['ecom', 'model', 'pattern', 'video', 'auto'],
+          description: '任务类型，auto 时由 AI 自动判断',
+          default: 'auto'
+        },
+        enableBack: {
+          type: 'boolean',
+          description: '是否生成背面图（电商图模式）',
+          default: false
+        },
+        enableDetail: {
+          type: 'boolean',
+          description: '是否生成细节图（电商图模式）',
+          default: false
+        },
+        aspectRatio: {
+          type: 'string',
+          enum: ['1:1', '3:4', '4:3', '9:16', '16:9'],
+          description: '输出图片宽高比',
+          default: '3:4'
+        },
+        imageSize: {
+          type: 'string',
+          enum: ['1K', '2K', '4K'],
+          description: '输出图片尺寸',
+          default: '2K'
+        }
+      },
+      required: ['userMessage']
+    }
+  },
+
+  // 14. 多Agent协同图片生成
+  {
+    name: 'collaborative_generate',
+    description: `多Agent协同图片生成。
+让多个 AI Agent 分工协作完成复杂的图片生成任务：
+
+**协作角色:**
+- 🔍 分析师 (Analyst): 分析图片内容，提取特征
+- 📋 规划师 (Planner): 制定生成计划和策略
+- 🎨 生成师 (Generator): 执行图片生成
+- ✅ 质检师 (QC): 检查质量，决定是否重试
+
+**工作流程:**
+1. 分析师分析输入图片 → @规划师
+2. 规划师制定生成计划 → @生成师
+3. 生成师执行生成 → @质检师
+4. 质检师检查质量 → 通过/重试
+
+**协作模板:**
+- gemini_all: Gemini 全能协作（单一 Provider）
+- multi_model: 多模型协作（Claude 规划 + Gemini 生成）
+- premium: 高质量协作（GPT-4 规划 + Gemini 生成）
+
+**使用场景:**
+- 需要高质量电商图时，让质检师多轮把关
+- 需要复杂任务规划时，让 Claude 来规划
+- 需要视觉分析时，让 Gemini 来分析`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        userMessage: {
+          type: 'string',
+          description: '用户需求描述'
+        },
+        images: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              base64: { type: 'string', description: 'Base64 编码的图片数据' },
+              path: { type: 'string', description: '本地文件路径' },
+              url: { type: 'string', description: '网络图片 URL' }
+            }
+          },
+          description: '输入图片列表'
+        },
+        template: {
+          type: 'string',
+          enum: ['gemini_all', 'multi_model', 'premium'],
+          description: '协作模板',
+          default: 'gemini_all'
+        },
+        taskType: {
+          type: 'string',
+          enum: ['ecom', 'model', 'pattern', 'video', 'auto'],
+          description: '任务类型',
+          default: 'auto'
+        },
+        maxRetries: {
+          type: 'number',
+          description: '最大重试次数',
+          default: 2
+        },
+        showThinking: {
+          type: 'boolean',
+          description: '是否显示各 Agent 的思考过程',
+          default: true
+        }
+      },
+      required: ['userMessage']
+    }
   }
 ]
 
@@ -647,14 +793,96 @@ class WorkflowServiceImpl {
     try {
       logger.info('Executing step', { stepType: args.stepType })
 
-      // TODO: 实现各步骤类型的执行逻辑
-      // 需要调用对应的 AI 服务
+      const { stepType, params, inputImage, inputImageBase64 } = args
 
-      return {
-        success: true,
-        stepType: args.stepType,
-        message: '步骤执行功能开发中',
-        result: null
+      // 根据步骤类型执行不同的操作
+      switch (stepType) {
+        case 'vision_prompt':
+        case 'qwen_prompt': {
+          // 视觉/文本提示步骤
+          const images: Array<{ base64?: string; path?: string }> = []
+          if (inputImageBase64) {
+            images.push({ base64: inputImageBase64 })
+          } else if (inputImage) {
+            images.push({ path: inputImage })
+          }
+
+          if (images.length > 0) {
+            const result = await mcpBridge.visionAnalysis({
+              systemPrompt: params?.systemPrompt || '',
+              userPrompt: params?.prompt || params?.userPrompt || '',
+              images
+            })
+            return { success: true, stepType, result }
+          } else {
+            const result = await mcpBridge.generateText({
+              systemPrompt: params?.systemPrompt || '',
+              userPrompt: params?.prompt || params?.userPrompt || ''
+            })
+            return { success: true, stepType, result }
+          }
+        }
+
+        case 'gemini_generate':
+        case 'gemini_edit':
+        case 'gemini_pattern':
+        case 'gemini_ecom': {
+          // Gemini 图像生成/编辑步骤
+          const mode =
+            stepType === 'gemini_generate'
+              ? 'generate'
+              : stepType === 'gemini_edit'
+                ? 'edit'
+                : stepType === 'gemini_pattern'
+                  ? 'pattern'
+                  : 'ecom'
+
+          const images: Array<{ base64?: string; path?: string }> = []
+          if (inputImageBase64) {
+            images.push({ base64: inputImageBase64 })
+          } else if (inputImage) {
+            images.push({ path: inputImage })
+          }
+
+          const result = await mcpBridge.generateImage({
+            mode,
+            prompt: params?.prompt || '',
+            systemPrompt: params?.systemPrompt,
+            images: images.length > 0 ? images : undefined,
+            aspectRatio: params?.aspectRatio,
+            imageSize: params?.imageSize
+          })
+          return { success: result.success, stepType, result: result.images, error: result.error }
+        }
+
+        case 'compare_image': {
+          // 图像比较步骤
+          const images: Array<{ base64?: string; path?: string }> = []
+          if (params?.images) {
+            for (const img of params.images) {
+              if (img.base64) {
+                images.push({ base64: img.base64 })
+              } else if (img.path) {
+                images.push({ path: img.path })
+              }
+            }
+          }
+
+          const result = await mcpBridge.visionAnalysis({
+            systemPrompt: '你是一个图像比较专家。请分析并比较这些图像的异同。',
+            userPrompt: params?.prompt || '请比较这些图像',
+            images
+          })
+          return { success: true, stepType, result }
+        }
+
+        default:
+          // 默认使用文本生成
+          const textResult = await mcpBridge.generateText({
+            systemPrompt: params?.systemPrompt || '',
+            userPrompt: params?.prompt || params?.userPrompt || `执行步骤: ${stepType}`
+          })
+          return { success: true, stepType, result: textResult }
       }
     } catch (error) {
       logger.error('Failed to execute step', { error })
@@ -670,15 +898,71 @@ class WorkflowServiceImpl {
     try {
       logger.info('Calling AI service', { provider: args.provider, action: args.action })
 
-      // TODO: 实现 AI 服务调用
-      // 需要使用对应的服务客户端
+      const { provider, action, params, inputImage } = args
 
-      return {
-        success: true,
-        provider: args.provider,
-        action: args.action,
-        message: 'AI 调用功能开发中',
-        result: null
+      // 根据 action 类型调用不同的 AI 服务
+      switch (action) {
+        case 'generate':
+        case 'text': {
+          const result = await mcpBridge.generateText({
+            systemPrompt: params?.systemPrompt || '',
+            userPrompt: params?.prompt || params?.userPrompt || ''
+          })
+          return { success: true, provider, action, result }
+        }
+
+        case 'vision':
+        case 'analyze': {
+          const images: Array<{ base64?: string; path?: string }> = []
+          if (params?.imageBase64) {
+            images.push({ base64: params.imageBase64 })
+          } else if (inputImage) {
+            images.push({ path: inputImage })
+          }
+
+          const result = await mcpBridge.visionAnalysis({
+            systemPrompt: params?.systemPrompt || '',
+            userPrompt: params?.prompt || params?.userPrompt || '',
+            images
+          })
+          return { success: true, provider, action, result }
+        }
+
+        case 'image':
+        case 'generate_image': {
+          const images: Array<{ base64?: string; path?: string }> = []
+          if (params?.imageBase64) {
+            images.push({ base64: params.imageBase64 })
+          } else if (inputImage) {
+            images.push({ path: inputImage })
+          }
+
+          const result = await mcpBridge.generateImage({
+            mode: params?.mode || 'generate',
+            prompt: params?.prompt || '',
+            systemPrompt: params?.systemPrompt,
+            images: images.length > 0 ? images : undefined,
+            aspectRatio: params?.aspectRatio,
+            imageSize: params?.imageSize
+          })
+          return { success: result.success, provider, action, result: result.images, error: result.error }
+        }
+
+        case 'search': {
+          const result = await mcpBridge.webSearch({
+            query: params?.query || params?.prompt || '',
+            maxResults: params?.maxResults || 10
+          })
+          return { success: true, provider, action, result }
+        }
+
+        default:
+          // 默认使用文本生成
+          const defaultResult = await mcpBridge.generateText({
+            systemPrompt: params?.systemPrompt || '',
+            userPrompt: params?.prompt || params?.userPrompt || `执行操作: ${action}`
+          })
+          return { success: true, provider, action, result: defaultResult }
       }
     } catch (error) {
       logger.error('Failed to call AI', { error })
@@ -739,12 +1023,12 @@ class WorkflowServiceImpl {
   }
 
   /**
-   * 图片生成 - 通过 IPC 桥接调用 Renderer 进程的 WorkflowAiService
+   * 图片生成 - 通过 MCPBridge 调用 Renderer 进程的 WorkflowAiService
    *
    * @param args 生成参数
    * @returns 生成结果
    *
-   * **Feature: mcp-generate-image, Phase 7.1**
+   * **Feature: mcp-generate-image, Phase 7.2**
    */
   async generateImage(args: {
     mode?: 'generate' | 'edit' | 'pattern' | 'ecom' | 'model'
@@ -758,19 +1042,10 @@ class WorkflowServiceImpl {
   }): Promise<any> {
     try {
       const mode = args.mode || 'generate'
-      logger.info('Generating image via IPC bridge', { mode, promptLength: args.prompt?.length })
+      logger.info('Generating image via MCPBridge', { mode, promptLength: args.prompt?.length })
 
-      // 获取主窗口
-      const mainWindow = windowService.getMainWindow()
-      if (!mainWindow || mainWindow.isDestroyed()) {
-        return {
-          success: false,
-          error: '主窗口未就绪，无法执行图片生成'
-        }
-      }
-
-      // 构建 IPC 请求参数
-      const ipcArgs = {
+      // 使用 MCPBridge 调用 Renderer 进程
+      const result = await mcpBridge.generateImage({
         mode,
         prompt: args.prompt,
         systemPrompt: args.systemPrompt,
@@ -779,57 +1054,91 @@ class WorkflowServiceImpl {
         imageSize: args.imageSize || '2K',
         negativePrompt: args.negativePrompt,
         stylePreset: args.stylePreset
-      }
-
-      // 通过 IPC 调用 Renderer 进程
-      // Renderer 进程需要注册对应的 handler
-      return new Promise((resolve) => {
-        const requestId = `gen_${Date.now()}_${Math.random().toString(36).substring(7)}`
-        const timeout = 120000 // 2 分钟超时
-
-        // 设置超时
-        const timeoutId = setTimeout(() => {
-          logger.warn('Image generation timeout', { requestId })
-          resolve({
-            success: false,
-            error: '图片生成超时',
-            requestId
-          })
-        }, timeout)
-
-        // 发送请求到 Renderer
-        mainWindow.webContents.send(IpcChannel.Workflow_GenerateImage, {
-          requestId,
-          ...ipcArgs
-        })
-
-        // 监听响应 (一次性监听)
-        const responseChannel = `${IpcChannel.Workflow_GenerateImage}:response:${requestId}`
-
-        // 使用 ipcMain.once 监听响应
-        // 注意：实际实现中，Renderer 进程需要通过 ipcRenderer.send 回复
-        // 这里使用简化的实现，实际应该使用 invoke/handle 模式
-        const { ipcMain } = require('electron')
-        ipcMain.once(responseChannel, (_event: any, result: any) => {
-          clearTimeout(timeoutId)
-          logger.info('Received image generation response', { requestId, success: result?.success })
-          resolve(result)
-        })
-
-        // 备用：如果 Renderer 不响应，返回待实现提示
-        setTimeout(() => {
-          clearTimeout(timeoutId)
-          ipcMain.removeAllListeners(responseChannel)
-          resolve({
-            success: true,
-            message: '图片生成请求已发送到渲染进程',
-            requestId,
-            note: 'Renderer 进程需要实现 IPC handler 来处理实际生成'
-          })
-        }, 1000)
       })
+
+      return result
     } catch (error) {
       logger.error('Failed to generate image', { error })
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  }
+
+  /**
+   * 自主图片生成
+   * 使用 AutonomousImageAgent 完成意图分析、任务规划、多步骤执行
+   *
+   * **Feature: autonomous-agent, Step 4**
+   */
+  async autonomousGenerate(args: {
+    userMessage: string
+    images?: Array<{ base64?: string; path?: string; url?: string }>
+    taskType?: 'ecom' | 'model' | 'pattern' | 'video' | 'auto'
+    enableBack?: boolean
+    enableDetail?: boolean
+    aspectRatio?: string
+    imageSize?: string
+  }): Promise<any> {
+    try {
+      logger.info('Autonomous generate via MCPBridge', {
+        messageLength: args.userMessage?.length,
+        imageCount: args.images?.length || 0,
+        taskType: args.taskType
+      })
+
+      // 使用 MCPBridge 调用 Renderer 进程的 AutonomousImageAgent
+      const result = await mcpBridge.autonomousGenerate({
+        userMessage: args.userMessage,
+        images: args.images,
+        taskType: args.taskType,
+        enableBack: args.enableBack,
+        enableDetail: args.enableDetail,
+        aspectRatio: args.aspectRatio,
+        imageSize: args.imageSize
+      })
+
+      return result
+    } catch (error) {
+      logger.error('Failed to autonomous generate', { error })
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  }
+
+  // 多Agent协同图片生成
+  async collaborativeGenerate(args: {
+    userMessage: string
+    images?: Array<{ base64?: string; path?: string; url?: string }>
+    template?: 'gemini_all' | 'multi_model' | 'premium'
+    taskType?: 'ecom' | 'model' | 'pattern' | 'video' | 'auto'
+    maxRetries?: number
+    showThinking?: boolean
+  }): Promise<any> {
+    try {
+      logger.info('Collaborative generate via MCPBridge', {
+        messageLength: args.userMessage?.length,
+        imageCount: args.images?.length || 0,
+        template: args.template,
+        taskType: args.taskType
+      })
+
+      // 使用 MCPBridge 调用 Renderer 进程的 ImageCollaborationAgent
+      const result = await mcpBridge.collaborativeGenerate({
+        userMessage: args.userMessage,
+        images: args.images,
+        template: args.template || 'gemini_all',
+        taskType: args.taskType,
+        maxRetries: args.maxRetries,
+        showThinking: args.showThinking
+      })
+
+      return result
+    } catch (error) {
+      logger.error('Failed to collaborative generate', { error })
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error)
@@ -1291,6 +1600,14 @@ class WorkflowServer {
 
           case 'generate_image':
             result = await this.workflowService.generateImage(args as any)
+            break
+
+          case 'autonomous_generate':
+            result = await this.workflowService.autonomousGenerate(args as any)
+            break
+
+          case 'collaborative_generate':
+            result = await this.workflowService.collaborativeGenerate(args as any)
             break
 
           default:

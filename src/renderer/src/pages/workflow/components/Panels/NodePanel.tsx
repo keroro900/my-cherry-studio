@@ -4,6 +4,7 @@
  * https://reactflow.dev/examples/interaction/drag-and-drop
  */
 
+import { Tooltip } from 'antd'
 import { ChevronDown, ChevronLeft, ChevronUp, Info, Layers, Plus, Search } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -11,6 +12,7 @@ import { NodeRegistryAdapter } from '../../nodes/base/NodeRegistryAdapter'
 import type { NodeDefinition } from '../../types'
 // NODE_REGISTRY 已废弃，仅作为初始化前的回退
 import { NODE_REGISTRY } from '../../types'
+import { CustomNodeBuilder } from '../CustomNodeBuilder'
 
 interface NodePanelProps {
   onCollapse?: () => void
@@ -28,7 +30,8 @@ const CATEGORY_COLORS: Record<NodeDefinition['category'], string> = {
   external: 'var(--ant-color-orange, #fa8c16)',
   custom: 'var(--workflow-theme-geekblue, #2f54eb)',
   text: 'var(--ant-color-cyan, #13c2c2)',
-  fashion: 'var(--ant-color-pink, #eb2f96)'
+  fashion: 'var(--ant-color-pink, #eb2f96)',
+  quality: 'var(--ant-color-lime, #a0d911)'
 }
 
 // 类别名称映射
@@ -42,7 +45,8 @@ const CATEGORY_NAMES: Record<NodeDefinition['category'], string> = {
   external: '外部服务',
   custom: '自定义节点',
   text: '文本/内容',
-  fashion: '时尚分析'
+  fashion: '时尚分析',
+  quality: '质量优化'
 }
 
 function getCategoryColor(category: NodeDefinition['category']): string {
@@ -223,12 +227,30 @@ const styles = {
 }
 
 type NodeCategory = NodeDefinition['category']
-const CATEGORIES: NodeCategory[] = ['input', 'ai', 'text', 'image', 'video', 'fashion', 'flow', 'output', 'external', 'custom']
+const CATEGORIES: NodeCategory[] = [
+  'input',
+  'ai',
+  'text',
+  'image',
+  'video',
+  'fashion',
+  'flow',
+  'output',
+  'external',
+  'custom'
+]
 
 function NodePanel({ onCollapse }: NodePanelProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [collapsedCategories, setCollapsedCategories] = useState<Set<NodeCategory>>(new Set())
   const [registryReady, setRegistryReady] = useState(() => NodeRegistryAdapter.isInitialized())
+  const [customNodeBuilderVisible, setCustomNodeBuilderVisible] = useState(false)
+
+  // 刷新节点列表（自定义节点保存后触发）
+  const [, forceUpdate] = useState(0)
+  const handleCustomNodeSaved = useCallback(() => {
+    forceUpdate((n) => n + 1)
+  }, [])
 
   // 确保节点注册系统已初始化
   useEffect(() => {
@@ -260,7 +282,8 @@ function NodePanel({ onCollapse }: NodePanelProps) {
       external: [],
       custom: [],
       text: [],
-      fashion: []
+      fashion: [],
+      quality: []
     }
 
     // 优先使用适配器获取所有节点，回退到旧系统
@@ -356,11 +379,29 @@ function NodePanel({ onCollapse }: NodePanelProps) {
           <Layers size={18} />
         </div>
         <span style={styles.headerTitle}>节点库</span>
+        <Tooltip title="自定义节点">
+          <button
+            onClick={() => setCustomNodeBuilderVisible(true)}
+            style={{
+              marginLeft: 'auto',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              color: 'var(--ant-color-text-tertiary)'
+            }}>
+            <Plus size={16} />
+          </button>
+        </Tooltip>
         {onCollapse && (
           <button
             onClick={onCollapse}
             style={{
-              marginLeft: 'auto',
               width: '28px',
               height: '28px',
               display: 'flex',
@@ -452,6 +493,13 @@ function NodePanel({ onCollapse }: NodePanelProps) {
         </div>
         <p style={styles.tipText as React.CSSProperties}>拖拽节点到画布上，然后连接输出端口到输入端口来传递数据。</p>
       </div>
+
+      {/* 自定义节点构建器 */}
+      <CustomNodeBuilder
+        visible={customNodeBuilderVisible}
+        onClose={() => setCustomNodeBuilderVisible(false)}
+        onSave={handleCustomNodeSaved}
+      />
     </div>
   )
 }

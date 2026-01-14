@@ -95,7 +95,9 @@ export default defineConfig({
         '@cherrystudio/ai-core/built-in/plugins': resolve('packages/aiCore/src/core/plugins/built-in'),
         '@cherrystudio/ai-core': resolve('packages/aiCore/src'),
         '@cherrystudio/extension-table-plus': resolve('packages/extension-table-plus/src'),
-        '@cherrystudio/ai-sdk-provider': resolve('packages/ai-sdk-provider/src')
+        '@cherrystudio/ai-sdk-provider': resolve('packages/ai-sdk-provider/src'),
+        // Polyfill Node.js path module for browser compatibility
+        path: 'path-browserify'
       }
     },
     optimizeDeps: {
@@ -115,7 +117,8 @@ export default defineConfig({
           miniWindow: resolve(__dirname, 'src/renderer/miniWindow.html'),
           selectionToolbar: resolve(__dirname, 'src/renderer/selectionToolbar.html'),
           selectionAction: resolve(__dirname, 'src/renderer/selectionAction.html'),
-          traceWindow: resolve(__dirname, 'src/renderer/traceWindow.html')
+          traceWindow: resolve(__dirname, 'src/renderer/traceWindow.html'),
+          vcpPluginWindow: resolve(__dirname, 'src/renderer/vcpPluginWindow.html')
         },
         onwarn(warning, warn) {
           if (warning.code === 'COMMONJS_VARIABLE_IN_ESM') return

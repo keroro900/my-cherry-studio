@@ -120,11 +120,7 @@ export class VideoGenerationService {
   private detectApiVersion(): 'v1' | 'v2' {
     const modelId = this.model.id.toLowerCase()
     // v2 API 模型列表
-    const v2Models = [
-      'veo', 'veo2', 'veo3', 'veo3.1',
-      'seedance', 'doubao',
-      'kling', 'hailuo', 'minimax'
-    ]
+    const v2Models = ['veo', 'veo2', 'veo3', 'veo3.1', 'seedance', 'doubao', 'kling', 'hailuo', 'minimax']
     if (v2Models.some((m) => modelId.includes(m))) {
       return 'v2'
     }
@@ -439,10 +435,7 @@ export class VideoGenerationService {
   /**
    * 生成视频（完整流程：提交 + 轮询 + 返回）
    */
-  async generate(
-    params: VideoGenerationParams,
-    options?: VideoGenerationOptions
-  ): Promise<VideoGenerationResult> {
+  async generate(params: VideoGenerationParams, options?: VideoGenerationOptions): Promise<VideoGenerationResult> {
     const { signal, timeout = 600000, pollingInterval = 5000, onProgress } = options || {}
 
     const startTime = Date.now()

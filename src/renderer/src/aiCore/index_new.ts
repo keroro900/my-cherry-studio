@@ -13,11 +13,19 @@ import { getEnableDeveloperMode } from '@renderer/hooks/useSettings'
 import { normalizeGatewayModels, normalizeSdkModels } from '@renderer/services/models/ModelAdapter'
 import { addSpan, endSpan } from '@renderer/services/SpanManagerService'
 import type { StartSpanParams } from '@renderer/trace/types/ModelSpanEntity'
-import { type Assistant, type GenerateImageParams, type Model, type Provider, SystemProviderIds } from '@renderer/types'
+import {
+  type Assistant,
+  type GenerateImageParams,
+  type ImageAssistant,
+  isImageAssistant,
+  type Model,
+  type Provider,
+  SystemProviderIds
+} from '@renderer/types'
 import type { AiSdkModel, StreamTextParams } from '@renderer/types/aiCoreTypes'
 import { SUPPORTED_IMAGE_ENDPOINT_LIST } from '@renderer/utils'
 import { buildClaudeCodeSystemModelMessage } from '@shared/anthropic'
-import { gateway, type ImageModel, type LanguageModel, type Provider as AiSdkProvider, wrapLanguageModel } from 'ai'
+import { gateway, type LanguageModel, type Provider as AiSdkProvider, wrapLanguageModel } from 'ai'
 
 import AiSdkToChunkAdapter from './chunk/AiSdkToChunkAdapter'
 import LegacyAiProvider from './legacy/index'
@@ -109,7 +117,7 @@ export default class ModernAiProvider {
    * 类型守卫函数：通过 provider 属性区分 Model 和 Provider
    */
   private isModel(obj: Model | Provider): obj is Model {
-    return 'provider' in obj && typeof obj.provider === 'string'
+    return obj != null && 'provider' in obj && typeof obj.provider === 'string'
   }
 
   public getActualProvider() {
@@ -133,8 +141,24 @@ export default class ModernAiProvider {
     if (!this.config) {
       throw new Error('Provider config is undefined; cannot proceed with completions')
     }
+
+    // 检查是否需要使用图片生成端点
+    // 1. 检查 endpoint 是否在支持列表中
+    // 2. 关键：检查是否是图片助手类型（确保图片助手走 ImageGenerationMiddleware）
     if (SUPPORTED_IMAGE_ENDPOINT_LIST.includes(this.config.options.endpoint)) {
       providerConfig.isImageGenerationEndpoint = true
+    }
+    if (isImageAssistant(providerConfig.assistant)) {
+      providerConfig.isImageGenerationEndpoint = true
+      // 提取图片助手的配置，供两条路径使用
+      const imageAssistant = providerConfig.assistant as ImageAssistant
+      providerConfig.imageConfig = imageAssistant.imageConfig
+      logger.debug('Detected image assistant, extracting imageConfig', {
+        assistantId: providerConfig.assistant.id,
+        assistantType: providerConfig.assistant.type,
+        imageSize: providerConfig.imageConfig?.imageSize,
+        aspectRatio: providerConfig.imageConfig?.aspectRatio
+      })
     }
     // 准备特殊配置
     await prepareSpecialProviderConfig(this.actualProvider, this.config)
@@ -510,66 +534,9 @@ export default class ModernAiProvider {
   }
 
   public async generateImage(params: GenerateImageParams): Promise<string[]> {
-    // 如果支持新的 AI SDK，使用现代化实现
-    if (isModernSdkSupported(this.actualProvider)) {
-      try {
-        // 确保 config 已定义
-        if (!this.config) {
-          throw new Error('Provider config is undefined; cannot proceed with generateImage')
-        }
-
-        // 确保本地provider已创建
-        if (!this.localProvider && this.config) {
-          this.localProvider = await createAiSdkProvider(this.config)
-          if (!this.localProvider) {
-            throw new Error('Local provider not created')
-          }
-        }
-
-        const result = await this.modernGenerateImage(params)
-        return result
-      } catch (error) {
-        logger.warn('Modern AI SDK generateImage failed, falling back to legacy:', error as Error)
-        // fallback 到传统实现
-        return this.legacyProvider.generateImage(params)
-      }
-    }
-
-    // 直接使用传统实现
+    // 统一使用 legacy 实现，因为 ImageGenerationService 更完善
+    // 支持多种 API 格式、图片编辑、参数透传等功能
     return this.legacyProvider.generateImage(params)
-  }
-
-  /**
-   * 使用现代化 AI SDK 的图像生成实现
-   */
-  private async modernGenerateImage(params: GenerateImageParams): Promise<string[]> {
-    const { model, prompt, imageSize, batchSize, signal } = params
-
-    // 转换参数格式
-    const aiSdkParams = {
-      prompt,
-      size: (imageSize || '1024x1024') as `${number}x${number}`,
-      n: batchSize || 1,
-      ...(signal && { abortSignal: signal })
-    }
-
-    const executor = createExecutor(this.config!.providerId, this.config!.options, [])
-    const result = await executor.generateImage({
-      model: this.localProvider?.imageModel(model) as ImageModel,
-      ...aiSdkParams
-    })
-
-    // 转换结果格式
-    const images: string[] = []
-    if (result.images) {
-      for (const image of result.images) {
-        if ('base64' in image && image.base64) {
-          images.push(`data:image/png;base64,${image.base64}`)
-        }
-      }
-    }
-
-    return images
   }
 
   public getBaseURL(): string {

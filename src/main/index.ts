@@ -36,6 +36,7 @@ import { TrayService } from './services/TrayService'
 import { versionService } from './services/VersionService'
 import { windowService } from './services/WindowService'
 import { initWebviewHotkeys } from './services/WebviewService'
+import { getUnifiedStorage } from './storage'
 import { runAsyncFunction } from './utils'
 import { isOvmsSupported } from './services/OvmsManager'
 
@@ -146,6 +147,20 @@ if (!app.requestSingleInstanceLock()) {
 
     nodeTraceService.init()
     powerMonitorService.init()
+
+    // 初始化统一存储核心 (Phase 6)
+    runAsyncFunction(async () => {
+      try {
+        const unifiedStorage = getUnifiedStorage()
+        await unifiedStorage.initialize({
+          vectorDimensions: 1536,
+          enableTagMemo: true
+        })
+        logger.info('UnifiedStorageCore initialized successfully')
+      } catch (error: any) {
+        logger.warn('Failed to initialize UnifiedStorageCore:', error)
+      }
+    })
 
     app.on('activate', function () {
       const mainWindow = windowService.getMainWindow()
@@ -262,6 +277,27 @@ if (!app.requestSingleInstanceLock()) {
       await apiServerService.stop()
     } catch (error) {
       logger.warn('Error cleaning up MCP service:', error as Error)
+    }
+
+    // 保存 TagMemo 共现矩阵
+    try {
+      const { getTagMemoService } = await import('./knowledge/tagmemo')
+      const tagMemoService = getTagMemoService()
+      if ('forceSave' in tagMemoService) {
+        await (tagMemoService as { forceSave: () => Promise<void> }).forceSave()
+      }
+    } catch (error) {
+      logger.warn('Error saving TagMemo:', error as Error)
+    }
+
+    // 关闭统一存储核心
+    try {
+      const { getUnifiedStorage } = await import('./storage')
+      const unifiedStorage = getUnifiedStorage()
+      await unifiedStorage.close()
+      logger.info('UnifiedStorageCore closed successfully')
+    } catch (error) {
+      logger.warn('Error closing UnifiedStorageCore:', error as Error)
     }
 
     // finish the logger

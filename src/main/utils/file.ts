@@ -221,7 +221,117 @@ export async function base64Image(file: FileMetadata): Promise<{ mime: string; b
 }
 
 /**
+ * 目录扫描选项
+ */
+export interface ScanDirOptions {
+  includeFiles?: boolean
+  includeDirectories?: boolean
+  fileExtensions?: string[] // 空数组表示不过滤
+  ignoreHiddenFiles?: boolean
+  recursive?: boolean
+  maxDepth?: number
+}
+
+const DEFAULT_SCAN_OPTIONS: Required<ScanDirOptions> = {
+  includeFiles: true,
+  includeDirectories: true,
+  fileExtensions: [], // 默认不过滤
+  ignoreHiddenFiles: true,
+  recursive: true,
+  maxDepth: 10
+}
+
+/**
+ * 通用目录扫描函数，支持自定义选项
+ * @param dirPath 当前要扫描的路径
+ * @param options 扫描选项
+ * @param depth 当前深度（内部使用）
+ * @param basePath 基础路径（内部使用）
+ * @returns 文件树结构
+ */
+export async function scanDirGeneric(
+  dirPath: string,
+  options?: ScanDirOptions,
+  depth = 0,
+  basePath?: string
+): Promise<NotesTreeNode[]> {
+  const opts = { ...DEFAULT_SCAN_OPTIONS, ...options }
+
+  // 如果是第一次调用，设置basePath为当前目录
+  if (!basePath) {
+    basePath = dirPath
+  }
+
+  if (opts.maxDepth !== undefined && depth > opts.maxDepth) {
+    return []
+  }
+
+  if (!fs.existsSync(dirPath)) {
+    loggerService.withContext('Utils:File').warn(`Dir not exist: ${dirPath}`)
+    return []
+  }
+
+  const entries = await fs.promises.readdir(dirPath, { withFileTypes: true })
+  const result: NotesTreeNode[] = []
+
+  for (const entry of entries) {
+    if (opts.ignoreHiddenFiles && entry.name.startsWith('.')) {
+      continue
+    }
+
+    const entryPath = path.join(dirPath, entry.name)
+    const relativePath = path.relative(basePath, entryPath)
+    const treePath = '/' + relativePath.replace(/\\/g, '/')
+
+    if (entry.isDirectory() && opts.includeDirectories) {
+      const stats = await fs.promises.stat(entryPath)
+      const externalDirPath = entryPath.replace(/\\/g, '/')
+      const dirTreeNode: NotesTreeNode = {
+        id: createHash('sha1').update(externalDirPath).digest('hex'),
+        name: entry.name,
+        treePath: treePath,
+        externalPath: externalDirPath,
+        createdAt: stats.birthtime.toISOString(),
+        updatedAt: stats.mtime.toISOString(),
+        type: 'folder',
+        children: []
+      }
+
+      // 如果启用了递归扫描，则递归调用
+      if (opts.recursive) {
+        dirTreeNode.children = await scanDirGeneric(entryPath, opts, depth + 1, basePath)
+      }
+
+      result.push(dirTreeNode)
+    } else if (entry.isFile() && opts.includeFiles) {
+      const ext = path.extname(entry.name).toLowerCase()
+
+      // 如果指定了文件扩展名过滤，检查是否匹配
+      if (opts.fileExtensions.length > 0 && !opts.fileExtensions.includes(ext)) {
+        continue
+      }
+
+      const stats = await fs.promises.stat(entryPath)
+      const externalFilePath = entryPath.replace(/\\/g, '/')
+      const fileTreeNode: NotesTreeNode = {
+        id: createHash('sha1').update(externalFilePath).digest('hex'),
+        name: entry.name,
+        treePath: treePath,
+        externalPath: externalFilePath,
+        createdAt: stats.birthtime.toISOString(),
+        updatedAt: stats.mtime.toISOString(),
+        type: 'file'
+      }
+      result.push(fileTreeNode)
+    }
+  }
+
+  return result
+}
+
+/**
  * 递归扫描目录，获取符合条件的文件和目录结构
+ * @deprecated 使用 scanDirGeneric 代替
  * @param dirPath 当前要扫描的路径
  * @param depth 当前深度
  * @param basePath

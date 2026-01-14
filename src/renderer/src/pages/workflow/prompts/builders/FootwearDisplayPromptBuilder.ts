@@ -73,7 +73,9 @@ export class FootwearDisplayPromptBuilder extends PromptBuilder<FootwearDisplayC
     const lightingTips = this.getLightingTips(lightingEffect)
 
     // 模特穿鞋模式的特殊提示
-    const modelWearingSection = displayMode === 'model_wearing' ? `
+    const modelWearingSection =
+      displayMode === 'model_wearing'
+        ? `
 [Model Wearing Mode - CRITICAL]
 This is a virtual try-on task. You must:
 1. Take the provided footwear product and seamlessly place it on the model's feet
@@ -82,7 +84,8 @@ This is a virtual try-on task. You must:
 4. Ensure natural foot positioning and shoe fit
 5. Preserve the model's pose and leg position
 6. Create realistic shadows and reflections where shoes meet the ground/floor
-` : ''
+`
+        : ''
 
     return `[Role: Professional Footwear Photographer]
 You are a world-class footwear product photographer with extensive experience in commercial shoe photography for luxury brands and e-commerce platforms.
@@ -94,17 +97,21 @@ Your expertise includes:
 - Commercial product photography standards
 ${displayMode === 'model_wearing' ? '- Virtual try-on and footwear compositing on models' : ''}
 
-${isAutoDetect ? `[Auto-Detection Mode]
+${
+  isAutoDetect
+    ? `[Auto-Detection Mode]
 Analyze the provided footwear image to automatically detect:
 - Shoe type and style
 - Material and texture
 - Color and finish
 Then apply appropriate photography techniques.
-` : `[Footwear Type: ${this.getFootwearLabel(footwearType)}]
+`
+    : `[Footwear Type: ${this.getFootwearLabel(footwearType)}]
 ${footwearTips}
 
 [Material Style: ${this.getMaterialLabel(materialStyle)}]
-${materialTips}`}
+${materialTips}`
+}
 
 [Lighting Effect: ${this.getLightingLabel(lightingEffect)}]
 ${lightingTips}
@@ -143,7 +150,15 @@ Do not output any text, JSON, or explanations - only generate the image.`
    * 构建用户提示词
    */
   buildUserPrompt(): string {
-    const { footwearType, displayAngle, materialStyle, sceneBackground, lightingEffect, displayMode, extraDescription } = this.config
+    const {
+      footwearType,
+      displayAngle,
+      materialStyle,
+      sceneBackground,
+      lightingEffect,
+      displayMode,
+      extraDescription
+    } = this.config
 
     // 自动检测模式
     const isAutoDetect = footwearType === 'auto' || materialStyle === 'auto'
@@ -187,9 +202,13 @@ Do not output any text, JSON, or explanations - only generate the image.`
    - Professional e-commerce quality
    - Realistic and convincing result
 
-${isAutoDetect ? `**Auto-Detection**: Analyze the footwear to determine type and material automatically.
-` : `**Footwear**: ${footwearLabel} with ${materialLabel} material
-`}
+${
+  isAutoDetect
+    ? `**Auto-Detection**: Analyze the footwear to determine type and material automatically.
+`
+    : `**Footwear**: ${footwearLabel} with ${materialLabel} material
+`
+}
 **Lighting**: ${this.getLightingLabel(lightingEffect)}
 **Background**: ${backgroundLabel}
 
@@ -202,14 +221,18 @@ ${extraDescription ? `**Additional Requirements**:\n${extraDescription}\n` : ''}
 
 **Task**: Create a professional product photo of ${footwearLabel} with ${angleLabel} angle and ${materialLabel} material appearance.
 
-${isAutoDetect ? `**Auto-Detection Mode**: Analyze the provided footwear image to determine:
+${
+  isAutoDetect
+    ? `**Auto-Detection Mode**: Analyze the provided footwear image to determine:
 - Shoe type and category
 - Material and texture
 - Appropriate display approach
 Then generate the optimized product photo.
-` : `**Footwear Type**: ${footwearLabel}
+`
+    : `**Footwear Type**: ${footwearLabel}
 **Display Angle**: ${angleLabel}
-**Material**: ${materialLabel}`}
+**Material**: ${materialLabel}`
+}
 **Background**: ${backgroundLabel}
 **Lighting**: ${this.getLightingLabel(lightingEffect)}
 
@@ -289,24 +312,15 @@ Return as JSON with fields: footwear_type, material_type, current_lighting, colo
 
   private getFootwearTips(type: string): string {
     const tips: Record<string, string> = {
-      sneakers:
-        'Athletic sneakers. Focus on dynamic design, cushioning technology, and sport-inspired aesthetics.',
-      leather:
-        'Leather dress shoes. Emphasize premium leather finish, formal elegance, and craftsmanship.',
-      boots:
-        'Boots of various styles. Highlight durability, construction quality, and rugged appeal.',
-      sandals:
-        'Open footwear. Showcase comfort features, strap design, and casual style.',
-      loafers:
-        'Slip-on loafers. Present refined comfort, versatile style, and subtle details.',
-      heels:
-        'High heels and pumps. Emphasize elegant silhouette, heel design, and feminine appeal.',
-      flats:
-        'Flat shoes and ballet flats. Highlight comfort, simplicity, and everyday elegance.',
-      athletic:
-        'Performance athletic shoes. Focus on technology features, breathability, and sport function.',
-      auto:
-        'Automatically detect shoe type from the provided image.'
+      sneakers: 'Athletic sneakers. Focus on dynamic design, cushioning technology, and sport-inspired aesthetics.',
+      leather: 'Leather dress shoes. Emphasize premium leather finish, formal elegance, and craftsmanship.',
+      boots: 'Boots of various styles. Highlight durability, construction quality, and rugged appeal.',
+      sandals: 'Open footwear. Showcase comfort features, strap design, and casual style.',
+      loafers: 'Slip-on loafers. Present refined comfort, versatile style, and subtle details.',
+      heels: 'High heels and pumps. Emphasize elegant silhouette, heel design, and feminine appeal.',
+      flats: 'Flat shoes and ballet flats. Highlight comfort, simplicity, and everyday elegance.',
+      athletic: 'Performance athletic shoes. Focus on technology features, breathability, and sport function.',
+      auto: 'Automatically detect shoe type from the provided image.'
     }
     return tips[type] || tips.sneakers
   }

@@ -8,6 +8,22 @@ export const getModelUniqId = (m?: Model) => {
   return m?.id ? JSON.stringify(pick(m, ['id', 'provider'])) : ''
 }
 
+/**
+ * 解析 modelUniqId 字符串，返回 providerId 和 modelId
+ */
+export const resolveModelUniqId = (uniqId: string): { providerId: string; modelId: string } | null => {
+  if (!uniqId) return null
+  try {
+    const parsed = JSON.parse(uniqId) as { id?: string; provider?: string }
+    if (parsed.id && parsed.provider) {
+      return { providerId: parsed.provider, modelId: parsed.id }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export const hasModel = (m?: Model) => {
   const allModels = getStoreProviders()
     .filter((p) => p.enabled)

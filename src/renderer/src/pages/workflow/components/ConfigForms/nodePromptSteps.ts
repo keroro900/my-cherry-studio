@@ -224,8 +224,35 @@ import {
   type ResolvedFillModeId,
   type ResolvedLayoutModeId
 } from '../../presets'
-import type { CosmeticsPhotoConfig, EcomConfig, EcomDetailType, ElectronicsPhotoConfig, EyewearTryonConfig, FoodConfig, FootwearDisplayConfig, FurnitureSceneConfig, JewelryConfig, JewelryTryonConfig, ModelConfig, PatternConfig, ProductSceneConfig } from '../../prompts/builders'
-import { CosmeticsPhotoPromptBuilder, EcomPromptBuilder, ElectronicsPhotoPromptBuilder, EyewearTryonPromptBuilder, FoodPromptBuilder, FootwearDisplayPromptBuilder, FurnitureScenePromptBuilder, JewelryPromptBuilder, JewelryTryonPromptBuilder, ModelPromptBuilder, PatternPromptBuilder, ProductScenePromptBuilder } from '../../prompts/builders'
+import type {
+  CosmeticsPhotoConfig,
+  EcomConfig,
+  EcomDetailType,
+  ElectronicsPhotoConfig,
+  EyewearTryonConfig,
+  FoodConfig,
+  FootwearDisplayConfig,
+  FurnitureSceneConfig,
+  JewelryConfig,
+  JewelryTryonConfig,
+  ModelConfig,
+  PatternConfig,
+  ProductSceneConfig
+} from '../../prompts/builders'
+import {
+  CosmeticsPhotoPromptBuilder,
+  EcomPromptBuilder,
+  ElectronicsPhotoPromptBuilder,
+  EyewearTryonPromptBuilder,
+  FoodPromptBuilder,
+  FootwearDisplayPromptBuilder,
+  FurnitureScenePromptBuilder,
+  JewelryPromptBuilder,
+  JewelryTryonPromptBuilder,
+  ModelPromptBuilder,
+  PatternPromptBuilder,
+  ProductScenePromptBuilder
+} from '../../prompts/builders'
 
 /**
  * 获取 Gemini 图片生成节点的提示词步骤

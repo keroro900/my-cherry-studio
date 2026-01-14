@@ -42,7 +42,7 @@ export class AplusContentExecutor extends BaseNodeExecutor {
       const promptJson = inputs.promptJson
 
       // 收集所有图片输入（支持动态端口）
-      const productImages = this.collectImageInputs(inputs, config)
+      const productImages = this.gatherImageInputsFromPorts(inputs, config)
 
       // 2. 验证配置
       if (!config.moduleTypes || config.moduleTypes.length === 0) {
@@ -73,12 +73,7 @@ export class AplusContentExecutor extends BaseNodeExecutor {
       if (productImages.length > 0 && config.enableDeepAnalysis !== false) {
         this.log(context, `分析 ${productImages.length} 张产品图片...`)
         try {
-          const imageAnalysis = await this.analyzeProductImages(
-            productImages,
-            provider,
-            model,
-            context
-          )
+          const imageAnalysis = await this.analyzeProductImages(productImages, provider, model, context)
           if (imageAnalysis) {
             enhancedProductInfo = productInfo
               ? `${productInfo}\n\n[Product Visual Analysis]\n${imageAnalysis}`
@@ -125,12 +120,8 @@ export class AplusContentExecutor extends BaseNodeExecutor {
       const output = this.parseAplusResponse(resultText, config, context)
 
       // 9. 提取额外输出
-      const seoKeywords = config.enableSeoKeywords !== false
-        ? this.extractSeoKeywords(output)
-        : null
-      const imageSuggestions = config.enableImageSuggestions !== false
-        ? this.extractImageSuggestions(output)
-        : null
+      const seoKeywords = config.enableSeoKeywords !== false ? this.extractSeoKeywords(output) : null
+      const imageSuggestions = config.enableImageSuggestions !== false ? this.extractImageSuggestions(output) : null
 
       const duration = Date.now() - startTime
       this.log(context, '节点执行完成', {
@@ -160,7 +151,7 @@ export class AplusContentExecutor extends BaseNodeExecutor {
   /**
    * 收集所有图片输入
    */
-  private collectImageInputs(inputs: Record<string, any>, config: AplusContentConfig): string[] {
+  private gatherImageInputsFromPorts(inputs: Record<string, any>, config: AplusContentConfig): string[] {
     const images: string[] = []
 
     // 从动态端口收集
@@ -205,9 +196,8 @@ export class AplusContentExecutor extends BaseNodeExecutor {
       }
 
       // 根据图片数量选择分析提示词
-      const analysisPrompt = imageBase64List.length > 1
-        ? buildMultiImageAnalysisPrompt(imageBase64List.length)
-        : buildImageAnalysisPrompt()
+      const analysisPrompt =
+        imageBase64List.length > 1 ? buildMultiImageAnalysisPrompt(imageBase64List.length) : buildImageAnalysisPrompt()
 
       const analysisResult = await WorkflowAiService.visionAnalysis(provider, model, {
         systemPrompt: `You are an expert product analyst and e-commerce content strategist.

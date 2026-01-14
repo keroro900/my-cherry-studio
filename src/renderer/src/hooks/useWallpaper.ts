@@ -14,12 +14,12 @@ import { useCallback, useEffect } from 'react'
 
 const logger = loggerService.withContext('Wallpaper')
 
-// 注意：getWallpaperUrl 函数已移至 GlobalWallpaper 组件
-// WALLPAPER_REPEAT_VALUES 和 WALLPAPER_SIZE_VALUES 不再需要，壁纸渲染由 GlobalWallpaper 组件处理
+// 注意：壁纸渲染现在通过 GlobalStyleProvider 在 body 上应用 CSS 变量实现
+// 效果控制通过 CSS class 实现（sidebar-glass-enabled, chat-bubble-decoration-enabled 等）
 
 /**
  * 应用壁纸设置
- * 只负责管理 body 的 CSS class，实际渲染由 GlobalWallpaper 组件处理
+ * 只负责管理 body 的 CSS class，实际渲染由 GlobalStyleProvider 和 CSS 变量处理
  */
 function applyWallpaperSettings(settings: WallpaperSettings) {
   if (!settings.enabled || settings.source === 'none') {

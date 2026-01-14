@@ -39,6 +39,7 @@ import {
 } from '@renderer/store/note'
 import type { NotesSortType, NotesTreeNode } from '@renderer/types/note'
 import type { FileChangeEvent } from '@shared/config/types'
+import { IpcChannel } from '@shared/IpcChannel'
 import { message } from 'antd'
 import { debounce } from 'lodash'
 import { AnimatePresence, motion } from 'motion/react'
@@ -237,6 +238,15 @@ const NotesPage: FC = () => {
   useEffect(() => {
     refreshTreeRef.current = refreshTree
   }, [refreshTree])
+
+  // 监听 Agent 日记写入刷新事件 (DailyNoteWritePlugin)
+  useEffect(() => {
+    const removeListener = window.electron.ipcRenderer.on(IpcChannel.Note_Refresh, () => {
+      logger.debug('Received Note_Refresh event, refreshing tree')
+      refreshTreeRef.current()
+    })
+    return () => removeListener()
+  }, [])
 
   useEffect(() => {
     async function initialize() {

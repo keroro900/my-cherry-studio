@@ -7,13 +7,15 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { updatePatternConfig } from '@renderer/store/imageStudio'
-import { Collapse, Input, InputNumber, Radio, Select, Slider, Upload } from 'antd'
 import type { UploadFile } from 'antd'
-import { ImagePlus, Palette, Sparkles, Wand2 } from 'lucide-react'
+import { Collapse, Input, Radio, Select, Slider, Upload } from 'antd'
+import { ImagePlus, Palette, Wand2 } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
+
+import { PromptEnhancer } from '../../common'
 
 // 风格预设
 const STYLE_PRESETS = [
@@ -53,11 +55,8 @@ const PatternConfigPanel: FC = () => {
             <ModeCard
               key={mode}
               $active={config.generationMode === mode}
-              onClick={() => dispatch(updatePatternConfig({ generationMode: mode }))}
-            >
-              <ModeIcon>
-                {mode === 'mode_a' ? '🔀' : mode === 'mode_b' ? '🔄' : '✨'}
-              </ModeIcon>
+              onClick={() => dispatch(updatePatternConfig({ generationMode: mode as 'mode_a' | 'mode_b' | 'mode_c' }))}>
+              <ModeIcon>{mode === 'mode_a' ? '🔀' : mode === 'mode_b' ? '🔄' : '✨'}</ModeIcon>
               <ModeName>{t(`image_studio.pattern.${mode}`)}</ModeName>
               <ModeDesc>{t(`image_studio.pattern.${mode}_desc`)}</ModeDesc>
             </ModeCard>
@@ -86,7 +85,9 @@ const PatternConfigPanel: FC = () => {
                 <RemoveButton onClick={() => handleRemoveRef(index)}>
                   <DeleteOutlined />
                 </RemoveButton>
-                <ImageLabel>{t('image_studio.pattern.ref')} {index + 1}</ImageLabel>
+                <ImageLabel>
+                  {t('image_studio.pattern.ref')} {index + 1}
+                </ImageLabel>
               </UploadedImage>
             ))}
 
@@ -97,8 +98,7 @@ const PatternConfigPanel: FC = () => {
                 multiple
                 beforeUpload={() => false}
                 onChange={handleRefUpload}
-                fileList={refFiles}
-              >
+                fileList={refFiles}>
                 <AddImageButton>
                   <PlusOutlined />
                   <span>{t('image_studio.pattern.add_ref')}</span>
@@ -123,8 +123,7 @@ const PatternConfigPanel: FC = () => {
             <StyleOption
               key={style.value}
               $active={config.stylePreset === style.value}
-              onClick={() => dispatch(updatePatternConfig({ stylePreset: style.value }))}
-            >
+              onClick={() => dispatch(updatePatternConfig({ stylePreset: style.value }))}>
               <StyleIcon>{style.icon}</StyleIcon>
               <StyleName>{t(`image_studio.pattern.style_${style.value}`)}</StyleName>
             </StyleOption>
@@ -139,8 +138,7 @@ const PatternConfigPanel: FC = () => {
           value={config.outputType}
           onChange={(e) => dispatch(updatePatternConfig({ outputType: e.target.value }))}
           buttonStyle="solid"
-          size="small"
-        >
+          size="small">
           <Radio.Button value="pattern_only">{t('image_studio.pattern.output_pattern')}</Radio.Button>
           <Radio.Button value="set">{t('image_studio.pattern.output_set')}</Radio.Button>
         </Radio.Group>
@@ -175,7 +173,11 @@ const PatternConfigPanel: FC = () => {
                 const density = value <= 2 ? 'sparse' : value <= 4 ? 'medium' : 'dense'
                 dispatch(updatePatternConfig({ density }))
               }}
-              marks={{ 1: t('image_studio.pattern.density_sparse'), 3: t('image_studio.pattern.density_medium'), 5: t('image_studio.pattern.density_dense') }}
+              marks={{
+                1: t('image_studio.pattern.density_sparse'),
+                3: t('image_studio.pattern.density_medium'),
+                5: t('image_studio.pattern.density_dense')
+              }}
             />
           </FormItem>
         </FormGrid>
@@ -188,8 +190,11 @@ const PatternConfigPanel: FC = () => {
                 key={tone}
                 $active={config.colorTone === tone}
                 $tone={tone}
-                onClick={() => dispatch(updatePatternConfig({ colorTone: tone }))}
-              >
+                onClick={() =>
+                  dispatch(
+                    updatePatternConfig({ colorTone: tone as 'auto' | 'bright' | 'dark' | 'high_contrast' | 'soft' })
+                  )
+                }>
                 {t(`image_studio.pattern.color_${tone}`)}
               </ColorToneOption>
             ))}
@@ -239,16 +244,20 @@ const PatternConfigPanel: FC = () => {
             <Wand2 size={16} />
             {t('image_studio.prompt.title')}
           </SectionTitle>
-          <PromptActions>
-            <ActionButton title={t('image_studio.prompt.optimize')}>
-              <Sparkles size={14} />
-            </ActionButton>
-          </PromptActions>
         </SectionHeader>
 
         <PromptEditor>
           <PromptSection>
-            <PromptLabel>{t('image_studio.pattern.design_prompt')}</PromptLabel>
+            <PromptLabelRow>
+              <PromptLabel>{t('image_studio.pattern.design_prompt')}</PromptLabel>
+              <PromptEnhancer
+                value={config.designPrompt || ''}
+                module="pattern"
+                mode="design"
+                moduleConfig={config}
+                onApply={(enhanced) => dispatch(updatePatternConfig({ designPrompt: enhanced }))}
+              />
+            </PromptLabelRow>
             <Input.TextArea
               value={config.designPrompt || ''}
               onChange={(e) => dispatch(updatePatternConfig({ designPrompt: e.target.value }))}
@@ -343,13 +352,13 @@ export default PatternConfigPanel
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 `
 
 const Section = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 `
 
 const SectionHeader = styled.div`
@@ -572,26 +581,6 @@ const FormLabel = styled.span`
   color: var(--color-text-2);
 `
 
-const PromptActions = styled.div`
-  display: flex;
-  gap: 4px;
-`
-
-const ActionButton = styled.button`
-  padding: 4px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-3);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-
-  &:hover {
-    color: var(--color-primary);
-    background: var(--color-primary-soft);
-  }
-`
-
 const PromptEditor = styled.div`
   display: flex;
   flex-direction: column;
@@ -605,6 +594,12 @@ const PromptSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
+`
+
+const PromptLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `
 
 const PromptLabel = styled.span`

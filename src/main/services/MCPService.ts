@@ -37,7 +37,9 @@ import type { MCPServerLogEntry } from '@shared/config/types'
 import { IpcChannel } from '@shared/IpcChannel'
 import { defaultAppHeaders } from '@shared/utils'
 import {
+  type BuiltinMCPServerName,
   BuiltinMCPServerNames,
+  BuiltinMCPServerNamesArray,
   type GetResourceResponse,
   isBuiltinMCPServer,
   type MCPCallToolResponse,
@@ -93,6 +95,24 @@ function redactSensitive(input: any): any {
   }
 
   return redact(input)
+}
+
+/**
+ * Check if an error is a connection-related error (expected when server is unavailable)
+ */
+function isConnectionError(error: any): boolean {
+  if (!error) return false
+  const message = error.message || String(error)
+  const connectionErrors = [
+    'ERR_CONNECTION_REFUSED',
+    'ECONNREFUSED',
+    'ENOTFOUND',
+    'ETIMEDOUT',
+    'ECONNRESET',
+    'EHOSTUNREACH',
+    'ENETUNREACH'
+  ]
+  return connectionErrors.some((code) => message.includes(code))
 }
 
 // Create a context-aware logger for a server
@@ -217,7 +237,12 @@ class McpService {
           return existingClient
         }
       } catch (error: any) {
-        getServerLogger(server).error(`Error pinging server ${server.name}`, error as Error)
+        // Connection errors are expected when server becomes unavailable
+        if (isConnectionError(error)) {
+          getServerLogger(server).warn(`Server ${server.name} unavailable, reconnecting...`)
+        } else {
+          getServerLogger(server).error(`Error pinging server ${server.name}`, error as Error)
+        }
         this.clients.delete(serverKey)
       }
     }
@@ -250,26 +275,18 @@ class McpService {
         > => {
           // Create appropriate transport based on configuration
 
-          // Special case for nowledgeMem - uses HTTP transport instead of in-memory
-          if (isBuiltinMCPServer(server) && server.name === BuiltinMCPServerNames.nowledgeMem) {
-            const nowledgeMemUrl = 'http://127.0.0.1:14242/mcp'
-            const options: StreamableHTTPClientTransportOptions = {
-              fetch: async (url, init) => {
-                return net.fetch(typeof url === 'string' ? url : url.toString(), init)
-              },
-              requestInit: {
-                headers: {
-                  ...defaultAppHeaders(),
-                  APP: 'Cherry Studio'
-                }
-              },
-              authProvider
-            }
-            getServerLogger(server).debug(`Using StreamableHTTPClientTransport for ${server.name}`)
-            return new StreamableHTTPClientTransport(new URL(nowledgeMemUrl), options)
+          // Check if this is a builtin in-memory server
+          const isBuiltin = isBuiltinMCPServer(server)
+          const isBuiltinName = BuiltinMCPServerNamesArray.includes(server.name as any)
+
+          // Log debug info for builtin server detection
+          if (isBuiltinName && !isBuiltin) {
+            getServerLogger(server).warn(
+              `Server "${server.name}" has builtin name but type="${server.type}" (expected "inMemory")`
+            )
           }
 
-          if (isBuiltinMCPServer(server) && server.name !== BuiltinMCPServerNames.mcpAutoInstall) {
+          if (isBuiltin && server.name !== BuiltinMCPServerNames.mcpAutoInstall) {
             getServerLogger(server).debug(`Using in-memory transport`)
             const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
             // start the in-memory server with the given name and environment variables
@@ -282,6 +299,19 @@ class McpService {
               throw new Error(`Failed to start in-memory server: ${error.message}`)
             }
             // set the client transport to the client
+            return clientTransport
+          } else if (isBuiltinName && server.type !== 'inMemory') {
+            // Builtin server with wrong type - fix it by using in-memory transport
+            getServerLogger(server).info(`Auto-correcting builtin server "${server.name}" to use in-memory transport`)
+            const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
+            const inMemoryServer = createInMemoryMCPServer(server.name as BuiltinMCPServerName, args, server.env || {})
+            try {
+              await inMemoryServer.connect(serverTransport)
+              getServerLogger(server).debug(`In-memory server started (auto-corrected)`)
+            } catch (error: any) {
+              getServerLogger(server).error(`Error starting in-memory server`, error as Error)
+              throw new Error(`Failed to start in-memory server: ${error.message}`)
+            }
             return clientTransport
           } else if (server.baseUrl) {
             if (server.type === 'streamableHttp') {
@@ -1078,7 +1108,12 @@ class McpService {
       getServerLogger(server).warn(`No version information available`)
       return null
     } catch (error: any) {
-      getServerLogger(server).error(`Failed to get server version`, error as Error)
+      // Connection errors are expected when server is unavailable, log as warn
+      if (isConnectionError(error)) {
+        getServerLogger(server).warn(`Server unavailable (connection refused)`)
+      } else {
+        getServerLogger(server).error(`Failed to get server version`, error as Error)
+      }
       return null
     }
   }

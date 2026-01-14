@@ -127,8 +127,7 @@ You have extensive experience with fast-fashion brands like SHEIN, TEMU, and Zaf
     const detailInstructions = {
       basic: 'Provide essential attributes only: category, primary color, pattern type.',
       standard: 'Provide complete attribute analysis with colors, patterns, structure, and style tags.',
-      detailed:
-        'Provide comprehensive analysis with material inference, styling suggestions, and market positioning.'
+      detailed: 'Provide comprehensive analysis with material inference, styling suggestions, and market positioning.'
     }
 
     const outputFormat =

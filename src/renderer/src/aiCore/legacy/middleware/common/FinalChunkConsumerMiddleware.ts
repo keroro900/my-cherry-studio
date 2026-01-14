@@ -117,12 +117,12 @@ const FinalChunkConsumerMiddleware: CompletionsMiddleware =
               controller.close()
             }
           }),
-          getText: () => {
-            return ctx._internal.customState?.accumulatedText || ''
+          getText: (): string => {
+            return (ctx._internal.customState?.accumulatedText as string) || ''
           }
         }
 
-        return modifiedResult
+        return modifiedResult as typeof result
       } else {
         logger.debug(`No GenericChunk stream to process.`)
       }
@@ -151,10 +151,10 @@ function extractAndAccumulateUsageMetrics(ctx: CompletionsContext, chunk: Generi
       }
 
       if (ctx._internal.customState && ctx._internal.customState?.firstTokenTimestamp) {
-        ctx._internal.observer.metrics.time_first_token_millsec =
-          ctx._internal.customState.firstTokenTimestamp - ctx._internal.customState.startTimestamp
-        ctx._internal.observer.metrics.time_completion_millsec +=
-          Date.now() - ctx._internal.customState.firstTokenTimestamp
+        const firstTokenTimestamp = ctx._internal.customState.firstTokenTimestamp as number
+        const startTimestamp = ctx._internal.customState.startTimestamp as number
+        ctx._internal.observer.metrics.time_first_token_millsec = firstTokenTimestamp - startTimestamp
+        ctx._internal.observer.metrics.time_completion_millsec += Date.now() - firstTokenTimestamp
       }
     }
 

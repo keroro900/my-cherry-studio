@@ -5,10 +5,10 @@
  * 分析服装趋势，生成设计建议
  */
 
-import type { NodeDefinition } from '../../base/types'
-import { TrendAnalysisExecutor } from './executor'
 import { getFashionCategoryOptions } from '../../../prompts/presets/fashionCategory'
 import { getTrendDimensionOptions } from '../../../prompts/presets/trendDimension'
+import type { NodeDefinition } from '../../base/types'
+import { TrendAnalysisExecutor } from './executor'
 
 // 分析深度选项
 const ANALYSIS_DEPTH_OPTIONS = [

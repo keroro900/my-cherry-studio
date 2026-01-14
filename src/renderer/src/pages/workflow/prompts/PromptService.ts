@@ -13,6 +13,23 @@
  * @module prompts/PromptService
  */
 
+import type {
+  CosmeticsModuleConfig,
+  EcomModuleConfig,
+  EditModuleConfig,
+  ElectronicsModuleConfig,
+  FoodModuleConfig,
+  FootwearModuleConfig,
+  FurnitureModuleConfig,
+  GenerateModuleConfig,
+  ImageAssistantConfig,
+  ImageAssistantType,
+  JewelryModuleConfig,
+  ModelModuleConfig,
+  PatternModuleConfig,
+  ProductModuleConfig
+} from '@renderer/types'
+
 import { EcomPromptBuilder, type EcomPromptJson } from './builders/EcomPromptBuilder'
 import { ModelPromptBuilder, type ModelPromptJson } from './builders/ModelPromptBuilder'
 import { PATTERN_STYLE_PRESETS, PatternPromptBuilder, type PatternPromptJson } from './builders/PatternPromptBuilder'
@@ -117,6 +134,206 @@ Focus on natural poses, appropriate settings, and commercial viability.`,
   }
 }
 
+// ==================== 助手 imageType 映射 ====================
+
+/**
+ * 助手 imageType 到工作流 nodeType 的映射
+ */
+const IMAGE_TYPE_TO_NODE_TYPE: Partial<Record<ImageAssistantType, SupportedNodeType>> = {
+  ecom: 'gemini_ecom',
+  model: 'gemini_generate_model',
+  pattern: 'gemini_pattern'
+}
+
+/**
+ * 助手提示词构建上下文
+ */
+export interface AssistantPromptContext {
+  /** 图片类型 */
+  imageType: ImageAssistantType
+  /** 模块配置 */
+  moduleConfig: ImageAssistantConfig['moduleConfig']
+  /** 用户输入的提示词 */
+  userPrompt: string
+  /** 系统提示词（可选） */
+  systemPrompt?: string
+}
+
+/**
+ * 通用模块配置字段映射表
+ * 用于将配置字段转换为自然语言描述
+ */
+const CONFIG_FIELD_LABELS: Record<string, Record<string, string>> = {
+  // 通用字段
+  layout: {
+    flat_lay: 'flat lay photography',
+    model_shot: 'model wearing the product',
+    hanging: 'hanging display',
+    none: 'product only'
+  },
+  ageGroup: {
+    small_kid: 'young child',
+    big_kid: 'teenager',
+    adult: 'adult'
+  },
+  gender: {
+    female: 'female',
+    male: 'male'
+  },
+  density: {
+    sparse: 'sparse',
+    medium: 'medium',
+    dense: 'dense'
+  },
+  colorTone: {
+    auto: '',
+    bright: 'bright',
+    soft: 'soft',
+    dark: 'dark',
+    high_contrast: 'high contrast'
+  }
+}
+
+/**
+ * 模块配置转描述的映射
+ * 每个 imageType 对应一组字段提取规则
+ */
+const MODULE_DESCRIPTION_RULES: Record<
+  string,
+  Array<{ field: string; label: string; transform?: (v: unknown) => string }>
+> = {
+  ecom: [
+    { field: 'layout', label: 'Layout' },
+    { field: 'stylePreset', label: 'Style' },
+    { field: 'garmentDescription', label: 'Product' }
+  ],
+  model: [
+    { field: 'gender', label: 'Gender' },
+    { field: 'ageGroup', label: 'Age' },
+    { field: 'ethnicity', label: 'Ethnicity' },
+    { field: 'scenePreset', label: 'Scene' },
+    { field: 'poseStyle', label: 'Pose' },
+    { field: 'styleDescription', label: 'Style' }
+  ],
+  pattern: [
+    { field: 'patternType', label: 'Pattern type' },
+    { field: 'density', label: 'Density' },
+    { field: 'colorTone', label: 'Color tone' },
+    { field: 'designPrompt', label: 'Design' },
+    { field: 'colorPrompt', label: 'Colors' }
+  ],
+  edit: [
+    { field: 'mode', label: 'Mode' },
+    { field: 'gender', label: 'Gender' },
+    { field: 'ageGroup', label: 'Age' },
+    { field: 'scenePreset', label: 'Scene' },
+    { field: 'posePreset', label: 'Pose' },
+    { field: 'customPrompt', label: 'Custom editing' }
+  ],
+  generate: [
+    { field: 'stylePreset', label: 'Style' },
+    { field: 'prompt', label: 'Prompt' },
+    { field: 'negativePrompt', label: 'Avoid' }
+  ],
+  cosmetics: [
+    { field: 'cosmeticsType', label: 'Product' },
+    { field: 'productTexture', label: 'Texture' },
+    { field: 'displayStyle', label: 'Display' },
+    { field: 'backgroundStyle', label: 'Background' },
+    { field: 'lightingStyle', label: 'Lighting' }
+  ],
+  food: [
+    { field: 'foodCategory', label: 'Category' },
+    { field: 'stylePreset', label: 'Style' },
+    { field: 'moodPreset', label: 'Mood' }
+  ],
+  electronics: [
+    { field: 'productType', label: 'Product' },
+    { field: 'displayStyle', label: 'Display' },
+    { field: 'backgroundStyle', label: 'Background' },
+    { field: 'lightingStyle', label: 'Lighting' }
+  ],
+  jewelry: [
+    { field: 'jewelryType', label: 'Type' },
+    { field: 'material', label: 'Material' },
+    { field: 'displayStyle', label: 'Display' },
+    { field: 'lightingStyle', label: 'Lighting' }
+  ],
+  furniture: [
+    { field: 'furnitureType', label: 'Type' },
+    { field: 'sceneStyle', label: 'Scene' },
+    { field: 'displayStyle', label: 'Display' },
+    { field: 'lightingStyle', label: 'Lighting' }
+  ],
+  footwear: [
+    { field: 'footwearType', label: 'Type' },
+    { field: 'displayStyle', label: 'Display' },
+    { field: 'backgroundStyle', label: 'Background' },
+    { field: 'lightingStyle', label: 'Lighting' }
+  ],
+  product: [
+    { field: 'displayStyle', label: 'Display' },
+    { field: 'backgroundStyle', label: 'Background' },
+    { field: 'lightingStyle', label: 'Lighting' },
+    { field: 'extraDescription', label: 'Details' }
+  ]
+}
+
+/**
+ * 将模块配置转换为自然语言描述
+ * 替代原 ImageGenerationMiddleware 中 265 行的 switch-case
+ */
+function buildModuleDescription(
+  imageType: string,
+  config:
+    | EcomModuleConfig
+    | ModelModuleConfig
+    | PatternModuleConfig
+    | EditModuleConfig
+    | GenerateModuleConfig
+    | CosmeticsModuleConfig
+    | FoodModuleConfig
+    | ElectronicsModuleConfig
+    | JewelryModuleConfig
+    | FurnitureModuleConfig
+    | FootwearModuleConfig
+    | ProductModuleConfig
+    | undefined
+): string {
+  if (!config) return ''
+
+  const rules = MODULE_DESCRIPTION_RULES[imageType]
+  if (!rules) return ''
+
+  const parts: string[] = []
+  const configObj = config as Record<string, unknown>
+
+  for (const rule of rules) {
+    const value = configObj[rule.field]
+    if (value === undefined || value === null || value === '' || value === 'auto' || value === 'none') {
+      continue
+    }
+
+    let displayValue: string
+    if (rule.transform) {
+      displayValue = rule.transform(value)
+    } else if (typeof value === 'string') {
+      // 尝试从映射表获取友好名称
+      displayValue = CONFIG_FIELD_LABELS[rule.field]?.[value] || value
+    } else if (Array.isArray(value)) {
+      displayValue = value.join(', ')
+    } else {
+      displayValue = String(value)
+    }
+
+    if (displayValue) {
+      parts.push(`${rule.label}: ${displayValue}`)
+    }
+  }
+
+  return parts.join('. ')
+}
+
 // ==================== PromptService 类 ====================
 
 /**
@@ -173,6 +390,66 @@ class PromptServiceImpl {
       fullPrompt: buildResult.prompt,
       source: buildResult.source,
       analysisResult: buildResult.analysisResult
+    }
+  }
+
+  /**
+   * 为图片助手构建增强提示词
+   *
+   * 统一入口：供 ImageGenerationMiddleware 调用
+   * 替代原有的 buildEnhancedPrompt + getModuleConfigDescription 逻辑
+   *
+   * @param context 助手提示词上下文
+   * @returns 构建结果
+   */
+  buildForAssistant(context: AssistantPromptContext): PromptResult {
+    const { imageType, moduleConfig, userPrompt, systemPrompt } = context
+
+    // 1. 尝试映射到工作流 nodeType 并使用专业构建器
+    const nodeType = IMAGE_TYPE_TO_NODE_TYPE[imageType]
+    if (nodeType && this.isSupported(nodeType)) {
+      // 使用专业构建器
+      const result = this.build({
+        nodeType,
+        config: moduleConfig || {},
+        inputs: { prompt: userPrompt },
+        customPrompts: systemPrompt ? { system: systemPrompt } : undefined
+      })
+
+      // 如果构建器成功返回，使用其结果
+      if (result.source !== 'fallback') {
+        return result
+      }
+    }
+
+    // 2. 回退到通用描述模式
+    const parts: string[] = []
+
+    // 添加系统提示词
+    if (systemPrompt) {
+      parts.push(`[System Context]\n${systemPrompt}`)
+    }
+
+    // 添加模块配置描述
+    if (moduleConfig && imageType) {
+      const configDesc = buildModuleDescription(imageType, moduleConfig)
+      if (configDesc) {
+        parts.push(`[Generation Settings]\n${configDesc}`)
+      }
+    }
+
+    // 添加用户请求
+    if (userPrompt) {
+      parts.push(`[User Request]\n${userPrompt}`)
+    }
+
+    const fullPrompt = parts.join('\n\n') || userPrompt
+
+    return {
+      systemPrompt: systemPrompt || '',
+      userPrompt,
+      fullPrompt,
+      source: 'fallback'
     }
   }
 

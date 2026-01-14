@@ -275,15 +275,11 @@ function WorkflowToolbar() {
         }
 
         // 构建工作流对象
-        const workflow = workflowExecutionService.buildWorkflow(
-          nodes as WorkflowNode[],
-          edges as WorkflowEdge[],
-          {
-            id: currentWorkflow?.id || 'temp',
-            name: currentWorkflow?.name || '临时工作流',
-            createdAt: currentWorkflow?.createdAt || Date.now()
-          }
-        )
+        const workflow = workflowExecutionService.buildWorkflow(nodes as WorkflowNode[], edges as WorkflowEdge[], {
+          id: currentWorkflow?.id || 'temp',
+          name: currentWorkflow?.name || '临时工作流',
+          createdAt: currentWorkflow?.createdAt || Date.now()
+        })
 
         // 使用统一服务执行工作流
         const result = await workflowExecutionService.execute(
@@ -832,11 +828,7 @@ function WorkflowToolbar() {
           <span>停止</span>
         </button>
       ) : (
-        <Dropdown
-          menu={{ items: runMenuItems }}
-          trigger={['click']}
-          disabled={nodes.length === 0}
-          destroyPopupOnHide>
+        <Dropdown menu={{ items: runMenuItems }} trigger={['click']} disabled={nodes.length === 0} destroyPopupOnHide>
           <button style={primaryButtonStyle} disabled={nodes.length === 0}>
             <span>▶️</span>
             <span>运行</span>

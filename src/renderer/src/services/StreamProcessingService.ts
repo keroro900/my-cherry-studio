@@ -94,6 +94,13 @@ export function createStreamProcessor(callbacks: StreamProcessorCallbacks = {}) 
           if (callbacks.onThinkingComplete) callbacks.onThinkingComplete(data.text, data.thinking_millsec)
           break
         }
+        case ChunkType.MCP_TOOL_CREATED: {
+          // Handle MCP_TOOL_CREATED chunk - convert tool_use_responses to MCPToolResponse format
+          if (callbacks.onToolCallPending && data.tool_use_responses) {
+            data.tool_use_responses.forEach((toolResp) => callbacks.onToolCallPending!(toolResp))
+          }
+          break
+        }
         case ChunkType.MCP_TOOL_PENDING: {
           if (callbacks.onToolCallPending) data.responses.forEach((toolResp) => callbacks.onToolCallPending!(toolResp))
           break

@@ -62,10 +62,7 @@ export class CodeExecutorExecutor extends BaseNodeExecutor {
 
       // 根据错误处理策略返回
       if (config.errorHandling === 'null') {
-        return this.success(
-          { output: null, output1: null, output2: null, logs: [] },
-          duration
-        )
+        return this.success({ output: null, output1: null, output2: null, logs: [] }, duration)
       } else if (config.errorHandling === 'error') {
         return this.success(
           {

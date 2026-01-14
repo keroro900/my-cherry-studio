@@ -3,6 +3,7 @@ import { createClient } from '@libsql/client'
 import { loggerService } from '@logger'
 import { DATA_PATH } from '@main/config'
 import Embeddings from '@main/knowledge/embedjs/embeddings/Embeddings'
+import { getTagMemoService, type TagMemoService } from '@main/knowledge/tagmemo'
 import { makeSureDirExists } from '@main/utils'
 import type {
   AddMemoryOptions,
@@ -55,8 +56,15 @@ export class MemoryService {
   private static readonly UNIFIED_DIMENSION = 1536
   private static readonly SIMILARITY_THRESHOLD = 0.85
 
+  /** TagMemo 服务 (单例) - 用于搜索增强 */
+  private tagMemo: TagMemoService | null = null
+
+  /** 是否启用 TagMemo 增强 */
+  private enableTagMemoEnhancement = true
+
   private constructor() {
     // Private constructor to enforce singleton pattern
+    // TagMemo 延迟初始化，避免循环依赖
   }
 
   public static getInstance(): MemoryService {
@@ -319,61 +327,71 @@ export class MemoryService {
     const { limit = 10, userId, agentId, filters = {} } = options
 
     try {
+      let memories: MemoryItem[] = []
+
       // If we have an embedder model configured, use vector search
       if (this.config?.embeddingModel) {
         try {
           const queryEmbedding = await this.generateEmbedding(query)
-          return await this.hybridSearch(query, queryEmbedding, { limit, userId, agentId, filters })
+          const result = await this.hybridSearch(query, queryEmbedding, { limit, userId, agentId, filters })
+          memories = result.memories
         } catch (error) {
           logger.error('Vector search failed, falling back to text search:', error as Error)
         }
       }
 
-      // Fallback to text search
-      const conditions: string[] = ['m.is_deleted = 0']
-      const params: any[] = []
+      // Fallback to text search if vector search didn't produce results
+      if (memories.length === 0) {
+        const conditions: string[] = ['m.is_deleted = 0']
+        const params: any[] = []
 
-      // Add search conditions
-      conditions.push('(m.memory LIKE ? OR m.memory LIKE ?)')
-      params.push(`%${query}%`, `%${query.split(' ').join('%')}%`)
+        // Add search conditions
+        conditions.push('(m.memory LIKE ? OR m.memory LIKE ?)')
+        params.push(`%${query}%`, `%${query.split(' ').join('%')}%`)
 
-      if (userId) {
-        conditions.push('m.user_id = ?')
-        params.push(userId)
-      }
-
-      if (agentId) {
-        conditions.push('m.agent_id = ?')
-        params.push(agentId)
-      }
-
-      // Add custom filters
-      for (const [key, value] of Object.entries(filters)) {
-        if (value !== undefined && value !== null) {
-          conditions.push(`json_extract(m.metadata, '$.${key}') = ?`)
-          params.push(value)
+        if (userId) {
+          conditions.push('m.user_id = ?')
+          params.push(userId)
         }
+
+        if (agentId) {
+          conditions.push('m.agent_id = ?')
+          params.push(agentId)
+        }
+
+        // Add custom filters
+        for (const [key, value] of Object.entries(filters)) {
+          if (value !== undefined && value !== null) {
+            conditions.push(`json_extract(m.metadata, '$.${key}') = ?`)
+            params.push(value)
+          }
+        }
+
+        const whereClause = conditions.join(' AND ')
+        params.push(limit)
+
+        const result = await this.db.execute({
+          sql: `${MemoryQueries.memory.list} ${whereClause}
+            ORDER BY m.created_at DESC
+            LIMIT ?
+          `,
+          args: params
+        })
+
+        memories = result.rows.map((row: any) => ({
+          id: row.id as string,
+          memory: row.memory as string,
+          hash: (row.hash as string) || undefined,
+          metadata: row.metadata ? JSON.parse(row.metadata as string) : undefined,
+          createdAt: row.created_at as string,
+          updatedAt: row.updated_at as string
+        }))
       }
 
-      const whereClause = conditions.join(' AND ')
-      params.push(limit)
-
-      const result = await this.db.execute({
-        sql: `${MemoryQueries.memory.list} ${whereClause}
-          ORDER BY m.created_at DESC
-          LIMIT ?
-        `,
-        args: params
-      })
-
-      const memories: MemoryItem[] = result.rows.map((row: any) => ({
-        id: row.id as string,
-        memory: row.memory as string,
-        hash: (row.hash as string) || undefined,
-        metadata: row.metadata ? JSON.parse(row.metadata as string) : undefined,
-        createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string
-      }))
+      // 应用 TagMemo 增强 (如果启用)
+      if (this.enableTagMemoEnhancement && memories.length > 0) {
+        memories = await this.applyTagMemoEnhancement(query, memories)
+      }
 
       return {
         memories,
@@ -386,6 +404,47 @@ export class MemoryService {
         count: 0,
         error: error instanceof Error ? error.message : 'Unknown error'
       }
+    }
+  }
+
+  /**
+   * 应用 TagMemo 增强
+   */
+  private async applyTagMemoEnhancement(query: string, memories: MemoryItem[]): Promise<MemoryItem[]> {
+    try {
+      // 延迟初始化 TagMemo
+      if (!this.tagMemo) {
+        this.tagMemo = getTagMemoService()
+      }
+
+      // 转换为 KnowledgeSearchResult 格式
+      const searchResults = memories.map((m) => ({
+        pageContent: m.memory,
+        score: m.score || 0.5,
+        metadata: m.metadata || {}
+      }))
+
+      // 1. 从搜索结果初始化共现矩阵 (增量学习)
+      await this.tagMemo.initializeFromSearchResults(searchResults)
+
+      // 2. 从查询中提取标签
+      const queryTags = this.tagMemo.extractTagsFromQuery(query)
+
+      // 3. 应用 TagMemo 增强
+      if (queryTags.length > 0) {
+        const boostedResults = await this.tagMemo.applyTagBoost(query, queryTags, searchResults)
+
+        // 合并回 MemoryItem
+        return memories.map((memory, i) => ({
+          ...memory,
+          score: boostedResults[i]?.score || memory.score
+        }))
+      }
+
+      return memories
+    } catch (error) {
+      logger.warn('TagMemo enhancement failed, returning original memories', error as Error)
+      return memories
     }
   }
 
@@ -847,6 +906,36 @@ export class MemoryService {
       sql: MemoryQueries.history.insert,
       args: [memoryId, previousValue, newValue, action, now, now]
     })
+  }
+
+  // ==================== TagMemo 配置方法 ====================
+
+  /**
+   * 启用/禁用 TagMemo 增强
+   */
+  public setTagMemoEnhancement(enabled: boolean): void {
+    this.enableTagMemoEnhancement = enabled
+    logger.info('TagMemo enhancement', { enabled })
+  }
+
+  /**
+   * 获取 TagMemo 统计信息
+   */
+  public getTagMemoStats(): { mode: string; tagCount: number; relationCount: number; documentCount: number } | null {
+    if (!this.tagMemo) {
+      this.tagMemo = getTagMemoService()
+    }
+    return this.tagMemo.getStats()
+  }
+
+  /**
+   * 获取 TagMemo 服务实例 (用于高级操作)
+   */
+  public getTagMemoService(): TagMemoService {
+    if (!this.tagMemo) {
+      this.tagMemo = getTagMemoService()
+    }
+    return this.tagMemo
   }
 }
 

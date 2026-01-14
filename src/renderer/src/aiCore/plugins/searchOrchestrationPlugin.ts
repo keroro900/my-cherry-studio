@@ -17,7 +17,7 @@ import {
 import { getDefaultModel, getProviderByModel } from '@renderer/services/AssistantService'
 import store from '@renderer/store'
 import { selectCurrentUserId, selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
-import type { Assistant } from '@renderer/types'
+import type { Assistant, WebSearchProviderId } from '@renderer/types'
 import type { ExtractResults } from '@renderer/utils/extract'
 import { extractInfoFromXML } from '@renderer/utils/extract'
 import type { LanguageModel, ModelMessage } from 'ai'
@@ -320,7 +320,7 @@ export const searchOrchestrationPlugin = (assistant: Assistant, topicId: string)
             // onChunk({ type: ChunkType.EXTERNEL_TOOL_IN_PROGRESS })
             // logger.info('🌐 Adding web search tool with pre-extracted keywords')
             params.tools['builtin_web_search'] = webSearchToolWithPreExtractedKeywords(
-              assistant.webSearchProviderId,
+              assistant.webSearchProviderId as WebSearchProviderId,
               analysisResult.websearch,
               context.requestId
             )

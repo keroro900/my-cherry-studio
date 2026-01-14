@@ -437,9 +437,7 @@ export function buildExecutionLevels(nodes: WorkflowNode[], edges: WorkflowEdge[
   let levelIndex = 0
   while (currentLevel.length > 0) {
     // 当前层级的节点
-    const levelNodes = currentLevel
-      .map((id) => nodeMap.get(id))
-      .filter((n): n is WorkflowNode => n !== undefined)
+    const levelNodes = currentLevel.map((id) => nodeMap.get(id)).filter((n): n is WorkflowNode => n !== undefined)
 
     levels.push({
       level: levelIndex,

@@ -64,51 +64,50 @@ export function useWorkflow() {
     const workflow: Workflow = workflowExecutionService.buildWorkflow(
       nodes,
       edges,
-      currentWorkflow ? {
-        id: currentWorkflow.id,
-        name: currentWorkflow.name,
-        createdAt: currentWorkflow.createdAt
-      } : undefined
+      currentWorkflow
+        ? {
+            id: currentWorkflow.id,
+            name: currentWorkflow.name,
+            createdAt: currentWorkflow.createdAt
+          }
+        : undefined
     )
 
     // 开始执行
     dispatch(startExecution())
 
     // 使用统一服务执行工作流
-    const result = await workflowExecutionService.execute(
-      workflow,
-      {
-        onNodeStatusChange: (nodeId, status, errorMessage) => {
-          dispatch(
-            updateNodeStatus({
-              nodeId,
-              status: status as any,
-              errorMessage
-            })
-          )
-        },
-        onNodeOutput: async (nodeId, outputs) => {
-          dispatch(
-            updateNodeStatus({
-              nodeId,
-              status: 'completed',
-              result: outputs
-            })
-          )
-          dispatch(
-            setNodeResult({
-              nodeId,
-              status: 'success',
-              outputs,
-              duration: outputs?.duration
-            })
-          )
-        },
-        onProgress: (progress, message) => {
-          dispatch(updateExecutionProgress({ progress, message }))
-        }
+    const result = await workflowExecutionService.execute(workflow, {
+      onNodeStatusChange: (nodeId, status, errorMessage) => {
+        dispatch(
+          updateNodeStatus({
+            nodeId,
+            status: status as any,
+            errorMessage
+          })
+        )
+      },
+      onNodeOutput: async (nodeId, outputs) => {
+        dispatch(
+          updateNodeStatus({
+            nodeId,
+            status: 'completed',
+            result: outputs
+          })
+        )
+        dispatch(
+          setNodeResult({
+            nodeId,
+            status: 'success',
+            outputs,
+            duration: outputs?.duration
+          })
+        )
+      },
+      onProgress: (progress, message) => {
+        dispatch(updateExecutionProgress({ progress, message }))
       }
-    )
+    })
 
     // 保存上下文用于取消
     setExecutionContext(result.context)

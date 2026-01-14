@@ -11,6 +11,10 @@ import { Type as GeminiSchemaType } from '@google/genai'
 import { loggerService } from '@logger'
 import { isFunctionCallingModel, isVisionModel } from '@renderer/config/models'
 import i18n from '@renderer/i18n'
+import {
+  handleGetTaskStatusToolCall,
+  handleInvokeAgentToolCallWithAsync
+} from '@renderer/services/AssistantInvocationService'
 import { currentSpan } from '@renderer/services/SpanManagerService'
 import store from '@renderer/store'
 import { addMCPServer } from '@renderer/store/mcp'
@@ -140,7 +144,119 @@ export async function callMCPTool(
     `Calling Tool: ${toolResponse.id} ${toolResponse.tool.serverName} ${toolResponse.tool.name}`,
     toolResponse.tool
   )
+
+  // 处理内置的 invoke_agent 工具 (支持同步/异步模式)
+  if (toolResponse.tool.name === 'invoke_agent' && toolResponse.tool.serverId === 'assistant-invocation') {
+    try {
+      const args = toolResponse.arguments as {
+        agent_name: string
+        request: string
+        mode?: 'sync' | 'async'
+        include_system_prompt?: boolean
+      }
+      const result = await handleInvokeAgentToolCallWithAsync(args)
+      logger.info(`Built-in invoke_agent tool called successfully`, { mode: args.mode || 'sync' })
+      return {
+        isError: false,
+        content: [{ type: 'text', text: result }]
+      }
+    } catch (e) {
+      logger.error(`Error calling invoke_agent tool:`, e as Error)
+      return {
+        isError: true,
+        content: [
+          {
+            type: 'text',
+            text: `Error calling invoke_agent: ${e instanceof Error ? e.message : String(e)}`
+          }
+        ]
+      }
+    }
+  }
+
+  // 处理内置的 get_agent_task_status 工具 (查询异步任务状态)
+  if (toolResponse.tool.name === 'get_agent_task_status' && toolResponse.tool.serverId === 'assistant-invocation') {
+    try {
+      const args = toolResponse.arguments as { task_id: string }
+      const result = handleGetTaskStatusToolCall(args)
+      logger.info(`Built-in get_agent_task_status tool called`, { taskId: args.task_id })
+      return {
+        isError: false,
+        content: [{ type: 'text', text: result }]
+      }
+    } catch (e) {
+      logger.error(`Error calling get_agent_task_status tool:`, e as Error)
+      return {
+        isError: true,
+        content: [
+          {
+            type: 'text',
+            text: `Error getting task status: ${e instanceof Error ? e.message : String(e)}`
+          }
+        ]
+      }
+    }
+  }
+
   try {
+    // 优先使用 VCP 统一 API（支持 VCP + MCP 双协议）
+    if (window.api?.vcpUnified?.executeTool) {
+      logger.debug(`Using VCP unified API for tool: ${toolResponse.tool.name}`)
+
+      const vcpResult = await window.api.vcpUnified.executeTool({
+        toolName: toolResponse.tool.name,
+        params: toolResponse.arguments as Record<string, unknown>,
+        requestId: toolResponse.id,
+        source: 'mcp'
+      })
+
+      if (vcpResult.success) {
+        // 处理 MCP 自动安装服务器的特殊逻辑
+        if (toolResponse.tool.serverName === BuiltinMCPServerNames.mcpAutoInstall) {
+          const data = vcpResult.output as
+            | {
+                name?: string
+                description?: string
+                baseUrl?: string
+                command?: string
+                args?: string[]
+                env?: Record<string, string>
+              }
+            | undefined
+          if (data && typeof data === 'object' && 'name' in data) {
+            const mcpServer: MCPServer = {
+              id: `f${nanoid()}`,
+              name: data.name || '',
+              description: data.description || '',
+              baseUrl: data.baseUrl || '',
+              command: data.command || '',
+              args: data.args || [],
+              env: data.env || {},
+              registryUrl: '',
+              isActive: false,
+              provider: 'CherryAI'
+            }
+            store.dispatch(addMCPServer(mcpServer))
+          }
+        }
+
+        logger.info(`Tool called via VCP unified: ${toolResponse.tool.name}`, { source: vcpResult.source })
+        return {
+          isError: false,
+          content: [
+            {
+              type: 'text',
+              text: typeof vcpResult.output === 'string' ? vcpResult.output : JSON.stringify(vcpResult.output)
+            }
+          ]
+        }
+      } else {
+        logger.warn(`VCP unified execution failed, fallback to MCP: ${vcpResult.error}`)
+        // VCP 执行失败，回退到 MCP 直接调用
+      }
+    }
+
+    // 回退: 直接调用 MCP API
     const server = getMcpServerByTool(toolResponse.tool)
 
     if (!server) {
@@ -174,7 +290,7 @@ export async function callMCPTool(
       }
     }
 
-    logger.info(`Tool called: ${toolResponse.tool.serverName} ${toolResponse.tool.name}`, resp)
+    logger.info(`Tool called via MCP direct: ${toolResponse.tool.serverName} ${toolResponse.tool.name}`, resp)
     return resp
   } catch (e) {
     logger.error(`Error calling Tool: ${toolResponse.tool.serverName} ${toolResponse.tool.name}`, e as Error)

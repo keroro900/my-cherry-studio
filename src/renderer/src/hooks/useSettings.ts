@@ -38,6 +38,7 @@ import {
 } from '@renderer/store/settings'
 import type { SidebarIcon, ThemeMode, TranslateLanguageCode } from '@renderer/types'
 import type { UpgradeChannel } from '@shared/config/constant'
+import { useEffect, useState } from 'react'
 import { shallowEqual } from 'react-redux'
 
 export function useSettings() {
@@ -162,5 +163,45 @@ export const useNavbarPosition = () => {
     isLeftNavbar: navbarPosition === 'left',
     isTopNavbar: navbarPosition === 'top',
     setNavbarPosition: (position: 'left' | 'top') => dispatch(setNavbarPosition(position))
+  }
+}
+
+/**
+ * ShowVCP 调试面板开关 Hook
+ * 用于控制 VCP 调试面板的启用状态
+ */
+export const useShowVCPDebug = () => {
+  const [showVCPEnabled, setShowVCPEnabledState] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // 初始化时获取当前状态
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await window.electron.ipcRenderer.invoke('showvcp:getConfig')
+        setShowVCPEnabledState(config?.enabled ?? false)
+      } catch {
+        // 服务未就绪时默认禁用
+        setShowVCPEnabledState(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchConfig()
+  }, [])
+
+  const setShowVCPEnabled = async (enabled: boolean) => {
+    try {
+      await window.electron.ipcRenderer.invoke('showvcp:updateConfig', { enabled })
+      setShowVCPEnabledState(enabled)
+    } catch (error) {
+      console.error('Failed to update ShowVCP config:', error)
+    }
+  }
+
+  return {
+    showVCPEnabled,
+    setShowVCPEnabled,
+    isLoading
   }
 }

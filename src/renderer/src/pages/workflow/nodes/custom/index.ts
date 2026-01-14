@@ -6,17 +6,17 @@
  */
 
 export { CustomNodeExecutor } from './CustomNodeExecutor'
-export { customNodeRegistry } from './CustomNodeRegistry'
 export type { CustomNodeDefinition, CustomNodeStorage } from './CustomNodeRegistry'
-export {
-  BUILTIN_TEMPLATES,
-  createDefaultCustomNodeDefinition,
-  validateCustomNodeDefinition
-} from './types'
+export { customNodeRegistry } from './CustomNodeRegistry'
 export type {
   CodeExecutionMode,
   CustomConfigField,
   CustomNodeTemplate,
   CustomPortConfig,
   ErrorHandlingStrategy
+} from './types'
+export {
+  BUILTIN_TEMPLATES,
+  createDefaultCustomNodeDefinition,
+  validateCustomNodeDefinition
 } from './types'

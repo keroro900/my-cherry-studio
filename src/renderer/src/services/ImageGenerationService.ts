@@ -11,6 +11,7 @@ import { loggerService } from '@logger'
 import AiProvider from '@renderer/aiCore'
 import { ModelRouter } from '@renderer/aiCore/routing'
 import type { Model, Provider } from '@renderer/types'
+import { withoutTrailingApiVersion } from '@renderer/utils/api'
 
 const logger = loggerService.withContext('ImageGenerationService')
 
@@ -66,6 +67,19 @@ export interface ImageGenerationResult {
   success: boolean
   images: string[] // Base64 或 URL 数组
   error?: string
+  reasoningText?: string // 模型的思考/推理文本
+}
+
+/**
+ * 流式生成选项
+ */
+export interface StreamingGenerationOptions {
+  signal?: AbortSignal
+  onProgress?: (current: number, total: number) => void
+  // 流式回调：收到文本/思考内容时调用
+  onTextChunk?: (text: string, type: 'thinking' | 'text') => void
+  // 流式回调：收到图片时调用
+  onImageChunk?: (image: string) => void
 }
 
 /**
@@ -174,7 +188,8 @@ export class ImageGenerationService {
    */
   private getBaseUrl(): string {
     if (this.provider.apiHost) {
-      return this.provider.apiHost.replace(/\/$/, '')
+      // Strip trailing API version to avoid duplication when endpoint methods append /v1/...
+      return withoutTrailingApiVersion(this.provider.apiHost.replace(/\/$/, ''))
     }
 
     const defaultUrls: Record<string, string> = {
@@ -382,9 +397,7 @@ export class ImageGenerationService {
         logger.debug(`[${requestId}] 使用缓存格式: ${cachedFormat}`)
         const result = await this.executeWithFormat(cachedFormat, params, apiKey, options, requestId)
         if (result.success) {
-          logger.debug(
-            `[${requestId}] 缓存格式成功，耗时: ${Date.now() - startTime}ms`
-          )
+          logger.debug(`[${requestId}] 缓存格式成功，耗时: ${Date.now() - startTime}ms`)
           return result
         }
         // 缓存格式失败，清除缓存并重新尝试
@@ -401,9 +414,7 @@ export class ImageGenerationService {
         if (result.success) {
           this.cacheApiFormat('gemini-native')
         }
-        logger.debug(
-          `[${requestId}] 完成，耗时: ${Date.now() - startTime}ms，成功: ${result.success}`
-        )
+        logger.debug(`[${requestId}] 完成，耗时: ${Date.now() - startTime}ms，成功: ${result.success}`)
         return result
       } else if (this.isGeminiImageModel()) {
         // Gemini 模型通过第三方代理，按顺序尝试不同格式
@@ -415,16 +426,11 @@ export class ImageGenerationService {
           const result = await this.generateWithChatCompletions(params, apiKey, options)
           if (result.success) {
             this.cacheApiFormat('chat-completions')
-            logger.debug(
-              `[${requestId}] Chat Completions 成功，耗时: ${Date.now() - startTime}ms`
-            )
+            logger.debug(`[${requestId}] Chat Completions 成功，耗时: ${Date.now() - startTime}ms`)
             return result
           }
         } catch (chatError) {
-          logger.debug(
-            `[${requestId}] Chat Completions 失败:`,
-            (chatError as Error).message
-          )
+          logger.debug('`[${requestId}] Chat Completions 失败`', chatError as Error)
         }
 
         // 尝试 2: OpenAI Images API
@@ -433,16 +439,11 @@ export class ImageGenerationService {
           const result = await this.generateWithOpenAI(params, apiKey, options)
           if (result.success) {
             this.cacheApiFormat('openai-images')
-            logger.debug(
-              `[${requestId}] OpenAI Images 成功，耗时: ${Date.now() - startTime}ms`
-            )
+            logger.debug(`[${requestId}] OpenAI Images 成功，耗时: ${Date.now() - startTime}ms`)
             return result
           }
         } catch (openaiError) {
-          logger.debug(
-            `[${requestId}] OpenAI Images 失败:`,
-            (openaiError as Error).message
-          )
+          logger.debug('`[${requestId}] OpenAI Images 失败`', openaiError as Error)
 
           // 尝试 3: Gemini Native（如果支持）
           if (this.canFallbackToGemini()) {
@@ -450,9 +451,7 @@ export class ImageGenerationService {
             const result = await this.generateWithGeminiNative(params, apiKey, options)
             if (result.success) {
               this.cacheApiFormat('gemini-native')
-              logger.debug(
-                `[${requestId}] Gemini Native 回退成功，耗时: ${Date.now() - startTime}ms`
-              )
+              logger.debug(`[${requestId}] Gemini Native 回退成功，耗时: ${Date.now() - startTime}ms`)
             }
             return result
           }
@@ -469,21 +468,405 @@ export class ImageGenerationService {
         if (result.success) {
           this.cacheApiFormat('openai-images')
         }
-        logger.debug(
-          `[${requestId}] 完成，耗时: ${Date.now() - startTime}ms，成功: ${result.success}`
-        )
+        logger.debug(`[${requestId}] 完成，耗时: ${Date.now() - startTime}ms，成功: ${result.success}`)
         return result
       }
     } catch (error) {
-      logger.debug(
-        `[${requestId}] 最终失败，耗时: ${Date.now() - startTime}ms，错误:`,
-        (error as Error).message
-      )
+      logger.debug(`[${requestId}] 最终失败，耗时: ${Date.now() - startTime}ms，错误: ${(error as Error).message}`)
       return {
         success: false,
         images: [],
         error: (error as Error).message
       }
+    }
+  }
+
+  /**
+   * 流式生成图片（支持思考步骤显示）
+   *
+   * API 格式选择策略：
+   * - Gemini 图像模型 + 支持 Gemini Native 的代理 → 使用 Gemini Native API（确保 imageSize/aspectRatio 正确传递）
+   * - 其他情况 → 使用 Chat Completions API
+   */
+  async generateStreaming(
+    params: ImageGenerationParams,
+    options?: StreamingGenerationOptions
+  ): Promise<ImageGenerationResult> {
+    const startTime = Date.now()
+    const requestId = Math.random().toString(36).substring(2, 8)
+
+    logger.debug(`[${requestId}] ========== 开始流式图片生成 ==========`)
+    logger.debug(`[${requestId}] 参数:`, {
+      model: params.model,
+      image_size: params.image_size,
+      aspect_ratio: params.aspect_ratio
+    })
+
+    try {
+      const apiKey = this.getApiKey()
+      if (!apiKey) {
+        return { success: false, images: [], error: '未配置 API Key' }
+      }
+
+      // 判断是否使用 Gemini Native 格式
+      const useGeminiNative = this.isGeminiNativeFormat()
+
+      if (useGeminiNative) {
+        logger.debug(`[${requestId}] 路由: Gemini Native 流式生成`)
+        const result = await this.generateStreamingWithGeminiNative(params, apiKey, options)
+        logger.debug(`[${requestId}] Gemini Native 流式生成完成，耗时: ${Date.now() - startTime}ms`)
+        return result
+      } else {
+        logger.debug(`[${requestId}] 路由: Chat Completions 流式生成`)
+        const result = await this.generateStreamingWithChatCompletions(params, apiKey, options)
+        logger.debug(`[${requestId}] Chat Completions 流式生成完成，耗时: ${Date.now() - startTime}ms`)
+        return result
+      }
+    } catch (error) {
+      logger.debug(`[${requestId}] 流式生成失败`, { error: (error as Error).message })
+      return {
+        success: false,
+        images: [],
+        error: (error as Error).message
+      }
+    }
+  }
+
+  /**
+   * 使用 Chat Completions API 进行流式图片生成
+   */
+  private async generateStreamingWithChatCompletions(
+    params: ImageGenerationParams,
+    apiKey: string,
+    options?: StreamingGenerationOptions
+  ): Promise<ImageGenerationResult> {
+    const baseUrl = this.getBaseUrl()
+    const url = `${baseUrl}/v1/chat/completions`
+
+    const modelId = params.model || this.model.id
+    const aspectRatio = params.aspect_ratio
+    const imageSize = params.image_size
+
+    // 构建提示词
+    let promptText = params.prompt
+    if (aspectRatio) {
+      const ratioInstructions: Record<string, string> = {
+        '1:1': '请生成正方形（1:1 宽高比）的图片。',
+        '3:4': '请生成竖版（3:4 宽高比）的图片。',
+        '4:3': '请生成横版（4:3 宽高比）的图片。',
+        '9:16': '请生成竖版手机屏幕比例（9:16 宽高比）的图片。',
+        '16:9': '请生成横版宽屏（16:9 宽高比）的图片。'
+      }
+      const instruction = ratioInstructions[aspectRatio] || `请生成宽高比为 ${aspectRatio} 的图片。`
+      promptText = `${params.prompt}\n\n${instruction}`
+    }
+
+    // 构建消息内容
+    const content: any[] = [{ type: 'text', text: promptText }]
+
+    // 添加参考图片
+    const referenceImages = this.collectReferenceImages(params)
+    for (const img of referenceImages) {
+      const imageUrl = img.startsWith('data:') ? img : `data:image/jpeg;base64,${img}`
+      content.push({
+        type: 'image_url',
+        image_url: { url: imageUrl, detail: 'auto' }
+      })
+    }
+
+    // 构建请求体 - 启用流式输出
+    const body: Record<string, any> = {
+      model: modelId,
+      messages: [{ role: 'user', content }],
+      max_tokens: 4096,
+      temperature: 0.7,
+      stream: true // 关键：启用流式输出
+    }
+
+    // 透传参数
+    body.n = params.n || 1
+    if (aspectRatio) body.aspect_ratio = aspectRatio
+    if (imageSize) body.image_size = imageSize
+    if (params.size) body.size = params.size
+
+    // Gemini generationConfig
+    if (aspectRatio || imageSize) {
+      body.generationConfig = {
+        responseModalities: ['TEXT', 'IMAGE'],
+        imageConfig: {
+          ...(aspectRatio && { aspectRatio }),
+          ...(imageSize && { imageSize })
+        }
+      }
+    }
+
+    logger.debug('Streaming Chat Completions - 发送参数', { modelId, aspectRatio, imageSize, stream: true })
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(body),
+      signal: options?.signal
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '')
+      throw new Error(`API 请求失败: HTTP ${response.status} - ${errorText.slice(0, 200)}`)
+    }
+
+    // 解析 SSE 流
+    const images: string[] = []
+    let reasoningText = ''
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+
+    if (!reader) {
+      throw new Error('无法获取响应流')
+    }
+
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // 保留不完整的行
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6).trim()
+        if (data === '[DONE]') continue
+
+        try {
+          const json = JSON.parse(data)
+          const delta = json.choices?.[0]?.delta
+
+          if (!delta) continue
+
+          // 处理文本内容（思考/推理）
+          if (delta.content) {
+            if (typeof delta.content === 'string') {
+              // 纯文本内容
+              reasoningText += delta.content
+              options?.onTextChunk?.(delta.content, 'text')
+            } else if (Array.isArray(delta.content)) {
+              // 多模态内容
+              for (const item of delta.content) {
+                if (item.type === 'text' && item.text) {
+                  reasoningText += item.text
+                  options?.onTextChunk?.(item.text, 'text')
+                } else if (item.type === 'image_url' && item.image_url?.url) {
+                  images.push(item.image_url.url)
+                  options?.onImageChunk?.(item.image_url.url)
+                } else if (item.b64_json) {
+                  const imageData = `data:image/png;base64,${item.b64_json}`
+                  images.push(imageData)
+                  options?.onImageChunk?.(imageData)
+                }
+              }
+            }
+          }
+
+          // 处理 reasoning_content（某些模型的思考输出）
+          if (delta.reasoning_content) {
+            reasoningText += delta.reasoning_content
+            options?.onTextChunk?.(delta.reasoning_content, 'thinking')
+          }
+        } catch {
+          // 忽略解析错误
+        }
+      }
+    }
+
+    // 如果流式没有返回图片，尝试从最终响应解析
+    if (images.length === 0) {
+      logger.debug('流式响应未包含图片，尝试从文本中提取')
+      const base64Match = reasoningText.match(/data:image\/[^;]+;base64,[A-Za-z0-9+/=]+/)
+      if (base64Match) {
+        images.push(base64Match[0])
+      }
+    }
+
+    return {
+      success: images.length > 0,
+      images,
+      reasoningText: reasoningText || undefined,
+      error: images.length === 0 ? '未返回图片数据' : undefined
+    }
+  }
+
+  /**
+   * 使用 Gemini Native API 进行流式图片生成
+   *
+   * 使用 generateContent API 的流式模式，确保 imageConfig 参数正确传递
+   * 适用于 CherryIN 等支持 Gemini 原生格式的代理
+   */
+  private async generateStreamingWithGeminiNative(
+    params: ImageGenerationParams,
+    apiKey: string,
+    options?: StreamingGenerationOptions
+  ): Promise<ImageGenerationResult> {
+    let baseUrl = this.provider.apiHost || 'https://generativelanguage.googleapis.com'
+    baseUrl = baseUrl.replace(/\/$/, '')
+    if (!baseUrl.includes('/v1beta')) {
+      baseUrl = `${baseUrl}/v1beta`
+    }
+
+    // 判断是否为中转站（非 Google 官方域名）
+    const isGoogleOfficial =
+      baseUrl.includes('generativelanguage.googleapis.com') || baseUrl.includes('aiplatform.googleapis.com')
+
+    const modelId = params.model || this.model.id
+
+    // 构建 URL 和 headers
+    let url: string
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+
+    if (isGoogleOfficial) {
+      // Google 官方 API - 使用 streamGenerateContent
+      url = `${baseUrl}/models/${modelId}:streamGenerateContent?key=${apiKey}&alt=sse`
+    } else {
+      // 中转站 - 使用 Bearer token 认证
+      url = `${baseUrl}/models/${modelId}:streamGenerateContent?alt=sse`
+      headers['Authorization'] = `Bearer ${apiKey}`
+    }
+
+    // 构建 parts 数组
+    const parts: any[] = [{ text: params.prompt }]
+
+    // 添加参考图片
+    const referenceImages = this.collectReferenceImages(params)
+    for (const img of referenceImages) {
+      const imageData = img.startsWith('data:') ? img.split(',')[1] : img
+      parts.push({
+        inline_data: {
+          mime_type: 'image/jpeg',
+          data: imageData
+        }
+      })
+    }
+
+    // 获取宽高比和图片尺寸
+    const aspectRatio = params.aspect_ratio
+    const imageSize = params.image_size
+
+    // 构建 imageConfig
+    const imageConfig: Record<string, string> = {}
+    if (aspectRatio) imageConfig.aspectRatio = aspectRatio
+    if (imageSize) imageConfig.imageSize = imageSize
+
+    // 生成随机 seed
+    const randomSeed = Math.floor(Math.random() * 2147483647)
+
+    // 构建请求体
+    const payload: Record<string, any> = {
+      contents: [{ parts }],
+      generationConfig: {
+        temperature: 1.0,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+        seed: randomSeed,
+        responseModalities: ['TEXT', 'IMAGE'],
+        ...(Object.keys(imageConfig).length > 0 && { imageConfig }),
+        ...(params.n ? { candidateCount: params.n } : {})
+      },
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+      ]
+    }
+
+    logger.debug('Gemini Native Streaming - 发送参数', {
+      aspectRatio,
+      imageSize,
+      imageConfig,
+      model: modelId
+    })
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+      signal: options?.signal
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '')
+      logger.error('Gemini Native Streaming API error:', {
+        status: response.status,
+        body: errorText
+      })
+      throw new Error(`Gemini API 请求失败: HTTP ${response.status} - ${errorText.slice(0, 200)}`)
+    }
+
+    // 解析 SSE 流
+    const images: string[] = []
+    let reasoningText = ''
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+
+    if (!reader) {
+      throw new Error('无法获取响应流')
+    }
+
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6).trim()
+        if (data === '[DONE]' || !data) continue
+
+        try {
+          const json = JSON.parse(data)
+
+          // 处理 Gemini 格式的响应
+          if (json.candidates && Array.isArray(json.candidates)) {
+            for (const candidate of json.candidates) {
+              const parts = candidate.content?.parts || []
+              for (const part of parts) {
+                // 处理文本内容
+                if (part.text) {
+                  reasoningText += part.text
+                  options?.onTextChunk?.(part.text, part.thought ? 'thinking' : 'text')
+                }
+
+                // 处理图片内容
+                const inlineData = part.inlineData || part.inline_data
+                if (inlineData?.data) {
+                  const mimeType = inlineData.mimeType || inlineData.mime_type || 'image/png'
+                  const imageData = `data:${mimeType};base64,${inlineData.data}`
+                  images.push(imageData)
+                  options?.onImageChunk?.(imageData)
+                }
+              }
+            }
+          }
+        } catch {
+          // 忽略解析错误
+        }
+      }
+    }
+
+    return {
+      success: images.length > 0,
+      images,
+      reasoningText: reasoningText || undefined,
+      error: images.length === 0 ? '未返回图片数据' : undefined
     }
   }
 
@@ -592,9 +975,18 @@ export class ImageGenerationService {
     // 构建提示词
     let promptText = params.prompt
 
-    // 在提示词末尾添加宽高比要求（仅当有明确宽高比且非 1:1 时）
-    if (aspectRatio && aspectRatio !== '1:1') {
-      promptText = `${params.prompt}\n\n请生成宽高比为 ${aspectRatio} 的图片。`
+    // 在提示词末尾添加宽高比要求（始终添加，确保 API 生成正确尺寸的图片）
+    // 注意：某些第三方代理可能不识别 aspect_ratio 参数，因此需要在提示词中明确指出
+    if (aspectRatio) {
+      const ratioInstructions: Record<string, string> = {
+        '1:1': '请生成正方形（1:1 宽高比）的图片。',
+        '3:4': '请生成竖版（3:4 宽高比）的图片。',
+        '4:3': '请生成横版（4:3 宽高比）的图片。',
+        '9:16': '请生成竖版手机屏幕比例（9:16 宽高比）的图片。',
+        '16:9': '请生成横版宽屏（16:9 宽高比）的图片。'
+      }
+      const instruction = ratioInstructions[aspectRatio] || `请生成宽高比为 ${aspectRatio} 的图片。`
+      promptText = `${params.prompt}\n\n${instruction}`
     }
 
     // 构建消息内容
@@ -657,7 +1049,7 @@ export class ImageGenerationService {
     })
 
     // 打印完整请求体（调试用）
-    logger.debug('Chat Completions - 完整请求体', JSON.stringify(body, null, 2))
+    logger.debug('Chat Completions - 完整请求体', { body })
 
     const response = await fetch(url, {
       method: 'POST',

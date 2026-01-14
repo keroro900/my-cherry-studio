@@ -49,6 +49,12 @@ const initialState: PreprocessState = {
       name: 'Open MinerU',
       apiKey: '',
       apiHost: ''
+    },
+    {
+      id: 'fashion',
+      name: 'Fashion',
+      apiKey: 'builtin',
+      apiHost: ''
     }
   ],
   defaultProvider: 'mineru'

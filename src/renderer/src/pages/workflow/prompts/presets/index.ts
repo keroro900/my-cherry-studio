@@ -39,19 +39,19 @@ export { getPosePreset, getPosePresetKeys, POSE_PRESETS } from './pose'
 
 // Fashion 服装品类预设
 export {
-  type FashionCategoryPreset,
   FASHION_CATEGORY_PRESETS,
+  type FashionCategoryPreset,
+  getFashionCategoryOptions,
   getFashionCategoryPreset,
-  getFashionCategoryPresetKeys,
-  getFashionCategoryOptions
+  getFashionCategoryPresetKeys
 } from './fashionCategory'
 
 // Fashion 趋势维度预设
 export {
-  type TrendDimensionPreset,
-  TREND_DIMENSION_PRESETS,
+  buildDimensionAnalysisPrompt,
+  getTrendDimensionOptions,
   getTrendDimensionPreset,
   getTrendDimensionPresetKeys,
-  getTrendDimensionOptions,
-  buildDimensionAnalysisPrompt
+  TREND_DIMENSION_PRESETS,
+  type TrendDimensionPreset
 } from './trendDimension'

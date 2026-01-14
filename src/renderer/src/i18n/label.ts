@@ -149,7 +149,10 @@ const titleKeyMap = {
   settings: 'title.settings',
   translate: 'title.translate',
   workflow: 'title.workflow',
-  image_studio: 'title.image_studio'
+  image_studio: 'title.image_studio',
+  'image-studio': 'title.image_studio',
+  canvas: 'title.canvas',
+  vcp: 'vcp.dashboard.title'
 } as const
 
 export const getTitleLabel = (key: string): string => {
@@ -189,7 +192,9 @@ const sidebarIconKeyMap = {
   code_tools: 'code.title',
   notes: 'notes.title',
   workflow: 'title.workflow',
-  image_studio: 'title.image_studio'
+  image_studio: 'title.image_studio',
+  canvas: 'title.canvas',
+  vcp_dashboard: 'vcp.dashboard.title'
 } as const
 
 export const getSidebarIconLabel = (key: string): string => {
@@ -337,7 +342,12 @@ const builtInMcpDescriptionKeyMap: Record<BuiltinMCPServerName, string> = {
   [BuiltinMCPServerNames.didiMCP]: 'settings.mcp.builtinServersDescriptions.didi_mcp',
   [BuiltinMCPServerNames.browser]: 'settings.mcp.builtinServersDescriptions.browser',
   [BuiltinMCPServerNames.nowledgeMem]: 'settings.mcp.builtinServersDescriptions.nowledge_mem',
-  [BuiltinMCPServerNames.workflow]: 'settings.mcp.builtinServersDescriptions.workflow'
+  [BuiltinMCPServerNames.workflow]: 'settings.mcp.builtinServersDescriptions.workflow',
+  [BuiltinMCPServerNames.fashion]: 'settings.mcp.builtinServersDescriptions.fashion',
+  [BuiltinMCPServerNames.fashionScraper]: 'settings.mcp.builtinServersDescriptions.fashion_scraper',
+  [BuiltinMCPServerNames.vcpRag]: 'settings.mcp.builtinServersDescriptions.vcp_rag',
+  [BuiltinMCPServerNames.agentCollab]: 'settings.mcp.builtinServersDescriptions.agent_collab',
+  [BuiltinMCPServerNames.diary]: 'settings.mcp.builtinServersDescriptions.diary'
 } as const
 
 export const getBuiltInMcpServerDescriptionLabel = (key: string): string => {

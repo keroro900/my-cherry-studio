@@ -197,12 +197,7 @@ class WorkflowStorageService {
    * 保存工作流草稿（自动保存）
    * 只保留最新的草稿，清理大型数据避免配额超限
    */
-  saveDraft(
-    nodes: WorkflowNode[],
-    edges: WorkflowEdge[],
-    workflowId?: string,
-    workflowName?: string
-  ): boolean {
+  saveDraft(nodes: WorkflowNode[], edges: WorkflowEdge[], workflowId?: string, workflowName?: string): boolean {
     try {
       // 清理节点中的大型数据（图片 base64 等）
       const cleanedNodes = nodes.map((node) => ({

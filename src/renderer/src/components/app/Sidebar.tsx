@@ -16,6 +16,8 @@ import { Avatar, Tooltip } from 'antd'
 import {
   Camera,
   Code,
+  Boxes,
+  FileEdit,
   FileSearch,
   Folder,
   Languages,
@@ -140,7 +142,9 @@ const MainMenus: FC = () => {
     notes: <NotepadText size={18} className="icon" />,
     code_tools: <Code size={18} className="icon" />,
     workflow: <Workflow size={18} className="icon" />,
-    image_studio: <Camera size={18} className="icon" />
+    image_studio: <Camera size={18} className="icon" />,
+    canvas: <FileEdit size={18} className="icon" />,
+    vcp_dashboard: <Boxes size={18} className="icon" />
   }
 
   const pathMap = {
@@ -154,7 +158,9 @@ const MainMenus: FC = () => {
     code_tools: '/code',
     notes: '/notes',
     workflow: '/workflow',
-    image_studio: '/image-studio'
+    image_studio: '/image-studio',
+    canvas: '/canvas',
+    vcp_dashboard: '/vcp'
   }
 
   return sidebarIcons.visible.map((icon) => {

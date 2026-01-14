@@ -8,6 +8,8 @@
 @import './animation.css';
 @import './richtext.css';
 @import './responsive.css';
+@import './vcp-enhanced.css';
+@import './messages.css';
 @import '../fonts/icon-fonts/iconfont.css';
 @import '../fonts/ubuntu/ubuntu.css';
 @import '../fonts/country-flag-fonts/flag.css';
@@ -26,8 +28,19 @@
   }
 }
 
-*:focus {
-  outline-style: none;
+/**
+ * 焦点样式优化
+ *
+ * - 鼠标点击时不显示焦点轮廓（提升视觉体验）
+ * - 键盘导航时显示焦点轮廓（保障可访问性）
+ */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary, #1677ff);
+  outline-offset: 2px;
 }
 
 * {
@@ -67,6 +80,17 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+/* ==================== 壁纸功能 - body 背景图片 ==================== */
+/* 壁纸直接应用在 body 上，与官方主题库方案对齐 */
+body.wallpaper-enabled {
+  background-image: var(--chat-background-image, none);
+  background-repeat: var(--chat-background-repeat, no-repeat);
+  background-position: var(--chat-background-position, center 30%);
+  background-size: var(--chat-background-size, cover);
+  background-attachment: fixed;
+  /* 基础滤镜效果通过 CSS 变量控制 */
 }
 
 input,

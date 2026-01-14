@@ -38,6 +38,11 @@ import { ConversationService } from './ConversationService'
 import { injectUserMessageWithKnowledgeSearchPrompt } from './KnowledgeService'
 import type { BlockManager } from './messageStreaming'
 import type { StreamProcessorCallbacks } from './StreamProcessingService'
+import {
+  createGetTaskStatusTool,
+  createInvokeAgentToolWithAsync,
+  isCollaborationEnabled
+} from './AssistantInvocationService'
 // import { processKnowledgeSearch } from './KnowledgeService'
 // import {
 //   filterContextMessages,
@@ -56,7 +61,7 @@ export async function fetchMcpTools(assistant: Assistant) {
   let mcpTools: MCPTool[] = [] // Initialize as empty array
   const allMcpServers = store.getState().mcp.servers || []
   const activedMcpServers = allMcpServers.filter((s) => s.isActive)
-  const assistantMcpServers = assistant.mcpServers || []
+  const assistantMcpServers = (assistant.mcpServers || []) as MCPServer[]
 
   const enabledMCPs = activedMcpServers.filter((server) => assistantMcpServers.some((s) => s.id === server.id))
 
@@ -81,6 +86,72 @@ export async function fetchMcpTools(assistant: Assistant) {
     }
   }
   return mcpTools
+}
+
+/**
+ * 获取 VCP 插件工具（包括内置服务和外部插件）
+ * VCP 工具将被转换为 MCPTool 格式，以便与现有中间件兼容
+ *
+ * 统一控制逻辑：
+ * - 选择了 MCP 服务器 → 启用所有工具（包括 VCP 内置）
+ * - 启用了 vcpConfig → 启用 VCP 内置工具
+ * - 两者是 OR 关系，任一条件满足即启用
+ */
+export async function fetchVcpTools(assistant: Assistant): Promise<MCPTool[]> {
+  // 统一控制：选择了 MCP 服务器 或 启用了 VCP 配置 → 工具调用启用
+  // 兼容新旧字段：tools.mcpServers (新) 或 mcpServers (旧，已弃用)
+  const mcpServers = assistant.tools?.mcpServers ?? assistant.mcpServers
+  const hasMcpServers = (mcpServers?.length ?? 0) > 0
+  const vcpConfigEnabled = assistant.vcpConfig?.enabled ?? false
+  const toolsEnabled = hasMcpServers || vcpConfigEnabled
+
+  if (!toolsEnabled) {
+    logger.debug('Tools disabled for assistant (no MCP servers selected and VCP not enabled)', {
+      assistantId: assistant.id
+    })
+    return []
+  }
+
+  try {
+    // 获取 VCP 工具定义
+    const result = await window.api.vcpTool.listDefinitions()
+
+    if (!result.success || !result.data) {
+      logger.debug('No VCP tools available or VCPRuntime not initialized')
+      return []
+    }
+
+    // 将 VCP 工具定义转换为 MCPTool 格式
+    const vcpTools: MCPTool[] = result.data.map((tool: any) => ({
+      id: tool.id || tool.name,
+      serverId: tool.serverId || 'vcp-runtime',
+      name: tool.name,
+      description: tool.description || '',
+      serverName: tool.serverName || 'VCPRuntime',
+      type: 'mcp' as const,
+      inputSchema: tool.inputSchema || {
+        type: 'object',
+        properties:
+          tool.parameters?.reduce(
+            (acc: Record<string, any>, param: any) => {
+              acc[param.name] = {
+                type: param.type || 'string',
+                description: param.description || ''
+              }
+              return acc
+            },
+            {} as Record<string, any>
+          ) || {},
+        required: tool.parameters?.filter((p: any) => p.required).map((p: any) => p.name) || []
+      }
+    }))
+
+    logger.info('Fetched VCP tools', { count: vcpTools.length })
+    return vcpTools
+  } catch (error) {
+    logger.error('Error fetching VCP tools:', error as Error)
+    return []
+  }
 }
 
 /**
@@ -172,6 +243,26 @@ export async function fetchChatCompletion({
 
   if (isPromptToolUse(assistant) || isSupportedToolUse(assistant)) {
     mcpTools.push(...(await fetchMcpTools(assistant)))
+  }
+
+  // 获取 VCP 插件工具（包括内置服务）
+  // VCP 工具独立于 MCP 工具获取，因为它们使用不同的协议
+  // 注意：fetchVcpTools 内部检查 vcpConfig.enabled（默认 false）
+  const vcpTools = await fetchVcpTools(assistant)
+  if (vcpTools.length > 0) {
+    mcpTools.push(...vcpTools)
+    logger.info('Added VCP tools to request', { vcpToolCount: vcpTools.length, totalToolCount: mcpTools.length })
+  }
+
+  // 添加助手间调用工具（当启用协作功能时）
+  if (isCollaborationEnabled(assistant) && (isPromptToolUse(assistant) || isSupportedToolUse(assistant))) {
+    // 添加支持同步/异步模式的 invoke_agent 工具
+    const invokeAgentTool = createInvokeAgentToolWithAsync(assistant.id)
+    mcpTools.push(invokeAgentTool)
+    // 添加异步任务状态查询工具
+    const taskStatusTool = createGetTaskStatusTool()
+    mcpTools.push(taskStatusTool)
+    logger.debug('Added collaboration tools (invoke_agent, get_agent_task_status)', { assistantId: assistant.id })
   }
   if (prompt) {
     messages = [
@@ -285,6 +376,8 @@ export async function fetchMessagesSummary({ messages, assistant }: { messages: 
   // }
   const summaryAssistant = {
     ...assistant,
+    // Override type to prevent image generation path for text summary
+    type: 'assistant',
     settings: {
       ...assistant.settings,
       reasoning_effort: undefined,
@@ -364,6 +457,8 @@ export async function fetchNoteSummary({ content, assistant }: { content: string
 
   const summaryAssistant = {
     ...resolvedAssistant,
+    // Override type to prevent image generation path for text summary
+    type: 'assistant',
     settings: {
       ...resolvedAssistant.settings,
       reasoning_effort: undefined,
@@ -429,11 +524,13 @@ export async function fetchNoteSummary({ content, assistant }: { content: string
 export async function fetchGenerate({
   prompt,
   content,
-  model
+  model,
+  signal
 }: {
   prompt: string
   content: string
   model?: Model
+  signal?: AbortSignal
 }): Promise<string> {
   if (!model) {
     model = getDefaultModel()
@@ -442,6 +539,11 @@ export async function fetchGenerate({
 
   if (!hasApiKey(provider)) {
     return ''
+  }
+
+  // Check if aborted before starting
+  if (signal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError')
   }
 
   // Apply API key rotation
@@ -481,7 +583,8 @@ export async function fetchGenerate({
       model.id,
       {
         system: prompt,
-        prompt: content
+        prompt: content,
+        abortSignal: signal
       },
       {
         ...middlewareConfig,
@@ -491,6 +594,86 @@ export async function fetchGenerate({
     )
     return result.getText() || ''
   } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw error
+    }
+    return ''
+  }
+}
+
+/**
+ * 流式生成文本 - 支持边生成边回调
+ */
+export async function fetchGenerateStream({
+  prompt,
+  content,
+  model,
+  signal,
+  onChunk
+}: {
+  prompt: string
+  content: string
+  model?: Model
+  signal?: AbortSignal
+  onChunk: (chunk: Chunk) => void
+}): Promise<string> {
+  if (!model) {
+    model = getDefaultModel()
+  }
+  const provider = getProviderByModel(model)
+
+  if (!hasApiKey(provider)) {
+    return ''
+  }
+
+  // Check if aborted before starting
+  if (signal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError')
+  }
+
+  // Apply API key rotation
+  const providerWithRotatedKey = {
+    ...provider,
+    apiKey: getRotatedApiKey(provider)
+  }
+
+  const AI = new AiProviderNew(model, providerWithRotatedKey)
+
+  const assistant = getDefaultAssistant()
+  assistant.model = model
+  assistant.prompt = prompt
+
+  const middlewareConfig: AiSdkMiddlewareConfig = {
+    streamOutput: true, // 强制启用流式输出
+    enableReasoning: false,
+    isPromptToolUse: false,
+    isSupportedToolUse: false,
+    isImageGenerationEndpoint: false,
+    enableWebSearch: false,
+    enableGenerateImage: false,
+    enableUrlContext: false,
+    onChunk // 传递流式回调
+  }
+
+  try {
+    const result = await AI.completions(
+      model.id,
+      {
+        system: prompt,
+        prompt: content,
+        abortSignal: signal
+      },
+      {
+        ...middlewareConfig,
+        assistant,
+        callType: 'generate'
+      }
+    )
+    return result.getText() || ''
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw error
+    }
     return ''
   }
 }

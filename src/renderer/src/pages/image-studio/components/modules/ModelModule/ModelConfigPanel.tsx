@@ -7,13 +7,15 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { updateModelConfig } from '@renderer/store/imageStudio'
-import { Checkbox, Collapse, Input, Radio, Select, Slider, Upload } from 'antd'
 import type { UploadFile } from 'antd'
-import { ImagePlus, Sparkles, User, Wand2 } from 'lucide-react'
+import { Checkbox, Collapse, Input, Radio, Select, Slider, Upload } from 'antd'
+import { ImagePlus, User, Wand2 } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
+
+import { PromptEnhancer } from '../../common'
 
 const ModelConfigPanel: FC = () => {
   const { t } = useTranslation()
@@ -73,8 +75,7 @@ const ModelConfigPanel: FC = () => {
               multiple
               beforeUpload={() => false}
               onChange={handleClothesUpload}
-              fileList={clothesFiles}
-            >
+              fileList={clothesFiles}>
               <AddImageButton>
                 <PlusOutlined />
                 <span>{t('image_studio.model.add_clothes')}</span>
@@ -108,7 +109,11 @@ const ModelConfigPanel: FC = () => {
             </RemoveButton>
           </UploadedModelImage>
         ) : (
-          <Upload.Dragger accept="image/*" showUploadList={false} beforeUpload={() => false} onChange={handleModelUpload}>
+          <Upload.Dragger
+            accept="image/*"
+            showUploadList={false}
+            beforeUpload={() => false}
+            onChange={handleModelUpload}>
             <UploadContent>
               <User size={24} />
               <span>{t('image_studio.model.upload_model_ref')}</span>
@@ -143,8 +148,7 @@ const ModelConfigPanel: FC = () => {
               value={config.gender}
               onChange={(e) => dispatch(updateModelConfig({ gender: e.target.value }))}
               buttonStyle="solid"
-              size="small"
-            >
+              size="small">
               <Radio.Button value="female">{t('image_studio.model.gender_female')}</Radio.Button>
               <Radio.Button value="male">{t('image_studio.model.gender_male')}</Radio.Button>
             </Radio.Group>
@@ -249,14 +253,12 @@ const ModelConfigPanel: FC = () => {
         <CheckboxGroup>
           <Checkbox
             checked={config.keepBackground}
-            onChange={(e) => dispatch(updateModelConfig({ keepBackground: e.target.checked }))}
-          >
+            onChange={(e) => dispatch(updateModelConfig({ keepBackground: e.target.checked }))}>
             {t('image_studio.model.keep_background')}
           </Checkbox>
           <Checkbox
             checked={config.showFullBody}
-            onChange={(e) => dispatch(updateModelConfig({ showFullBody: e.target.checked }))}
-          >
+            onChange={(e) => dispatch(updateModelConfig({ showFullBody: e.target.checked }))}>
             {t('image_studio.model.show_full_body')}
           </Checkbox>
         </CheckboxGroup>
@@ -269,16 +271,20 @@ const ModelConfigPanel: FC = () => {
             <Wand2 size={16} />
             {t('image_studio.prompt.title')}
           </SectionTitle>
-          <PromptActions>
-            <ActionButton title={t('image_studio.prompt.optimize')}>
-              <Sparkles size={14} />
-            </ActionButton>
-          </PromptActions>
         </SectionHeader>
 
         <PromptEditor>
           <PromptSection>
-            <PromptLabel>{t('image_studio.model.style_desc')}</PromptLabel>
+            <PromptLabelRow>
+              <PromptLabel>{t('image_studio.model.style_desc')}</PromptLabel>
+              <PromptEnhancer
+                value={config.styleDescription || ''}
+                module="model"
+                mode="style"
+                moduleConfig={config}
+                onApply={(enhanced) => dispatch(updateModelConfig({ styleDescription: enhanced }))}
+              />
+            </PromptLabelRow>
             <Input.TextArea
               value={config.styleDescription || ''}
               onChange={(e) => dispatch(updateModelConfig({ styleDescription: e.target.value }))}
@@ -351,13 +357,13 @@ export default ModelConfigPanel
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 `
 
 const Section = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 `
 
 const SectionHeader = styled.div`
@@ -518,26 +524,6 @@ const CheckboxGroup = styled.div`
   gap: 8px;
 `
 
-const PromptActions = styled.div`
-  display: flex;
-  gap: 4px;
-`
-
-const ActionButton = styled.button`
-  padding: 4px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-3);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-
-  &:hover {
-    color: var(--color-primary);
-    background: var(--color-primary-soft);
-  }
-`
-
 const PromptEditor = styled.div`
   display: flex;
   flex-direction: column;
@@ -551,6 +537,12 @@ const PromptSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
+`
+
+const PromptLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `
 
 const PromptLabel = styled.span`

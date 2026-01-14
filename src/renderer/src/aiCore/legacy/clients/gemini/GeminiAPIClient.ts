@@ -165,7 +165,29 @@ export class GeminiAPIClient extends BaseApiClient<
   }
 
   override getBaseURL(): string {
-    return withoutTrailingApiVersion(super.getBaseURL())
+    let baseUrl = super.getBaseURL()
+
+    // 先移除尾部的 API 版本号（如 /v1, /v2beta）
+    baseUrl = withoutTrailingApiVersion(baseUrl)
+
+    // 移除可能导致问题的路径后缀
+    // 某些代理服务可能需要配置为基础 URL，而不是带有路径的 URL
+    const problematicSuffixes = ['/models/google', '/models', '/v1beta', '/v1alpha']
+    for (const suffix of problematicSuffixes) {
+      if (baseUrl.endsWith(suffix)) {
+        const cleanedUrl = baseUrl.slice(0, -suffix.length)
+        logger.warn('Removed problematic suffix from baseUrl', {
+          original: baseUrl,
+          suffix,
+          cleaned: cleanedUrl,
+          provider: this.provider.name
+        })
+        baseUrl = cleanedUrl
+        break
+      }
+    }
+
+    return baseUrl
   }
 
   override async getSdkInstance() {

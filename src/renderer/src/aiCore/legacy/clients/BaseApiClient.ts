@@ -55,6 +55,7 @@ import { defaultAppHeaders } from '@shared/utils'
 import { isEmpty } from 'lodash'
 
 import type { CompletionsContext } from '../middleware/types'
+import { ApiKeyManager } from './ApiKeyManager'
 import type { ApiClient, RequestTransformer, ResponseChunkTransformer } from './types'
 
 const logger = loggerService.withContext('BaseApiClient')
@@ -76,10 +77,17 @@ export abstract class BaseApiClient<
   public provider: Provider
   protected host: string
   protected sdkInstance?: TSdkInstance
+  protected apiKeyManager: ApiKeyManager
+  /**
+   * Set of cache keys pending cleanup after successful request completion.
+   * This allows retries to still access cached data.
+   */
+  private pendingCacheCleanup: Set<string> = new Set()
 
   constructor(provider: Provider) {
     this.provider = provider
     this.host = this.getBaseURL()
+    this.apiKeyManager = new ApiKeyManager(provider.apiKey, provider.id)
   }
 
   /**
@@ -167,26 +175,50 @@ export abstract class BaseApiClient<
     return this.provider.apiHost
   }
 
-  public getApiKey() {
-    const keys = this.provider.apiKey.split(',').map((key) => key.trim())
-    const keyName = `provider:${this.provider.id}:last_used_key`
+  /**
+   * Get API key for the current request.
+   * Uses the cached key if available, ensuring consistency within a single request.
+   * @returns The API key to use
+   */
+  public getApiKey(): string {
+    return this.apiKeyManager.getCurrentRequestKey()
+  }
 
-    if (keys.length === 1) {
-      return keys[0]
+  /**
+   * Rotate to a new API key for a new request.
+   * Call this at the start of each new request to enable key rotation.
+   * @returns The new API key
+   */
+  public rotateApiKeyForNewRequest(): string {
+    return this.apiKeyManager.getKeyForNewRequest()
+  }
+
+  /**
+   * Clear the request-scoped API key cache.
+   * Call this at the end of a request to allow rotation on the next request.
+   */
+  public clearApiKeyRequestScope(): void {
+    this.apiKeyManager.clearRequestScope()
+  }
+
+  /**
+   * Execute pending cache cleanup after successful request completion.
+   * Call this at the end of a successful request to clean up cached data.
+   */
+  public executePendingCacheCleanup(): void {
+    for (const key of this.pendingCacheCleanup) {
+      window.keyv.remove(key)
+      logger.debug(`Cleaned up cache: ${key}`)
     }
+    this.pendingCacheCleanup.clear()
+  }
 
-    const lastUsedKey = window.keyv.get(keyName)
-    if (!lastUsedKey) {
-      window.keyv.set(keyName, keys[0])
-      return keys[0]
-    }
-
-    const currentIndex = keys.indexOf(lastUsedKey)
-    const nextIndex = (currentIndex + 1) % keys.length
-    const nextKey = keys[nextIndex]
-    window.keyv.set(keyName, nextKey)
-
-    return nextKey
+  /**
+   * Cancel pending cache cleanup (on error/retry).
+   * Call this when a request fails and might be retried.
+   */
+  public cancelPendingCacheCleanup(): void {
+    this.pendingCacheCleanup.clear()
   }
 
   public defaultHeaders() {
@@ -361,10 +393,13 @@ export abstract class BaseApiClient<
     if (isEmpty(content)) {
       return []
     }
-    const webSearch: WebSearchResponse = window.keyv.get(`web-search-${message.id}`)
+    const cacheKey = `web-search-${message.id}`
+    const webSearch: WebSearchResponse = window.keyv.get(cacheKey)
 
     if (webSearch) {
-      window.keyv.remove(`web-search-${message.id}`)
+      // Mark for deferred cleanup instead of immediate deletion
+      // This allows retries to still access the cached data
+      this.pendingCacheCleanup.add(cacheKey)
       return (webSearch.results as WebSearchProviderResponse).results.map(
         (result, index) =>
           ({
@@ -387,10 +422,12 @@ export abstract class BaseApiClient<
     if (isEmpty(content)) {
       return []
     }
-    const knowledgeReferences: KnowledgeReference[] = window.keyv.get(`knowledge-search-${message.id}`)
+    const cacheKey = `knowledge-search-${message.id}`
+    const knowledgeReferences: KnowledgeReference[] = window.keyv.get(cacheKey)
 
     if (!isEmpty(knowledgeReferences)) {
-      window.keyv.remove(`knowledge-search-${message.id}`)
+      // Mark for deferred cleanup instead of immediate deletion
+      this.pendingCacheCleanup.add(cacheKey)
       logger.debug(`Found ${knowledgeReferences.length} knowledge base references in cache for ID: ${message.id}`)
       return knowledgeReferences
     }

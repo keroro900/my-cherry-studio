@@ -37,25 +37,53 @@ export { type JewelryConfig, JewelryPromptBuilder, type JewelryPromptJson } from
 export { type FoodConfig, FoodPromptBuilder, type FoodPromptJson } from './FoodPromptBuilder'
 
 // 产品场景构建器
-export { type ProductSceneConfig, ProductScenePromptBuilder, type ProductScenePromptJson } from './ProductScenePromptBuilder'
+export {
+  type ProductSceneConfig,
+  ProductScenePromptBuilder,
+  type ProductScenePromptJson
+} from './ProductScenePromptBuilder'
 
 // 首饰试戴构建器
-export { type JewelryTryonConfig, JewelryTryonPromptBuilder, type JewelryTryonPromptJson } from './JewelryTryonPromptBuilder'
+export {
+  type JewelryTryonConfig,
+  JewelryTryonPromptBuilder,
+  type JewelryTryonPromptJson
+} from './JewelryTryonPromptBuilder'
 
 // 眼镜试戴构建器
-export { type EyewearTryonConfig, EyewearTryonPromptBuilder, type EyewearTryonPromptJson } from './EyewearTryonPromptBuilder'
+export {
+  type EyewearTryonConfig,
+  EyewearTryonPromptBuilder,
+  type EyewearTryonPromptJson
+} from './EyewearTryonPromptBuilder'
 
 // 鞋类展示构建器
-export { type FootwearDisplayConfig, FootwearDisplayPromptBuilder, type FootwearDisplayPromptJson } from './FootwearDisplayPromptBuilder'
+export {
+  type FootwearDisplayConfig,
+  FootwearDisplayPromptBuilder,
+  type FootwearDisplayPromptJson
+} from './FootwearDisplayPromptBuilder'
 
 // 美妆产品构建器
-export { type CosmeticsPhotoConfig, CosmeticsPhotoPromptBuilder, type CosmeticsPhotoPromptJson } from './CosmeticsPhotoPromptBuilder'
+export {
+  type CosmeticsPhotoConfig,
+  CosmeticsPhotoPromptBuilder,
+  type CosmeticsPhotoPromptJson
+} from './CosmeticsPhotoPromptBuilder'
 
 // 家具场景构建器
-export { type FurnitureSceneConfig, FurnitureScenePromptBuilder, type FurnitureScenePromptJson } from './FurnitureScenePromptBuilder'
+export {
+  type FurnitureSceneConfig,
+  FurnitureScenePromptBuilder,
+  type FurnitureScenePromptJson
+} from './FurnitureScenePromptBuilder'
 
 // 电子产品构建器
-export { type ElectronicsPhotoConfig, ElectronicsPhotoPromptBuilder, type ElectronicsPhotoPromptJson } from './ElectronicsPhotoPromptBuilder'
+export {
+  type ElectronicsPhotoConfig,
+  ElectronicsPhotoPromptBuilder,
+  type ElectronicsPhotoPromptJson
+} from './ElectronicsPhotoPromptBuilder'
 
 // Fashion 服装分析构建器
 export {

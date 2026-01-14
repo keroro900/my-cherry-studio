@@ -2,6 +2,11 @@
  * Image Studio 类型定义
  */
 
+// 导出新增的类型模块
+export * from './consistency'
+export * from './preset-market'
+export * from './task-decomposition'
+
 // ============================================================================
 // 模块类型
 // ============================================================================
@@ -69,6 +74,7 @@ export interface ImageOutputs {
   // 图案设计
   patternImage?: string
   graphicImage?: string
+  seamlessImage?: string
 }
 
 // ============================================================================
@@ -123,15 +129,22 @@ export interface EcomModuleConfig {
   // 服装描述
   garmentDescription?: string
 
+  // 提示词
+  systemPrompt?: string
+  negativePrompt?: string
+
   // 高级选项
   useSystemPrompt?: boolean
   professionalRetouch?: boolean
+  batchCount?: number
+  seed?: number
 }
 
 export interface ModelModuleConfig {
   // 模特设置
   ageGroup: 'small_kid' | 'big_kid' | 'adult'
   gender: 'female' | 'male'
+  ethnicity?: 'asian' | 'caucasian' | 'african' | 'mixed'
   ethnicityPreset?: string
 
   // 场景和姿态
@@ -142,6 +155,18 @@ export interface ModelModuleConfig {
   // 图片设置
   imageSize: '1K' | '2K' | '4K'
   aspectRatio: string
+
+  // 输出选项
+  keepBackground?: boolean
+  showFullBody?: boolean
+
+  // 提示词
+  styleDescription?: string
+  negativePrompt?: string
+
+  // 高级设置
+  batchCount?: number
+  seed?: number
 }
 
 export interface PatternModuleConfig {
@@ -157,6 +182,7 @@ export interface PatternModuleConfig {
   colorTone: 'auto' | 'bright' | 'soft' | 'dark' | 'high_contrast'
 
   // 风格预设
+  stylePreset?: string
   stylePresetId?: string
   stylePresetPrompt?: string
 
@@ -164,8 +190,15 @@ export interface PatternModuleConfig {
   imageSize: '1K' | '2K' | '4K'
   aspectRatio: string
 
-  // 批量
+  // 提示词
+  designPrompt?: string
+  colorPrompt?: string
+  negativePrompt?: string
+
+  // 高级设置
   batchSize: number
+  tileScale?: number
+  seed?: number
 }
 
 // ============================================================================

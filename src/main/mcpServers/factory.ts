@@ -3,15 +3,21 @@ import type { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import type { BuiltinMCPServerName } from '@types'
 import { BuiltinMCPServerNames } from '@types'
 
+import AgentCollabServer from './agent-collab'
 import BraveSearchServer from './brave-search'
 import BrowserServer from './browser'
+import DiaryServer from './diary-server'
 import DiDiMcpServer from './didi-mcp'
+import NowledgeMemServer from './nowledge-mem'
 import DifyKnowledgeServer from './dify-knowledge'
+import FashionServer from './fashion'
+import FashionScraperServer from './fashion-scraper'
 import FetchServer from './fetch'
 import FileSystemServer from './filesystem'
 import MemoryServer from './memory'
 import PythonServer from './python'
 import ThinkingServer from './sequentialthinking'
+import VCPRAGServer from './vcp-rag'
 import WorkflowServer from './workflow'
 
 const logger = loggerService.withContext('MCPFactory')
@@ -55,6 +61,24 @@ export function createInMemoryMCPServer(
     }
     case BuiltinMCPServerNames.workflow: {
       return new WorkflowServer().server
+    }
+    case BuiltinMCPServerNames.fashion: {
+      return new FashionServer().server
+    }
+    case BuiltinMCPServerNames.vcpRag: {
+      return new VCPRAGServer().server
+    }
+    case BuiltinMCPServerNames.fashionScraper: {
+      return new FashionScraperServer().server
+    }
+    case BuiltinMCPServerNames.agentCollab: {
+      return new AgentCollabServer().server
+    }
+    case BuiltinMCPServerNames.diary: {
+      return new DiaryServer().server
+    }
+    case BuiltinMCPServerNames.nowledgeMem: {
+      return new NowledgeMemServer().server
     }
     default:
       throw new Error(`Unknown in-memory MCP server: ${name}`)

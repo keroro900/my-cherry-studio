@@ -208,7 +208,13 @@ export const FootwearDisplayNode: NodeDefinition = {
     imageInputCount: 3,
     imageInputPorts: [
       { id: 'image_1', label: '鞋类产品', dataType: 'image', required: true, description: '鞋类产品图片' },
-      { id: 'image_2', label: '模特照片', dataType: 'image', required: false, description: '模特全身/脚部照片（模特穿鞋模式必需）' },
+      {
+        id: 'image_2',
+        label: '模特照片',
+        dataType: 'image',
+        required: false,
+        description: '模特全身/脚部照片（模特穿鞋模式必需）'
+      },
       { id: 'image_3', label: '场景参考', dataType: 'image', required: false, description: '可选的场景或风格参考图' }
     ]
   },

@@ -254,13 +254,17 @@ export class HttpRequestExecutor extends BaseNodeExecutor {
     }
 
     try {
-      const response = await fetch(url, {
+      const fetchOptions: RequestInit = {
         method: config.method,
         headers,
-        body,
         redirect: config.followRedirects ? 'follow' : 'manual',
         signal: controller.signal
-      })
+      }
+      // Only include body for non-GET methods
+      if (body !== undefined && config.method !== 'GET') {
+        fetchOptions.body = body
+      }
+      const response = await fetch(url, fetchOptions)
 
       return response
     } finally {

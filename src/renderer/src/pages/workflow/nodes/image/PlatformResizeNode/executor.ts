@@ -7,7 +7,7 @@
 
 import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
 import type { NodeExecutionContext, NodeExecutionResult } from '../../base/types'
-import { PLATFORM_SPECS,type PlatformResizeConfig, type PlatformResizeOutput } from './types'
+import { PLATFORM_SPECS, type PlatformResizeConfig, type PlatformResizeOutput } from './types'
 
 export class PlatformResizeExecutor extends BaseNodeExecutor {
   constructor() {
@@ -39,7 +39,8 @@ export class PlatformResizeExecutor extends BaseNodeExecutor {
       })
 
       // 2. 确定目标平台列表
-      const targetPlatforms = config.batchMode && config.batchPlatforms?.length ? config.batchPlatforms : [config.targetPlatform]
+      const targetPlatforms =
+        config.batchMode && config.batchPlatforms?.length ? config.batchPlatforms : [config.targetPlatform]
 
       // 3. 处理每个目标平台
       const results: PlatformResizeOutput[] = []
@@ -174,7 +175,8 @@ export class PlatformResizeExecutor extends BaseNodeExecutor {
           ctx.drawImage(img, x, y, width, height)
 
           // 输出
-          const mimeType = options.outputFormat === 'png' ? 'image/png' : options.outputFormat === 'webp' ? 'image/webp' : 'image/jpeg'
+          const mimeType =
+            options.outputFormat === 'png' ? 'image/png' : options.outputFormat === 'webp' ? 'image/webp' : 'image/jpeg'
           const quality = options.quality / 100
           resolve(canvas.toDataURL(mimeType, quality))
         } catch (e) {

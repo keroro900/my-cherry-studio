@@ -79,3 +79,14 @@ export const removeEnvProxy = (env: Record<string, string>) => {
   delete env.http_proxy
   delete env.https_proxy
 }
+
+// 时间表达式解析器
+export {
+  TimeExpressionParser,
+  getTimeExpressionParser,
+  parseTimeExpressions,
+  hasTimeExpression,
+  chineseToNumber,
+  type TimeRange,
+  type SupportedLocale
+} from './TimeExpressionParser'

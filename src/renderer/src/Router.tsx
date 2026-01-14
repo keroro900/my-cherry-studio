@@ -9,9 +9,11 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import TabsContainer from './components/Tab/TabContainer'
 import NavigationHandler from './handler/NavigationHandler'
 import { useNavbarPosition } from './hooks/useSettings'
+import CanvasPage from './pages/canvas/CanvasPage'
 import CodeToolsPage from './pages/code/CodeToolsPage'
 import FilesPage from './pages/files/FilesPage'
 import HomePage from './pages/home/HomePage'
+import ImageStudioPage from './pages/image-studio/ImageStudioPage'
 import KnowledgePage from './pages/knowledge/KnowledgePage'
 import LaunchpadPage from './pages/launchpad/LaunchpadPage'
 import MinAppPage from './pages/minapps/MinAppPage'
@@ -21,8 +23,8 @@ import PaintingsRoutePage from './pages/paintings/PaintingsRoutePage'
 import SettingsPage from './pages/settings/SettingsPage'
 import AssistantPresetsPage from './pages/store/assistants/presets/AssistantPresetsPage'
 import TranslatePage from './pages/translate/TranslatePage'
+import VCPDashboard from './pages/vcp/VCPDashboard'
 import WorkflowPage from './pages/workflow/WorkflowPage'
-import ImageStudioPage from './pages/image-studio/ImageStudioPage'
 
 const Router: FC = () => {
   const { navbarPosition } = useNavbarPosition()
@@ -42,7 +44,9 @@ const Router: FC = () => {
           <Route path="/apps" element={<MinAppsPage />} />
           <Route path="/code" element={<CodeToolsPage />} />
           <Route path="/workflow" element={<WorkflowPage />} />
+          <Route path="/canvas" element={<CanvasPage />} />
           <Route path="/image-studio" element={<ImageStudioPage />} />
+          <Route path="/vcp/*" element={<VCPDashboard />} />
           <Route path="/settings/*" element={<SettingsPage />} />
           <Route path="/launchpad" element={<LaunchpadPage />} />
         </Routes>

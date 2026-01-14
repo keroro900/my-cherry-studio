@@ -1,3 +1,14 @@
+/**
+ * VCP 统一协议工具显示组件
+ *
+ * 虽然文件名包含 "Mcp"，但该组件是 VCP 统一协议的一部分：
+ * - 所有工具（MCP/VCP/内置）都通过 VCP 协议格式调用
+ * - MCP 服务器的工具会自动转换为 VCP 格式
+ * - 执行使用 VCPToolExecutorMiddleware 统一处理
+ *
+ * @see src/renderer/src/aiCore/legacy/middleware/VCPToolExecutorMiddleware.ts
+ * @see src/main/knowledge/vcp/MCPOBridge.ts
+ */
 import { loggerService } from '@logger'
 import { CopyIcon, LoadingIcon } from '@renderer/components/Icons'
 import { useCodeStyle } from '@renderer/context/CodeStyleProvider'

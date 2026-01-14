@@ -2,7 +2,19 @@ import App from '@renderer/components/MinApp/MinApp'
 import { useMinapps } from '@renderer/hooks/useMinapps'
 import { useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
-import { Camera, Code, FileSearch, Folder, GitBranch, Languages, LayoutGrid, NotepadText, Palette, Sparkle } from 'lucide-react'
+import {
+  Camera,
+  Code,
+  FileEdit,
+  FileSearch,
+  Folder,
+  GitBranch,
+  Languages,
+  LayoutGrid,
+  NotepadText,
+  Palette,
+  Sparkle
+} from 'lucide-react'
 import type { FC } from 'react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -76,6 +88,12 @@ const LaunchpadPage: FC = () => {
       text: t('title.image_studio'),
       path: '/image-studio',
       bgColor: 'linear-gradient(135deg, #F472B6, #EC4899)' // 图片工坊：粉色渐变，代表创意和图像
+    },
+    {
+      icon: <FileEdit size={32} className="icon" />,
+      text: t('title.canvas'),
+      path: '/canvas',
+      bgColor: 'linear-gradient(135deg, #14B8A6, #2DD4BF)' // Canvas：青绿色，代表协作和编辑
     }
   ]
 

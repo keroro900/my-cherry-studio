@@ -68,7 +68,8 @@ export {
   resolveLayoutMode,
   // 解析函数
   resolveLightingMode,
-  resolvePlatformStyle} from './ecom'
+  resolvePlatformStyle
+} from './ecom'
 
 // ==================== 模特预设 ====================
 export {

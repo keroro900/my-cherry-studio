@@ -141,7 +141,7 @@ export class JsonTransformExecutor extends BaseNodeExecutor {
   private extractPath(data: any, path: string): any {
     if (!path) return data
 
-    const parts = path.split(/[.\[\]]/).filter(Boolean)
+    const parts = path.split(/[.[\]]/).filter(Boolean)
     let result = data
 
     for (const part of parts) {

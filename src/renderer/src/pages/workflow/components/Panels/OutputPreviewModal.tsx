@@ -6,7 +6,7 @@
 import { CopyOutlined, FileTextOutlined } from '@ant-design/icons'
 import CodeEditor from '@renderer/components/CodeEditor'
 import { TopView } from '@renderer/components/TopView'
-import { message,Modal } from 'antd'
+import { message, Modal } from 'antd'
 import { memo, useState } from 'react'
 import styled from 'styled-components'
 
@@ -137,10 +137,8 @@ const TypeBadge = styled.span<{ $type: string }>`
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
-  background: ${({ $type }) =>
-    $type === 'json' ? 'var(--ant-color-warning-bg)' : 'var(--ant-color-info-bg)'};
-  color: ${({ $type }) =>
-    $type === 'json' ? 'var(--ant-color-warning)' : 'var(--ant-color-info)'};
+  background: ${({ $type }) => ($type === 'json' ? 'var(--ant-color-warning-bg)' : 'var(--ant-color-info-bg)')};
+  color: ${({ $type }) => ($type === 'json' ? 'var(--ant-color-warning)' : 'var(--ant-color-info)')};
 `
 
 // ==================== 主组件 ====================

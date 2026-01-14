@@ -1,10 +1,12 @@
 import EmojiIcon from '@renderer/components/EmojiIcon'
+import { FlowLockIndicator } from '@renderer/components/FlowLock'
 import HorizontalScrollContainer from '@renderer/components/HorizontalScrollContainer'
 import { useActiveAgent } from '@renderer/hooks/agents/useActiveAgent'
 import { useActiveSession } from '@renderer/hooks/agents/useActiveSession'
 import { useUpdateSession } from '@renderer/hooks/agents/useUpdateSession'
 import { useRuntime } from '@renderer/hooks/useRuntime'
 import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
+import { useAppSelector } from '@renderer/store'
 import type { AgentEntity, AgentSessionEntity, ApiModel, Assistant } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
 import { formatErrorMessageWithPrefix } from '@renderer/utils/error'
@@ -31,6 +33,10 @@ const ChatNavbarContent: FC<Props> = ({ assistant }) => {
   const { agent: activeAgent } = useActiveAgent()
   const { session: activeSession } = useActiveSession()
   const { updateModel } = useUpdateSession(activeAgent?.id ?? null)
+
+  // 获取当前话题 ID 用于 FlowLock
+  const activeTopic = useAppSelector((state) => state.runtime.chat.activeTopic)
+  const topicId = activeTopic?.id || ''
 
   const assistantName = useMemo(() => assistant.name || t('chat.default.name'), [assistant.name])
 
@@ -60,6 +66,14 @@ const ChatNavbarContent: FC<Props> = ({ assistant }) => {
 
             {/* Model Button */}
             <SelectModelButton assistant={assistant} />
+
+            {/* FlowLock Indicator */}
+            {topicId && (
+              <>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <FlowLockIndicator sessionId={topicId} />
+              </>
+            )}
           </div>
         </HorizontalScrollContainer>
       )}

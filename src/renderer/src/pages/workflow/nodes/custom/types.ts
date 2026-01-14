@@ -9,7 +9,7 @@
  * - 节点模板和分享
  */
 
-import type { PortDataType, PortDefinition } from '../base/types'
+import type { PortDataType } from '../base/types'
 
 /**
  * 自定义节点端口配置
@@ -198,9 +198,7 @@ return result;`,
       description: '从 JSON 数据中提取指定字段',
       category: 'custom',
       version: '1.0.0',
-      inputs: [
-        { id: 'data', label: '输入数据', dataType: 'json', required: true }
-      ],
+      inputs: [{ id: 'data', label: '输入数据', dataType: 'json', required: true }],
       outputs: [
         { id: 'value', label: '提取值', dataType: 'any' },
         { id: 'found', label: '是否找到', dataType: 'boolean' }
@@ -387,16 +385,12 @@ return items;`,
       description: '暂停执行指定时间',
       category: 'custom',
       version: '1.0.0',
-      inputs: [
-        { id: 'input', label: '输入', dataType: 'any' }
-      ],
+      inputs: [{ id: 'input', label: '输入', dataType: 'any' }],
       outputs: [
         { id: 'output', label: '输出', dataType: 'any' },
         { id: 'duration', label: '实际延迟', dataType: 'number' }
       ],
-      configFields: [
-        { key: 'delayMs', label: '延迟时间 (ms)', type: 'number', default: 1000, min: 0, max: 60000 }
-      ],
+      configFields: [{ key: 'delayMs', label: '延迟时间 (ms)', type: 'number', default: 1000, min: 0, max: 60000 }],
       defaultConfig: { delayMs: 1000 },
       code: `// 延迟执行
 const delayMs = config.delayMs || 1000;
@@ -484,12 +478,8 @@ export function createDefaultCustomNodeDefinition(): CustomNodeDefinition {
     description: '自定义节点',
     category: 'custom',
     version: '1.0.0',
-    inputs: [
-      { id: 'input', label: '输入', dataType: 'any', required: true }
-    ],
-    outputs: [
-      { id: 'output', label: '输出', dataType: 'any' }
-    ],
+    inputs: [{ id: 'input', label: '输入', dataType: 'any', required: true }],
+    outputs: [{ id: 'output', label: '输出', dataType: 'any' }],
     configFields: [],
     defaultConfig: {},
     code: `// 自定义节点代码

@@ -5,13 +5,14 @@
  * 从知识库检索服装趋势和设计参考
  */
 
-import store from '@renderer/store'
 import { searchKnowledgeBase } from '@renderer/services/KnowledgeService'
-import { WorkflowAiService } from '../../../services/WorkflowAiService'
-import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
-import type { NodeExecutionContext, NodeExecutionResult } from '../../../types/core'
+import store from '@renderer/store'
+
 import { GarmentAnalysisPromptBuilder } from '../../../prompts/builders/GarmentAnalysisPromptBuilder'
 import { extractAndParseJson } from '../../../prompts/utils/jsonExtractor'
+import { WorkflowAiService } from '../../../services/WorkflowAiService'
+import type { NodeExecutionContext, NodeExecutionResult } from '../../../types/core'
+import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
 
 /**
  * 知识库检索节点配置

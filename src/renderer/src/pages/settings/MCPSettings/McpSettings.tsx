@@ -817,7 +817,7 @@ const McpSettings: React.FC = () => {
         width={720}
         centered
         transitionName="animation-move-down"
-        bodyStyle={{ maxHeight: '70vh', minHeight: '40vh', overflowY: 'auto' }}
+        styles={{ body: { maxHeight: '70vh', minHeight: '40vh', overflowY: 'auto' } }}
         afterOpenChange={(open) => {
           if (open) {
             fetchServerLogs()

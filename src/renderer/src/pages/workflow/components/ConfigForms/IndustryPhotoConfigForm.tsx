@@ -73,8 +73,18 @@ import type { PresetItem } from './PresetGalleryModal'
 
 const JEWELRY_TYPE_PRESETS: PresetItem[] = [
   { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别珠宝类型', category: 'artistic' as PresetCategory },
-  { id: 'ring', label: '戒指', description: '各类戒指，包括订婚戒、结婚戒、时尚戒指', category: 'artistic' as PresetCategory },
-  { id: 'necklace', label: '项链', description: '吊坠项链、链条项链、珍珠项链等', category: 'artistic' as PresetCategory },
+  {
+    id: 'ring',
+    label: '戒指',
+    description: '各类戒指，包括订婚戒、结婚戒、时尚戒指',
+    category: 'artistic' as PresetCategory
+  },
+  {
+    id: 'necklace',
+    label: '项链',
+    description: '吊坠项链、链条项链、珍珠项链等',
+    category: 'artistic' as PresetCategory
+  },
   { id: 'earring', label: '耳环', description: '耳钉、耳环、耳坠等各类耳饰', category: 'artistic' as PresetCategory },
   { id: 'bracelet', label: '手链', description: '手链、手镯、charm 手链等', category: 'artistic' as PresetCategory },
   { id: 'watch', label: '手表', description: '奢华腕表、时尚手表', category: 'artistic' as PresetCategory },
@@ -112,22 +122,52 @@ const STONE_TYPE_PRESETS: PresetItem[] = [
 ]
 
 const LIGHTING_SETUP_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳打光方式', category: 'commercial' as PresetCategory },
-  { id: 'soft_box', label: '柔光箱', description: '专业柔光箱，均匀照明，减少反光', category: 'commercial' as PresetCategory },
-  { id: 'ring_light', label: '环形灯', description: '环形灯，对称照明，无死角', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳打光方式',
+    category: 'commercial' as PresetCategory
+  },
+  {
+    id: 'soft_box',
+    label: '柔光箱',
+    description: '专业柔光箱，均匀照明，减少反光',
+    category: 'commercial' as PresetCategory
+  },
+  {
+    id: 'ring_light',
+    label: '环形灯',
+    description: '环形灯，对称照明，无死角',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'natural', label: '自然光', description: '窗户自然光，温暖柔和氛围', category: 'lifestyle' as PresetCategory },
-  { id: 'dramatic', label: '戏剧光', description: '强对比戏剧性光线，突出质感', category: 'artistic' as PresetCategory },
+  {
+    id: 'dramatic',
+    label: '戏剧光',
+    description: '强对比戏剧性光线，突出质感',
+    category: 'artistic' as PresetCategory
+  },
   { id: 'backlit', label: '逆光', description: '背光效果，轮廓分明', category: 'artistic' as PresetCategory },
   { id: 'tent', label: '灯罩帐篷', description: '360°柔光帐篷，消除反射', category: 'commercial' as PresetCategory },
   { id: 'spotlight', label: '聚光灯', description: '聚焦照明，突出焦点', category: 'artistic' as PresetCategory }
 ]
 
 const BACKGROUND_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳背景', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳背景',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'white', label: '纯白', description: '干净的纯白背景，电商标准', category: 'commercial' as PresetCategory },
   { id: 'black', label: '纯黑', description: '高级感的黑色背景，奢华风', category: 'artistic' as PresetCategory },
   { id: 'gradient', label: '渐变', description: '柔和的渐变背景，层次丰富', category: 'pattern' as PresetCategory },
-  { id: 'lifestyle', label: '生活场景', description: '场景化背景展示，有氛围感', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'lifestyle',
+    label: '生活场景',
+    description: '场景化背景展示，有氛围感',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'velvet', label: '丝绒', description: '丝绒质感背景，奢华质感', category: 'artistic' as PresetCategory },
   { id: 'marble', label: '大理石', description: '大理石纹理背景，高端大气', category: 'artistic' as PresetCategory },
   { id: 'bokeh', label: '虚化光斑', description: '柔美的光斑虚化背景', category: 'artistic' as PresetCategory },
@@ -137,13 +177,23 @@ const BACKGROUND_STYLE_PRESETS: PresetItem[] = [
 // ==================== 食品摄影预设 ====================
 
 const FOOD_CATEGORY_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别食品类别', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别食品类别',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'beverage', label: '饮品', description: '咖啡、茶、果汁、鸡尾酒等', category: 'lifestyle' as PresetCategory },
   { id: 'dessert', label: '甜点', description: '蛋糕、冰淇淋、糕点、巧克力', category: 'lifestyle' as PresetCategory },
   { id: 'main_dish', label: '主菜', description: '正餐主菜、肉类、鱼类料理', category: 'lifestyle' as PresetCategory },
   { id: 'snack', label: '零食', description: '休闲零食小吃、薯片、坚果', category: 'lifestyle' as PresetCategory },
   { id: 'ingredient', label: '原料', description: '新鲜食材、蔬菜、水果原料', category: 'lifestyle' as PresetCategory },
-  { id: 'breakfast', label: '早餐', description: '早餐食品、面包、麦片、鸡蛋', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'breakfast',
+    label: '早餐',
+    description: '早餐食品、面包、麦片、鸡蛋',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'salad', label: '沙拉', description: '健康沙拉、轻食料理', category: 'lifestyle' as PresetCategory },
   { id: 'soup', label: '汤品', description: '各类汤品、炖品', category: 'lifestyle' as PresetCategory },
   { id: 'seafood', label: '海鲜', description: '海鲜料理、刺身、寿司', category: 'lifestyle' as PresetCategory },
@@ -153,32 +203,62 @@ const FOOD_CATEGORY_PRESETS: PresetItem[] = [
 ]
 
 const FOOD_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据食物类型自动选择最佳风格', category: 'commercial' as PresetCategory },
-  { id: 'minimalist', label: '极简', description: '简约干净的风格，突出食物本身', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据食物类型自动选择最佳风格',
+    category: 'commercial' as PresetCategory
+  },
+  {
+    id: 'minimalist',
+    label: '极简',
+    description: '简约干净的风格，突出食物本身',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'rustic', label: '乡村', description: '温暖的乡村风格，质朴自然', category: 'lifestyle' as PresetCategory },
   { id: 'modern', label: '现代', description: '时尚现代的呈现，几何构图', category: 'commercial' as PresetCategory },
   { id: 'traditional', label: '传统', description: '经典传统的风格，怀旧感', category: 'lifestyle' as PresetCategory },
   { id: 'nordic', label: '北欧', description: '北欧简约风格，清新自然', category: 'lifestyle' as PresetCategory },
   { id: 'asian_style', label: '东方', description: '东方美学风格，意境深远', category: 'artistic' as PresetCategory },
-  { id: 'mediterranean', label: '地中海', description: '地中海风格，阳光海岸感', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'mediterranean',
+    label: '地中海',
+    description: '地中海风格，阳光海岸感',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'dark_mood', label: '暗调', description: '暗调摄影风格，戏剧性强', category: 'artistic' as PresetCategory },
   { id: 'bright_airy', label: '明亮通透', description: '明亮通透风格，清新感', category: 'lifestyle' as PresetCategory }
 ]
 
 const FOOD_MOOD_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据食物自动选择最佳氛围', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据食物自动选择最佳氛围',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'warm', label: '温暖', description: '温馨舒适的氛围，暖色调', category: 'lifestyle' as PresetCategory },
   { id: 'fresh', label: '清新', description: '清爽新鲜的感觉，绿色系', category: 'lifestyle' as PresetCategory },
   { id: 'cozy', label: '舒适', description: '放松惬意的氛围，居家感', category: 'lifestyle' as PresetCategory },
   { id: 'elegant', label: '优雅', description: '精致高雅的格调，餐厅级别', category: 'artistic' as PresetCategory },
-  { id: 'appetizing', label: '诱人', description: '勾起食欲的感觉，色彩鲜艳', category: 'commercial' as PresetCategory },
+  {
+    id: 'appetizing',
+    label: '诱人',
+    description: '勾起食欲的感觉，色彩鲜艳',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'healthy', label: '健康', description: '健康活力的感觉，清淡系', category: 'lifestyle' as PresetCategory },
   { id: 'indulgent', label: '奢享', description: '奢华享受的感觉，高热量', category: 'artistic' as PresetCategory },
   { id: 'festive', label: '节日', description: '节日庆祝的氛围，喜庆感', category: 'lifestyle' as PresetCategory }
 ]
 
 const FOOD_BACKGROUND_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据食物自动选择最佳背景', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据食物自动选择最佳背景',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'white', label: '纯白', description: '干净的白色背景，电商标准', category: 'commercial' as PresetCategory },
   { id: 'wood', label: '木质', description: '温暖的木质纹理，自然感', category: 'lifestyle' as PresetCategory },
   { id: 'marble', label: '大理石', description: '高级大理石台面，精致感', category: 'artistic' as PresetCategory },
@@ -194,7 +274,12 @@ const FOOD_BACKGROUND_PRESETS: PresetItem[] = [
 // ==================== 产品场景预设 ====================
 
 const SCENE_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳场景', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳场景',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'studio', label: '摄影棚', description: '专业摄影棚环境，可控照明', category: 'commercial' as PresetCategory },
   { id: 'outdoor', label: '户外', description: '自然户外场景，阳光草地', category: 'scene' as PresetCategory },
   { id: 'lifestyle', label: '生活场景', description: '日常生活场景，真实感', category: 'lifestyle' as PresetCategory },
@@ -211,12 +296,22 @@ const SCENE_TYPE_PRESETS: PresetItem[] = [
 ]
 
 const LIGHTING_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳光线', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳光线',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'natural', label: '自然光', description: '柔和的自然光线，最真实', category: 'lifestyle' as PresetCategory },
   { id: 'studio', label: '棚拍光', description: '专业摄影棚灯光，可控性强', category: 'commercial' as PresetCategory },
   { id: 'dramatic', label: '戏剧光', description: '强对比戏剧效果，有冲击力', category: 'artistic' as PresetCategory },
   { id: 'soft', label: '柔和光', description: '温柔柔和的光线，无阴影', category: 'lifestyle' as PresetCategory },
-  { id: 'golden_hour', label: '黄金时刻', description: '日落黄金光线，温暖浪漫', category: 'artistic' as PresetCategory },
+  {
+    id: 'golden_hour',
+    label: '黄金时刻',
+    description: '日落黄金光线，温暖浪漫',
+    category: 'artistic' as PresetCategory
+  },
   { id: 'blue_hour', label: '蓝调时刻', description: '日出前/日落后蓝调光', category: 'artistic' as PresetCategory },
   { id: 'rim_light', label: '轮廓光', description: '边缘轮廓光，突出形状', category: 'commercial' as PresetCategory },
   { id: 'high_key', label: '高调光', description: '高亮度低对比，明亮感', category: 'commercial' as PresetCategory },
@@ -224,7 +319,12 @@ const LIGHTING_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const MOOD_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳氛围', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳氛围',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'professional', label: '专业', description: '商业专业风格，信任感', category: 'commercial' as PresetCategory },
   { id: 'warm', label: '温暖', description: '温馨舒适的感觉，亲和力', category: 'lifestyle' as PresetCategory },
   { id: 'cool', label: '冷调', description: '冷静现代的氛围，科技感', category: 'commercial' as PresetCategory },
@@ -236,7 +336,12 @@ const MOOD_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const PRODUCT_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别产品类型', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别产品类型',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'general', label: '通用产品', description: '各类通用产品，标准展示', category: 'commercial' as PresetCategory },
   { id: 'fashion', label: '时尚服饰', description: '服装配饰类，模特展示', category: 'model' as PresetCategory },
   { id: 'electronics', label: '电子产品', description: '数码电子类，科技感', category: 'commercial' as PresetCategory },
@@ -245,7 +350,12 @@ const PRODUCT_TYPE_PRESETS: PresetItem[] = [
   { id: 'food', label: '食品饮料', description: '食品饮料类，诱人感', category: 'lifestyle' as PresetCategory },
   { id: 'sports', label: '运动健身', description: '运动器材类，动感', category: 'artistic' as PresetCategory },
   { id: 'toys', label: '玩具母婴', description: '玩具母婴类，童趣感', category: 'lifestyle' as PresetCategory },
-  { id: 'automotive', label: '汽车配件', description: '汽车相关产品，工业感', category: 'commercial' as PresetCategory },
+  {
+    id: 'automotive',
+    label: '汽车配件',
+    description: '汽车相关产品，工业感',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'pet', label: '宠物用品', description: '宠物相关产品，可爱感', category: 'lifestyle' as PresetCategory }
 ]
 
@@ -283,13 +393,23 @@ const TRYON_BLEND_MODE_PRESETS: PresetItem[] = [
 // ==================== 眼镜试戴预设 ====================
 
 const EYEWEAR_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别眼镜类型', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别眼镜类型',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'glasses', label: '眼镜', description: '日常配镜眼镜，清晰透明镜片', category: 'lifestyle' as PresetCategory },
   { id: 'sunglasses', label: '太阳镜', description: '时尚太阳镜，防晒遮阳', category: 'artistic' as PresetCategory },
   { id: 'goggles', label: '护目镜', description: '运动护目镜，保护眼睛', category: 'commercial' as PresetCategory },
   { id: 'sports', label: '运动眼镜', description: '运动专用眼镜，防滑设计', category: 'commercial' as PresetCategory },
   { id: 'reading', label: '老花镜', description: '阅读用老花镜，舒适设计', category: 'lifestyle' as PresetCategory },
-  { id: 'blue_light', label: '防蓝光', description: '防蓝光护眼镜，电脑专用', category: 'commercial' as PresetCategory },
+  {
+    id: 'blue_light',
+    label: '防蓝光',
+    description: '防蓝光护眼镜，电脑专用',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'fashion', label: '时尚眼镜', description: '潮流设计眼镜，装饰为主', category: 'artistic' as PresetCategory }
 ]
 
@@ -308,7 +428,12 @@ const FRAME_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const LENS_EFFECT_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别镜片效果', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别镜片效果',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'clear', label: '透明', description: '完全透明镜片，日常佩戴', category: 'lifestyle' as PresetCategory },
   { id: 'tinted', label: '染色', description: '均匀染色镜片，柔和遮光', category: 'artistic' as PresetCategory },
   { id: 'gradient', label: '渐变', description: '从上到下渐变色，时尚感', category: 'artistic' as PresetCategory },
@@ -321,7 +446,12 @@ const LENS_EFFECT_PRESETS: PresetItem[] = [
 // ==================== 鞋类展示预设 ====================
 
 const FOOTWEAR_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别鞋类类型', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别鞋类类型',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'sneakers', label: '运动鞋', description: '休闲运动风格，时尚舒适', category: 'lifestyle' as PresetCategory },
   { id: 'leather', label: '皮鞋', description: '正装皮鞋，商务精英', category: 'commercial' as PresetCategory },
   { id: 'boots', label: '靴子', description: '各类靴款，帅气有型', category: 'artistic' as PresetCategory },
@@ -329,11 +459,21 @@ const FOOTWEAR_TYPE_PRESETS: PresetItem[] = [
   { id: 'loafers', label: '乐福鞋', description: '休闲便鞋，轻松优雅', category: 'lifestyle' as PresetCategory },
   { id: 'heels', label: '高跟鞋', description: '女性高跟鞋，优雅性感', category: 'artistic' as PresetCategory },
   { id: 'flats', label: '平底鞋', description: '舒适平底鞋，日常百搭', category: 'lifestyle' as PresetCategory },
-  { id: 'athletic', label: '专业运动鞋', description: '专业运动装备，性能优先', category: 'commercial' as PresetCategory }
+  {
+    id: 'athletic',
+    label: '专业运动鞋',
+    description: '专业运动装备，性能优先',
+    category: 'commercial' as PresetCategory
+  }
 ]
 
 const DISPLAY_ANGLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳展示角度', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳展示角度',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'front', label: '正面', description: '正面展示，完整视角', category: 'commercial' as PresetCategory },
   { id: 'side', label: '侧面', description: '侧面轮廓，展示设计', category: 'artistic' as PresetCategory },
   { id: 'back', label: '背面', description: '背面展示，细节呈现', category: 'commercial' as PresetCategory },
@@ -344,7 +484,12 @@ const DISPLAY_ANGLE_PRESETS: PresetItem[] = [
 ]
 
 const MATERIAL_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别材质类型', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别材质类型',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'leather', label: '皮革', description: '真皮材质，质感高级', category: 'commercial' as PresetCategory },
   { id: 'canvas', label: '帆布', description: '帆布面料，休闲自然', category: 'lifestyle' as PresetCategory },
   { id: 'suede', label: '麂皮', description: '绒面质感，柔软舒适', category: 'artistic' as PresetCategory },
@@ -354,7 +499,12 @@ const MATERIAL_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const FOOTWEAR_BACKGROUND_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳背景', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳背景',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'white', label: '纯白', description: '纯白背景，干净专业', category: 'commercial' as PresetCategory },
   { id: 'gradient', label: '渐变', description: '柔和渐变，层次感强', category: 'artistic' as PresetCategory },
   { id: 'lifestyle', label: '生活', description: '生活场景，真实自然', category: 'lifestyle' as PresetCategory },
@@ -364,7 +514,12 @@ const FOOTWEAR_BACKGROUND_PRESETS: PresetItem[] = [
 ]
 
 const FOOTWEAR_LIGHTING_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳光线', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳光线',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'soft', label: '柔光', description: '柔和光线，自然舒适', category: 'lifestyle' as PresetCategory },
   { id: 'dramatic', label: '戏剧', description: '强烈对比，视觉冲击', category: 'artistic' as PresetCategory },
   { id: 'natural', label: '自然', description: '自然光照，真实呈现', category: 'lifestyle' as PresetCategory },
@@ -375,13 +530,28 @@ const FOOTWEAR_LIGHTING_PRESETS: PresetItem[] = [
 // ==================== 美妆产品预设 ====================
 
 const COSMETICS_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别美妆类型', category: 'lifestyle' as PresetCategory },
-  { id: 'skincare', label: '护肤品', description: '精华、面霜、乳液、爽肤水等', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别美妆类型',
+    category: 'lifestyle' as PresetCategory
+  },
+  {
+    id: 'skincare',
+    label: '护肤品',
+    description: '精华、面霜、乳液、爽肤水等',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'makeup', label: '彩妆', description: '口红、眼影、粉底、睫毛膏等', category: 'artistic' as PresetCategory },
   { id: 'perfume', label: '香水', description: '香水瓶、香氛产品', category: 'artistic' as PresetCategory },
   { id: 'haircare', label: '洗护', description: '洗发水、护发素、发膜等', category: 'lifestyle' as PresetCategory },
   { id: 'nail', label: '美甲', description: '指甲油、美甲产品', category: 'artistic' as PresetCategory },
-  { id: 'bodycare', label: '身体护理', description: '身体乳、沐浴露、磨砂膏等', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'bodycare',
+    label: '身体护理',
+    description: '身体乳、沐浴露、磨砂膏等',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'tools', label: '美容工具', description: '化妆刷、美容仪、化妆镜等', category: 'commercial' as PresetCategory }
 ]
 
@@ -396,7 +566,12 @@ const PRODUCT_TEXTURE_PRESETS: PresetItem[] = [
 ]
 
 const COSMETICS_DISPLAY_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳展示风格', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳展示风格',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'clean', label: '简洁', description: '干净简洁的展示风格', category: 'commercial' as PresetCategory },
   { id: 'luxury', label: '奢华', description: '高端奢华的呈现方式', category: 'artistic' as PresetCategory },
   { id: 'natural', label: '自然', description: '自然清新的风格', category: 'lifestyle' as PresetCategory },
@@ -406,7 +581,12 @@ const COSMETICS_DISPLAY_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const COSMETICS_BACKGROUND_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳背景', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳背景',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'white', label: '纯白', description: '干净纯白背景', category: 'commercial' as PresetCategory },
   { id: 'gradient', label: '渐变', description: '柔和渐变背景', category: 'artistic' as PresetCategory },
   { id: 'marble', label: '大理石', description: '大理石纹理背景', category: 'artistic' as PresetCategory },
@@ -416,7 +596,12 @@ const COSMETICS_BACKGROUND_PRESETS: PresetItem[] = [
 ]
 
 const COSMETICS_LIGHTING_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳光线', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳光线',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'soft', label: '柔光', description: '柔和均匀的照明', category: 'commercial' as PresetCategory },
   { id: 'bright', label: '明亮', description: '明亮清新的光线', category: 'lifestyle' as PresetCategory },
   { id: 'dramatic', label: '戏剧', description: '强对比戏剧性光线', category: 'artistic' as PresetCategory },
@@ -427,7 +612,12 @@ const COSMETICS_LIGHTING_PRESETS: PresetItem[] = [
 // ==================== 家具场景预设 ====================
 
 const FURNITURE_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别家具类型', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别家具类型',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'sofa', label: '沙发', description: '沙发、沙发床、懒人沙发等', category: 'lifestyle' as PresetCategory },
   { id: 'chair', label: '椅子', description: '餐椅、办公椅、休闲椅等', category: 'lifestyle' as PresetCategory },
   { id: 'table', label: '桌子', description: '餐桌、书桌、茶几等', category: 'lifestyle' as PresetCategory },
@@ -439,7 +629,12 @@ const FURNITURE_TYPE_PRESETS: PresetItem[] = [
 ]
 
 const FURNITURE_SCENE_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据家具自动选择最佳室内风格', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据家具自动选择最佳室内风格',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'modern', label: '现代', description: '简洁现代的设计风格', category: 'commercial' as PresetCategory },
   { id: 'minimalist', label: '极简', description: '极简主义，少即是多', category: 'commercial' as PresetCategory },
   { id: 'scandinavian', label: '北欧', description: '北欧风格，自然温馨', category: 'lifestyle' as PresetCategory },
@@ -450,7 +645,12 @@ const FURNITURE_SCENE_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const FURNITURE_ROOM_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据家具自动选择最佳房间类型', category: 'lifestyle' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据家具自动选择最佳房间类型',
+    category: 'lifestyle' as PresetCategory
+  },
   { id: 'living_room', label: '客厅', description: '客厅空间展示', category: 'lifestyle' as PresetCategory },
   { id: 'bedroom', label: '卧室', description: '卧室空间展示', category: 'lifestyle' as PresetCategory },
   { id: 'dining_room', label: '餐厅', description: '餐厅空间展示', category: 'lifestyle' as PresetCategory },
@@ -460,7 +660,12 @@ const FURNITURE_ROOM_TYPE_PRESETS: PresetItem[] = [
 ]
 
 const FURNITURE_LIGHTING_MOOD_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据家具自动选择最佳光线氛围', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据家具自动选择最佳光线氛围',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'bright', label: '明亮', description: '明亮通透的光线', category: 'commercial' as PresetCategory },
   { id: 'warm', label: '温暖', description: '温暖舒适的氛围', category: 'lifestyle' as PresetCategory },
   { id: 'dramatic', label: '戏剧', description: '戏剧性强烈对比', category: 'artistic' as PresetCategory },
@@ -470,7 +675,12 @@ const FURNITURE_LIGHTING_MOOD_PRESETS: PresetItem[] = [
 ]
 
 const FURNITURE_SPACE_SIZE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据家具自动选择最佳空间大小', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据家具自动选择最佳空间大小',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'compact', label: '紧凑', description: '小空间，紧凑布局', category: 'commercial' as PresetCategory },
   { id: 'medium', label: '中等', description: '中等空间，标准布局', category: 'lifestyle' as PresetCategory },
   { id: 'spacious', label: '宽敞', description: '宽敞空间，舒适布局', category: 'lifestyle' as PresetCategory },
@@ -480,7 +690,12 @@ const FURNITURE_SPACE_SIZE_PRESETS: PresetItem[] = [
 // ==================== 电子产品预设 ====================
 
 const ELECTRONICS_TYPE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别电子产品类型', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别电子产品类型',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'smartphone', label: '手机', description: '智能手机、移动设备', category: 'commercial' as PresetCategory },
   { id: 'laptop', label: '笔记本', description: '笔记本电脑、便携电脑', category: 'commercial' as PresetCategory },
   { id: 'tablet', label: '平板', description: '平板电脑、电子阅读器', category: 'commercial' as PresetCategory },
@@ -492,7 +707,12 @@ const ELECTRONICS_TYPE_PRESETS: PresetItem[] = [
 ]
 
 const ELECTRONICS_DISPLAY_STYLE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳展示风格', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳展示风格',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'minimal', label: '极简', description: '简洁干净的展示', category: 'commercial' as PresetCategory },
   { id: 'tech', label: '科技', description: '科技感未来感', category: 'artistic' as PresetCategory },
   { id: 'lifestyle', label: '生活', description: '生活场景展示', category: 'lifestyle' as PresetCategory },
@@ -502,7 +722,12 @@ const ELECTRONICS_DISPLAY_STYLE_PRESETS: PresetItem[] = [
 ]
 
 const ELECTRONICS_SURFACE_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据图片自动识别产品表面材质', category: 'artistic' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据图片自动识别产品表面材质',
+    category: 'artistic' as PresetCategory
+  },
   { id: 'glossy', label: '光泽', description: '高光亮泽表面', category: 'artistic' as PresetCategory },
   { id: 'matte', label: '哑光', description: '哑光防指纹表面', category: 'commercial' as PresetCategory },
   { id: 'metallic', label: '金属', description: '金属质感表面', category: 'artistic' as PresetCategory },
@@ -511,7 +736,12 @@ const ELECTRONICS_SURFACE_PRESETS: PresetItem[] = [
 ]
 
 const ELECTRONICS_LIGHTING_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳光线', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳光线',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'soft', label: '柔光', description: '柔和均匀光线', category: 'commercial' as PresetCategory },
   { id: 'dramatic', label: '戏剧', description: '高对比戏剧光线', category: 'artistic' as PresetCategory },
   { id: 'neon', label: '霓虹', description: 'RGB霓虹灯效果', category: 'artistic' as PresetCategory },
@@ -521,7 +751,12 @@ const ELECTRONICS_LIGHTING_PRESETS: PresetItem[] = [
 ]
 
 const ELECTRONICS_SCREEN_PRESETS: PresetItem[] = [
-  { id: 'auto', label: '🔍 自动检测', description: '根据产品自动选择最佳屏幕内容', category: 'commercial' as PresetCategory },
+  {
+    id: 'auto',
+    label: '🔍 自动检测',
+    description: '根据产品自动选择最佳屏幕内容',
+    category: 'commercial' as PresetCategory
+  },
   { id: 'blank', label: '空白', description: '干净空白屏幕', category: 'commercial' as PresetCategory },
   { id: 'ui_demo', label: 'UI展示', description: '用户界面演示', category: 'commercial' as PresetCategory },
   { id: 'app_showcase', label: '应用展示', description: '应用程序展示', category: 'lifestyle' as PresetCategory },
@@ -795,7 +1030,10 @@ function IndustryPhotoConfigForm({
 
       <FormSection title="✨ 动态效果">
         <FormRow label="蒸汽效果" description="为热食添加蒸汽效果">
-          <FormSwitch checked={config.enableSteam ?? false} onChange={(checked) => onUpdateConfig('enableSteam', checked)} />
+          <FormSwitch
+            checked={config.enableSteam ?? false}
+            onChange={(checked) => onUpdateConfig('enableSteam', checked)}
+          />
         </FormRow>
         <FormRow label="水珠效果" description="添加新鲜水珠/凝结效果">
           <FormSwitch

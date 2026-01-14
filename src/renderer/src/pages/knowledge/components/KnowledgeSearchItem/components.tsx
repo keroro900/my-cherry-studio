@@ -25,9 +25,13 @@ export const KnowledgeItemMetadata: React.FC<KnowledgeItemMetadataProps> = ({ it
     <MetadataContainer>
       <Text type="secondary">
         {t('knowledge.source')}:{' '}
-        <a href={sourceLink.href} target="_blank" rel="noreferrer">
-          {sourceLink.text}
-        </a>
+        {sourceLink.href ? (
+          <a href={sourceLink.href} target="_blank" rel="noreferrer">
+            {sourceLink.text}
+          </a>
+        ) : (
+          <span>{sourceLink.text}</span>
+        )}
       </Text>
       {item.score !== 0 && <ScoreTag>Score: {(item.score * 100).toFixed(1)}%</ScoreTag>}
     </MetadataContainer>

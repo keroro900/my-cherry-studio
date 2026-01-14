@@ -245,7 +245,8 @@ export function applyCompletionsMiddlewares<
       }
 
       const abortSignal = context._internal.flowControl?.abortSignal
-      const timeout = context._internal.customState?.sdkMetadata?.timeout
+      const sdkMetadata = context._internal.customState?.sdkMetadata as { timeout?: number } | undefined
+      const timeout = sdkMetadata?.timeout
 
       const methodCall = async (payload) => {
         return await originalCompletionsMethod.call(originalApiClientInstance, payload, {

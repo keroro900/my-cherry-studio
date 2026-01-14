@@ -70,7 +70,8 @@ function getModuleEnglishName(moduleType: AplusModuleType): string {
 function getStyleDescription(style: string): string {
   const styles: Record<string, string> = {
     professional: 'Professional, authoritative, fact-based. Use industry terminology and highlight specifications.',
-    emotional: 'Emotional, story-driven, connecting with customer feelings. Focus on benefits and lifestyle improvement.',
+    emotional:
+      'Emotional, story-driven, connecting with customer feelings. Focus on benefits and lifestyle improvement.',
     technical: 'Technical, detailed specifications. Appeal to informed buyers with precise data.',
     lifestyle: 'Lifestyle-oriented, aspirational. Paint pictures of how the product fits into daily life.',
     premium: 'Premium, luxurious tone. Emphasize exclusivity, craftsmanship, and superior quality.'
@@ -158,9 +159,7 @@ Universal Best Practices:
 export function buildSystemPrompt(config: AplusContentConfig): string {
   const { contentStyle, language, moduleTypes, platform = 'amazon' } = config
 
-  const moduleList = moduleTypes
-    .map((m) => `- ${getModuleEnglishName(m)} (${getModuleConstraints(m)})`)
-    .join('\n')
+  const moduleList = moduleTypes.map((m) => `- ${getModuleEnglishName(m)} (${getModuleConstraints(m)})`).join('\n')
 
   return `[Role: Elite E-commerce Content Strategist & Copywriter]
 You are a world-class e-commerce content specialist with 15+ years of experience creating high-converting product detail pages for Fortune 500 brands. Your expertise spans:

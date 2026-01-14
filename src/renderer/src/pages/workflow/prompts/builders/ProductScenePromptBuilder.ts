@@ -204,12 +204,9 @@ Return as JSON with fields: product_type, recommended_scenes, lighting_notes, in
 
   private getSceneTips(scene: string): string {
     const tips: Record<string, string> = {
-      studio:
-        'Clean, controlled environment. Seamless backgrounds. Perfect for highlighting product details.',
-      outdoor:
-        'Natural environments. Consider weather, time of day, and natural elements. Lifestyle appeal.',
-      lifestyle:
-        'Real-world context. Show product in use. Relatable and aspirational settings.',
+      studio: 'Clean, controlled environment. Seamless backgrounds. Perfect for highlighting product details.',
+      outdoor: 'Natural environments. Consider weather, time of day, and natural elements. Lifestyle appeal.',
+      lifestyle: 'Real-world context. Show product in use. Relatable and aspirational settings.',
       minimalist: 'Clean, simple backgrounds. Focus entirely on product. Modern aesthetic.',
       luxury: 'Premium materials and settings. High-end lifestyle. Exclusive feel.'
     }
@@ -218,10 +215,8 @@ Return as JSON with fields: product_type, recommended_scenes, lighting_notes, in
 
   private getLightingTips(lighting: string): string {
     const tips: Record<string, string> = {
-      natural:
-        'Soft, diffused daylight. Golden hour warmth. Window light with fill. Natural shadows.',
-      studio:
-        'Controlled multi-light setup. Key, fill, and rim lights. Precise shadow control.',
+      natural: 'Soft, diffused daylight. Golden hour warmth. Window light with fill. Natural shadows.',
+      studio: 'Controlled multi-light setup. Key, fill, and rim lights. Precise shadow control.',
       dramatic: 'Strong directional light. Deep shadows. High contrast. Bold and impactful.',
       soft: 'Heavily diffused light. Minimal shadows. Even illumination. Gentle gradients.'
     }
@@ -230,8 +225,7 @@ Return as JSON with fields: product_type, recommended_scenes, lighting_notes, in
 
   private getMoodTips(mood: string): string {
     const tips: Record<string, string> = {
-      professional:
-        'Clean, corporate feel. Neutral tones. Business-appropriate. Trustworthy appearance.',
+      professional: 'Clean, corporate feel. Neutral tones. Business-appropriate. Trustworthy appearance.',
       warm: 'Inviting and cozy. Warm color temperature. Comfortable and approachable.',
       cool: 'Modern and sleek. Cool tones. Technology-forward. Clean and precise.',
       vibrant: 'Bold and energetic. Saturated colors. Dynamic and eye-catching.'

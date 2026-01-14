@@ -261,12 +261,14 @@ class KlingService {
       ...params
     }
 
-    logger.info('提交图生视频任务:', {
-      model_name: requestBody.model_name,
-      mode: requestBody.mode,
-      duration: requestBody.duration,
-      hasPrompt: !!requestBody.prompt,
-      hasImage: !!requestBody.image
+    logger.info('提交图生视频任务', {
+      value: {
+        model_name: requestBody.model_name,
+        mode: requestBody.mode,
+        duration: requestBody.duration,
+        hasPrompt: !!requestBody.prompt,
+        hasImage: !!requestBody.image
+      }
     })
 
     const result = await this.request<TaskCreatedData>('/v1/videos/image2video', 'POST', requestBody)
@@ -275,7 +277,7 @@ class KlingService {
       throw new Error(result.message || '任务提交失败')
     }
 
-    logger.info('任务提交成功:', result.data.task_id)
+    logger.info('任务提交成功', { value: result.data.task_id })
     return result.data.task_id
   }
 
@@ -326,7 +328,7 @@ class KlingService {
           // 任务完成
           const videos = status.task_result?.videos || []
           const urls = videos.map((v) => v.url)
-          logger.info('视频生成完成:', urls)
+          logger.info('视频生成完成', { value: urls })
           onProgress?.('视频生成完成', 100)
           return urls
 

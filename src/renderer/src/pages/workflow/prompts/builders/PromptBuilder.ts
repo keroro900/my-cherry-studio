@@ -465,9 +465,7 @@ export abstract class PromptBuilder<
       fabric_texture: parsed.fabric_texture as string | undefined,
       structural_details: parsed.structural_details as string | undefined,
       recommended_background: parsed.recommended_background as string | undefined,
-      recommended_props: Array.isArray(parsed.recommended_props)
-        ? (parsed.recommended_props as string[])
-        : undefined,
+      recommended_props: Array.isArray(parsed.recommended_props) ? (parsed.recommended_props as string[]) : undefined,
       recommended_lighting: parsed.recommended_lighting as string | undefined,
       full_prompt: parsed.full_prompt as string | undefined
     }

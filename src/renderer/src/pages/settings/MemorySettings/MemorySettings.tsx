@@ -1,4 +1,4 @@
-import { ExclamationCircleOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { loggerService } from '@logger'
 import { DeleteIcon, EditIcon, LoadingIcon, RefreshIcon } from '@renderer/components/Icons'
 import { HStack } from '@renderer/components/Layout'
@@ -14,10 +14,20 @@ import {
   setGlobalMemoryEnabled
 } from '@renderer/store/memory'
 import type { MemoryItem } from '@types'
-import { Badge, Button, Dropdown, Empty, Flex, Form, Input, Modal, Pagination, Space, Spin, Switch } from 'antd'
+import { Badge, Button, Dropdown, Empty, Flex, Form, Input, Modal, Pagination, Space, Spin, Switch, Tag } from 'antd'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Brain, Calendar, MenuIcon, PlusIcon, Settings2, UserRound, UserRoundMinus, UserRoundPlus } from 'lucide-react'
+import {
+  Brain,
+  Calendar,
+  FlaskConical,
+  MenuIcon,
+  PlusIcon,
+  Settings2,
+  UserRound,
+  UserRoundMinus,
+  UserRoundPlus
+} from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -32,6 +42,8 @@ import {
   SettingRowTitle,
   SettingTitle
 } from '../index'
+import VectorSettings from '../VectorSettings/VectorSettings'
+import AdvancedMemorySettings from './AdvancedMemorySettings'
 import { DEFAULT_USER_ID } from './constants'
 import MemorySettingsModal from './MemorySettingsModal'
 import UserSelector from './UserSelector'
@@ -283,11 +295,29 @@ const MemorySettings = () => {
   const [addMemoryModalVisible, setAddMemoryModalVisible] = useState(false)
   const [editingMemory, setEditingMemory] = useState<MemoryItem | null>(null)
   const [addUserModalVisible, setAddUserModalVisible] = useState(false)
+  const [testModalVisible, setTestModalVisible] = useState(false)
+  const [testResults, setTestResults] = useState<Record<string, any> | null>(null)
+  const [testLoading, setTestLoading] = useState(false)
   const [form] = Form.useForm()
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
   const memoryService = MemoryService.getInstance()
+
+  // Test memory features
+  const handleTestFeatures = async () => {
+    setTestModalVisible(true)
+    setTestLoading(true)
+    try {
+      const results = await window.api.memory.testFeatures()
+      setTestResults(results)
+    } catch (error) {
+      logger.error('Failed to test memory features:', error as Error)
+      setTestResults({ error: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setTestLoading(false)
+    }
+  }
 
   // Utility functions
   const getUserDisplayName = (user: string) => {
@@ -543,11 +573,22 @@ const MemorySettings = () => {
 
   const memoryConfig = useSelector(selectMemoryConfig)
   const embeddingModel = useModel(memoryConfig.embeddingModel?.id, memoryConfig.embeddingModel?.provider)
+  const llmModel = useModel(memoryConfig.llmModel?.id, memoryConfig.llmModel?.provider)
 
   const handleGlobalMemoryToggle = async (enabled: boolean) => {
-    if (enabled && !embeddingModel) {
-      window.keyv.set('memory.wait.settings', true)
-      return setSettingsModalVisible(true)
+    if (enabled) {
+      // 验证嵌入模型已配置
+      if (!embeddingModel) {
+        window.toast.error({ title: t('memory.embedding_model_required'), key: 'memory-model-required' })
+        window.keyv.set('memory.wait.settings', true)
+        return setSettingsModalVisible(true)
+      }
+      // 验证 LLM 模型已配置且有效
+      if (!llmModel) {
+        window.toast.error({ title: t('memory.llm_model_required'), key: 'memory-model-required' })
+        window.keyv.set('memory.wait.settings', true)
+        return setSettingsModalVisible(true)
+      }
     }
 
     dispatch(setGlobalMemoryEnabled(enabled))
@@ -640,6 +681,12 @@ const MemorySettings = () => {
                     label: t('common.refresh'),
                     icon: <RefreshIcon size={14} />,
                     onClick: () => loadMemories(currentUser)
+                  },
+                  {
+                    key: 'test',
+                    label: t('memory.test_features') || 'Test Features',
+                    icon: <FlaskConical size={14} />,
+                    onClick: handleTestFeatures
                   },
                   {
                     key: 'divider-reset',
@@ -772,6 +819,12 @@ const MemorySettings = () => {
         </div>
       </SettingGroup>
 
+      {/* Advanced Memory (LightMemo / DeepMemo / MeshMemo) */}
+      <AdvancedMemorySettings theme={theme} />
+
+      {/* Vector Database Settings */}
+      <VectorSettings />
+
       {/* Modals */}
       <AddMemoryModal
         visible={addMemoryModalVisible}
@@ -799,6 +852,102 @@ const MemorySettings = () => {
         onCancel={handleSettingsCancel}
         form={form}
       />
+
+      {/* Memory Features Test Modal */}
+      <Modal
+        title={
+          <Flex align="center" gap={8}>
+            <FlaskConical size={16} color="var(--color-primary)" />
+            <span>{t('memory.test_features') || 'Test Memory Features'}</span>
+          </Flex>
+        }
+        open={testModalVisible}
+        onCancel={() => setTestModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setTestModalVisible(false)}>
+            {t('common.close')}
+          </Button>
+        ]}
+        width={600}
+        centered>
+        {testLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <Spin indicator={<LoadingIcon color="var(--color-text-2)" />} />
+            <div style={{ marginTop: 16, color: 'var(--color-text-secondary)' }}>
+              {t('memory.testing') || 'Testing features...'}
+            </div>
+          </div>
+        ) : testResults?.error ? (
+          <div style={{ color: 'var(--color-error)', padding: '20px', textAlign: 'center' }}>{testResults.error}</div>
+        ) : testResults ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>{testResults.timestamp}</div>
+
+            {/* Features Status */}
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 12 }}>{t('memory.native_modules') || 'Native Modules'}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {testResults.features &&
+                  Object.entries(testResults.features).map(([key, value]: [string, any]) => (
+                    <div
+                      key={key}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        background: 'var(--color-background-soft)',
+                        borderRadius: 8
+                      }}>
+                      <div>
+                        <div style={{ fontWeight: 500 }}>{key}</div>
+                        <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>{value.description}</div>
+                      </div>
+                      <Tag
+                        color={value.available ? 'success' : 'default'}
+                        icon={value.available ? <CheckCircleOutlined /> : <CloseCircleOutlined />}>
+                        {value.available ? 'Available' : 'Unavailable'}
+                      </Tag>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Test Results */}
+            {testResults.testResults && (
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 12 }}>{t('memory.test_results') || 'Test Results'}</div>
+                <div
+                  style={{
+                    padding: 12,
+                    background: 'var(--color-background-soft)',
+                    borderRadius: 8,
+                    fontSize: 13
+                  }}>
+                  {testResults.testResults.initialized ? (
+                    <>
+                      <div style={{ color: 'var(--color-success)', marginBottom: 8 }}>
+                        ✓ {t('memory.initialized_success') || 'Initialized successfully'}
+                      </div>
+                      <div>
+                        {t('memory.tag_count') || 'Tag count'}: {testResults.testResults.tagCount}
+                      </div>
+                      <div>
+                        {t('memory.extracted_tags') || 'Extracted tags'}:{' '}
+                        {testResults.testResults.extractedTags?.join(', ') || 'None'}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ color: 'var(--color-error)' }}>
+                      ✗ {testResults.testResults.error || 'Initialization failed'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </Modal>
     </SettingContainer>
   )
 }

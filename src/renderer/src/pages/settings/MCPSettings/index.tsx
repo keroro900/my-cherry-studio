@@ -11,8 +11,9 @@ import ListItem from '@renderer/components/ListItem'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useMCPServers } from '@renderer/hooks/useMCPServers'
+import { VCPPluginList } from '@renderer/components/VCP'
 import { Button, Flex } from 'antd'
-import { FolderCog, Package, ShoppingBag } from 'lucide-react'
+import { Blocks, FolderCog, Package, Plug, ShoppingBag } from 'lucide-react'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
@@ -28,6 +29,7 @@ import McpServersList from './McpServersList'
 import McpSettings from './McpSettings'
 import NpxSearch from './NpxSearch'
 import { providers } from './providers/config'
+import UnifiedPluginView from './UnifiedPluginView'
 
 const MCPSettings: FC = () => {
   const { theme } = useTheme()
@@ -41,8 +43,10 @@ const MCPSettings: FC = () => {
     const path = location.pathname
 
     // 精确匹配路径
+    if (path === '/settings/mcp/unified') return 'unified'
     if (path === '/settings/mcp/builtin') return 'builtin'
     if (path === '/settings/mcp/marketplaces') return 'marketplaces'
+    if (path === '/settings/mcp/vcp-plugins') return 'vcp-plugins'
 
     // 检查是否是服务商页面 - 精确匹配
     for (const provider of providers) {
@@ -62,7 +66,9 @@ const MCPSettings: FC = () => {
     const path = location.pathname
     // 主页面不显示返回按钮
     if (path === '/settings/mcp' || path === '/settings/mcp/servers') return true
+    if (path === '/settings/mcp/unified') return true
     if (path === '/settings/mcp/builtin' || path === '/settings/mcp/marketplaces') return true
+    if (path === '/settings/mcp/vcp-plugins') return true
 
     // 服务商页面也是主页面
     return providers.some((p) => path === `/settings/mcp/${p.key}`)
@@ -83,6 +89,13 @@ const MCPSettings: FC = () => {
       <MainContainer>
         <MenuList>
           <ListItem
+            title={t('settings.mcp.unified', '全部插件')}
+            active={activeView === 'unified'}
+            onClick={() => navigate('/settings/mcp/unified')}
+            icon={<Blocks size={18} />}
+            titleStyle={{ fontWeight: 500 }}
+          />
+          <ListItem
             title={t('settings.mcp.servers', 'MCP Servers')}
             active={activeView === 'servers'}
             onClick={() => navigate('/settings/mcp/servers')}
@@ -102,6 +115,13 @@ const MCPSettings: FC = () => {
             active={activeView === 'marketplaces'}
             onClick={() => navigate('/settings/mcp/marketplaces')}
             icon={<ShoppingBag size={18} />}
+            titleStyle={{ fontWeight: 500 }}
+          />
+          <ListItem
+            title={t('settings.mcp.vcpPlugins', 'VCP 插件')}
+            active={activeView === 'vcp-plugins'}
+            onClick={() => navigate('/settings/mcp/vcp-plugins')}
+            icon={<Plug size={18} />}
             titleStyle={{ fontWeight: 500 }}
           />
           <DividerWithText text={t('settings.mcp.providers', 'Providers')} style={{ margin: '10px 0 8px 0' }} />
@@ -127,7 +147,15 @@ const MCPSettings: FC = () => {
             </BackButtonContainer>
           )}
           <Routes>
-            <Route index element={<Navigate to="servers" replace />} />
+            <Route index element={<Navigate to="unified" replace />} />
+            <Route
+              path="unified"
+              element={
+                <ContentWrapper>
+                  <UnifiedPluginView />
+                </ContentWrapper>
+              }
+            />
             <Route path="servers" element={<McpServersList />} />
             <Route path="settings/:serverId" element={<McpSettings />} />
             <Route
@@ -159,6 +187,14 @@ const MCPSettings: FC = () => {
               element={
                 <ContentWrapper>
                   <McpMarketList />
+                </ContentWrapper>
+              }
+            />
+            <Route
+              path="vcp-plugins"
+              element={
+                <ContentWrapper>
+                  <VCPPluginList />
                 </ContentWrapper>
               }
             />

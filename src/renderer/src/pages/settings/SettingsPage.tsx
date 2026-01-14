@@ -1,5 +1,4 @@
 import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
-import { McpLogo } from '@renderer/components/Icons'
 import Scrollbar from '@renderer/components/Scrollbar'
 import ModelSettings from '@renderer/pages/settings/ModelSettings/ModelSettings'
 import { Divider as AntDivider } from 'antd'
@@ -17,6 +16,7 @@ import {
   Search,
   Server,
   Settings2,
+  ShoppingBag,
   TextCursorInput,
   Zap
 } from 'lucide-react'
@@ -94,8 +94,8 @@ const SettingsPage: FC = () => {
           <Divider />
           <MenuItemLink to="/settings/mcp">
             <MenuItem className={isRoute('/settings/mcp')}>
-              <McpLogo width={18} height={18} style={{ opacity: 0.8 }} />
-              {t('settings.mcp.title')}
+              <ShoppingBag size={18} />
+              {t('settings.pluginStore.title', '插件商店')}
             </MenuItem>
           </MenuItemLink>
           <MenuItemLink to="/settings/websearch">

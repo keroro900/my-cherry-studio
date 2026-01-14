@@ -2,51 +2,81 @@
  * 全局样式 Provider
  * Global Style Provider
  *
- * 在应用启动时应用主题预设和壁纸设置
- * Applies theme presets and wallpaper settings on app startup
+ * 统一处理所有样式注入
+ *
+ * 样式优先级（从低到高）：
+ * 1. 基础 CSS 文件（index.css, themeVariables.css 等）
+ * 2. 壁纸预设 CSS（注入到 <style id="wallpaper-preset-css">）
+ * 3. 用户自定义 CSS（最高优先级，注入到 <style id="user-defined-custom-css">）
+ *
+ * 壁纸预设 = 主题预设（包含壁纸图片 + 完整组件样式）
  */
 
-import { BUILT_IN_THEME_PRESETS, getThemeColors } from '@renderer/config/themePresets'
-import { applyThemeColors, clearThemeColors } from '@renderer/hooks/useThemePreset'
 import { useAppSelector } from '@renderer/store'
-import type { WallpaperSettings } from '@renderer/types/wallpaper'
-import { DEFAULT_WALLPAPER_SETTINGS } from '@renderer/types/wallpaper'
+import { getPresetById } from '@renderer/types/wallpaperPresets'
 import type { PropsWithChildren } from 'react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
-import { useTheme } from './ThemeProvider'
-
-// applyThemeColors 和 clearThemeColors 从 useThemePreset 导入，避免代码重复
+// CSS 样式元素 ID
+const PRESET_CSS_ELEMENT_ID = 'wallpaper-preset-css'
+const CUSTOM_CSS_ELEMENT_ID = 'user-defined-custom-css'
 
 /**
- * 应用壁纸设置
- * 只负责管理 body 的 CSS class 和 CSS 变量，实际渲染由 GlobalWallpaper 组件处理
+ * 应用壁纸预设 CSS
+ * 优先级低于用户自定义 CSS
  */
-function applyWallpaperSettings(settings: WallpaperSettings) {
-  if (!settings.enabled || settings.source === 'none') {
-    // 禁用壁纸 - 移除相关 class 和 CSS 变量
-    document.body.classList.remove('wallpaper-enabled')
-    document.body.classList.remove('wallpaper-exclude-workflow')
-    document.documentElement.style.removeProperty('--wallpaper-bg-opacity')
+function applyPresetCSS(presetId: string | undefined) {
+  // 移除现有的预设 CSS 元素
+  let presetCssElement = document.getElementById(PRESET_CSS_ELEMENT_ID) as HTMLStyleElement
+  if (presetCssElement) {
+    presetCssElement.remove()
+  }
+
+  // 如果没有选择预设，直接返回
+  if (!presetId) {
     return
   }
 
-  // 启用壁纸 - 添加 class 让 body 背景透明
-  document.body.classList.add('wallpaper-enabled')
+  // 获取预设
+  const preset = getPresetById(presetId)
+  if (!preset || !preset.presetCss) {
+    return
+  }
 
-  // 设置组件背景透明度 CSS 变量
-  // opacity 是壁纸图片的透明度(0-100)，组件背景透明度使用相反的逻辑
-  // 壁纸越不透明(opacity 高)，组件背景应该越透明，让壁纸更可见
-  // 计算公式: 组件透明度 = 1 - (壁纸透明度 * 0.5) / 100
-  // 例如: 壁纸 100% -> 组件 0.5, 壁纸 50% -> 组件 0.75, 壁纸 0% -> 组件 1.0
-  const bgOpacity = 1 - (settings.opacity * 0.5) / 100
-  document.documentElement.style.setProperty('--wallpaper-bg-opacity', bgOpacity.toFixed(2))
+  // 创建新的 style 元素并插入到 head 中
+  // 确保在自定义 CSS 之前插入，以便自定义 CSS 可以覆盖
+  presetCssElement = document.createElement('style')
+  presetCssElement.id = PRESET_CSS_ELEMENT_ID
+  presetCssElement.textContent = preset.presetCss
 
-  // 工作流排除
-  if (settings.excludeWorkflow) {
-    document.body.classList.add('wallpaper-exclude-workflow')
+  // 查找自定义 CSS 元素的位置
+  const customCssElement = document.getElementById(CUSTOM_CSS_ELEMENT_ID)
+  if (customCssElement) {
+    // 在自定义 CSS 之前插入
+    customCssElement.parentNode?.insertBefore(presetCssElement, customCssElement)
   } else {
-    document.body.classList.remove('wallpaper-exclude-workflow')
+    // 如果没有自定义 CSS，直接添加到 head 末尾
+    document.head.appendChild(presetCssElement)
+  }
+}
+
+/**
+ * 应用用户自定义 CSS
+ * 优先级最高，可以覆盖预设 CSS
+ */
+function applyCustomCSS(customCss: string) {
+  // 移除现有的自定义 CSS 元素
+  let customCssElement = document.getElementById(CUSTOM_CSS_ELEMENT_ID) as HTMLStyleElement
+  if (customCssElement) {
+    customCssElement.remove()
+  }
+
+  // 如果有自定义 CSS，创建新的 style 元素
+  if (customCss && customCss.trim()) {
+    customCssElement = document.createElement('style')
+    customCssElement.id = CUSTOM_CSS_ELEMENT_ID
+    customCssElement.textContent = customCss
+    document.head.appendChild(customCssElement)
   }
 }
 
@@ -54,43 +84,21 @@ function applyWallpaperSettings(settings: WallpaperSettings) {
  * 全局样式 Provider 组件
  */
 export const GlobalStyleProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  // 获取壁纸预设ID（壁纸预设 = 主题预设）
+  const activePresetId = useAppSelector((state) => state.settings.wallpaper?.activePresetId)
 
-  // 获取主题预设设置
-  const activeThemePresetId = useAppSelector((state) => state.settings.activeThemePresetId)
-  const customThemePresets = useAppSelector((state) => state.settings.customThemePresets) || []
+  // 获取用户自定义 CSS
+  const customCss = useAppSelector((state) => state.settings.customCss)
 
-  // 获取壁纸设置
-  const wallpaperSettings = useAppSelector((state) => state.settings.wallpaper) || DEFAULT_WALLPAPER_SETTINGS
-
-  // 合并内置和自定义主题
-  const allThemePresets = useMemo(() => {
-    return [...BUILT_IN_THEME_PRESETS, ...(customThemePresets || [])]
-  }, [customThemePresets])
-
-  // 当前激活的主题预设
-  const activePreset = useMemo(() => {
-    if (!activeThemePresetId) return null
-    return allThemePresets.find((p) => p.id === activeThemePresetId) || null
-  }, [activeThemePresetId, allThemePresets])
-
-  // 应用主题预设
+  // 应用壁纸预设 CSS
   useEffect(() => {
-    if (activePreset) {
-      const colors = getThemeColors(activePreset, isDark)
-      applyThemeColors(colors, activePreset.effects)
-    } else {
-      clearThemeColors()
-    }
-  }, [activePreset, isDark])
+    applyPresetCSS(activePresetId)
+  }, [activePresetId])
 
-  // 应用壁纸设置
+  // 应用用户自定义 CSS（最高优先级）
   useEffect(() => {
-    if (wallpaperSettings) {
-      applyWallpaperSettings(wallpaperSettings)
-    }
-  }, [wallpaperSettings])
+    applyCustomCSS(customCss || '')
+  }, [customCss])
 
   return <>{children}</>
 }

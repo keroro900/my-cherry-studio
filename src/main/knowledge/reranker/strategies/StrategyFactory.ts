@@ -1,4 +1,6 @@
 import { BailianStrategy } from './BailianStrategy'
+import { BGEStrategy } from './BGEStrategy'
+import { CohereStrategy } from './CohereStrategy'
 import { DefaultStrategy } from './DefaultStrategy'
 import { JinaStrategy } from './JinaStrategy'
 import type { RerankStrategy } from './RerankStrategy'
@@ -15,6 +17,10 @@ export class StrategyFactory {
         return new BailianStrategy()
       case RERANKER_PROVIDERS.JINA:
         return new JinaStrategy()
+      case RERANKER_PROVIDERS.COHERE:
+        return new CohereStrategy()
+      case RERANKER_PROVIDERS.BGE:
+        return new BGEStrategy()
       default:
         if (isTEIProvider(provider)) {
           return new TEIStrategy()

@@ -7,6 +7,7 @@ import type { Assistant } from '@renderer/types'
 import type { AiSdkMiddlewareConfig } from '../middleware/AiSdkMiddlewareBuilder'
 import { searchOrchestrationPlugin } from './searchOrchestrationPlugin'
 import { createTelemetryPlugin } from './telemetryPlugin'
+import { vcpContextPlugin } from './vcpContextPlugin'
 
 const logger = loggerService.withContext('PluginBuilder')
 /**
@@ -71,6 +72,18 @@ export function buildPlugins(
   // if (middlewareConfig.enableUrlContext && middlewareConfig.) {
   //   plugins.push(googleToolsPlugin({ urlContext: true }))
   // }
+
+  // 5. VCP 上下文注入插件 (如果 Agent 启用、配置了知识库、或系统提示词包含 VCP 占位符)
+  // 统一模型：助手即智能体，使用助手 ID 作为 Agent ID
+  const vcpAgentId = middlewareConfig.assistant.vcpConfig?.enabled ? middlewareConfig.assistant.id : undefined
+  const hasKnowledgeBases = (middlewareConfig.assistant.knowledge_bases?.length ?? 0) > 0
+  // 检查系统提示词是否包含 VCP 占位符 {{VCPAllTools}}, {{VCPPluginName}} 等
+  const hasVCPPlaceholder = middlewareConfig.assistant.prompt?.includes('{{VCP') ?? false
+
+  if (vcpAgentId || hasKnowledgeBases || hasVCPPlaceholder) {
+    plugins.push(vcpContextPlugin(middlewareConfig.assistant, middlewareConfig.topicId || ''))
+    logger.debug('VCP context plugin added', { vcpAgentId: !!vcpAgentId, hasKnowledgeBases, hasVCPPlaceholder })
+  }
 
   logger.debug(
     'Final plugin list:',

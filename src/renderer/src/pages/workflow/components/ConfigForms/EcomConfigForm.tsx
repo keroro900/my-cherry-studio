@@ -81,7 +81,7 @@ const LIGHTING_OPTIONS = LIGHTING_PRESETS.getOptions().map((o) => ({
 const STYLE_PRESETS = [
   { id: 'none', label: '无（自由发挥）', description: '完全由AI自由判断', category: 'basic' },
   { id: 'auto', label: '自动识别', description: 'AI 根据服装图案和颜色自动判断风格', category: 'basic' },
-  
+
   // Cute
   { id: 'sweet', label: '甜美风格', description: '草莓/樱桃/格纹/爱心，温暖柔和', category: 'cute' },
   { id: 'ip_theme', label: 'IP主题', description: '根据IP角色设计背景道具', category: 'cute' },

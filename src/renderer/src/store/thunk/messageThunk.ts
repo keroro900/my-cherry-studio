@@ -451,6 +451,11 @@ const blockUpdateRafs = new LRUCache<string, number>({
 
 /**
  * 获取或创建消息块专用的节流函数。
+ *
+ * 优化说明:
+ * - 节流间隔从 150ms 增加到 200ms，减少更新频率
+ * - Redux dispatch 优先执行，保证 UI 响应
+ * - DB 写入异步执行，不阻塞 UI
  */
 const getBlockThrottler = (id: string) => {
   if (!blockUpdateThrottlers.has(id)) {
@@ -460,6 +465,7 @@ const getBlockThrottler = (id: string) => {
         cancelAnimationFrame(existingRAF)
       }
 
+      // 优先更新 UI（通过 RAF）
       const rafId = requestAnimationFrame(() => {
         store.dispatch(updateOneBlock({ id, changes: blockUpdate }))
         blockUpdateRafs.delete(id)

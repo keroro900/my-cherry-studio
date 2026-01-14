@@ -189,25 +189,19 @@ Return as JSON with fields: jewelry_type, placement_area, lighting_direction, sk
 
   private getJewelryTips(type: string): string {
     const tips: Record<string, string> = {
-      necklace:
-        'Position around neck area. Follow neckline curve. Consider chain drape and pendant placement.',
-      earring:
-        'Position at earlobe or along ear edge. Match ear angle. Consider hair interaction.',
-      bracelet:
-        'Position on wrist area. Follow wrist curve. Consider hand pose and visibility.',
+      necklace: 'Position around neck area. Follow neckline curve. Consider chain drape and pendant placement.',
+      earring: 'Position at earlobe or along ear edge. Match ear angle. Consider hair interaction.',
+      bracelet: 'Position on wrist area. Follow wrist curve. Consider hand pose and visibility.',
       ring: 'Position on finger. Match finger angle and size. Ensure natural fit appearance.',
-      watch:
-        'Position on wrist. Follow wrist curve. Consider strap integration and dial visibility.'
+      watch: 'Position on wrist. Follow wrist curve. Consider strap integration and dial visibility.'
     }
     return tips[type] || tips.necklace
   }
 
   private getBlendTips(mode: string): string {
     const tips: Record<string, string> = {
-      natural:
-        'Seamless integration with natural lighting. Subtle shadows. Realistic appearance.',
-      enhanced:
-        'Slightly enhanced jewelry visibility. Boosted reflections. Eye-catching but natural.',
+      natural: 'Seamless integration with natural lighting. Subtle shadows. Realistic appearance.',
+      enhanced: 'Slightly enhanced jewelry visibility. Boosted reflections. Eye-catching but natural.',
       subtle: 'Very subtle integration. Minimal shadows. Soft blending for delicate look.'
     }
     return tips[mode] || tips.natural

@@ -24,6 +24,29 @@ export const MIDDLEWARE_CONTEXT_SYMBOL = Symbol.for('AiProviderMiddlewareContext
 export type OnChunkFunction = (chunk: Chunk | ErrorChunk) => void
 
 /**
+ * VCP Tool Result structure for custom state
+ */
+export interface VCPToolResult {
+  toolName: string
+  status: 'success' | 'error'
+  result?: unknown
+  error?: string
+  executionTimeMs?: number
+}
+
+/**
+ * Known custom state keys for type safety
+ * Add new custom state properties here for better type checking
+ */
+export interface KnownCustomState {
+  vcpToolResults?: VCPToolResult[]
+  requestStartTime?: number
+  apiKeyUsed?: string
+  webSearchCache?: WebSearchResponse
+  requestId?: string
+}
+
+/**
  * Base context that carries information about the current method call.
  */
 export interface BaseContext {
@@ -65,7 +88,7 @@ export interface ProcessingState<
     cleanup?: () => void
   }
   enhancedDispatch?: (context: CompletionsContext, params: CompletionsParams) => Promise<CompletionsResult>
-  customState?: Record<string, any>
+  customState?: KnownCustomState & Record<string, unknown>
 }
 
 /**

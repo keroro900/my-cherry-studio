@@ -27,6 +27,9 @@ import { addFileLoader } from '@main/knowledge/embedjs/loader'
 import { NoteLoader } from '@main/knowledge/embedjs/loader/noteLoader'
 import PreprocessProvider from '@main/knowledge/preprocess/PreprocessProvider'
 import Reranker from '@main/knowledge/reranker/Reranker'
+import { getTagMemoService, type TagMemoService } from '@main/knowledge/tagmemo'
+import { SemanticGroupService } from '@main/services/memory/SemanticGroupService'
+import { parseTimeExpressions, hasTimeExpression } from '@main/utils/TimeExpressionParser'
 import { fileStorage } from '@main/services/FileStorage'
 import { windowService } from '@main/services/WindowService'
 import { getDataPath } from '@main/utils'
@@ -114,9 +117,29 @@ class KnowledgeService {
     status: 'failed'
   }
 
+  /** TagMemo 服务 (单例) - 用于搜索增强 */
+  private tagMemo: TagMemoService
+
+  /** SemanticGroup 服务 - 用于查询扩展 */
+  private semanticGroupService: SemanticGroupService
+
+  /** 是否启用 TagMemo 增强 */
+  private enableTagMemoEnhancement = true
+
+  /** 是否启用语义组扩展 */
+  private enableSemanticGroupExpansion = true
+
+  /** 是否启用时间表达式解析 */
+  private enableTimeExpressionParsing = true
+
   constructor() {
     this.initStorageDir()
     this.cleanupOnStartup()
+    // 获取 TagMemo 单例
+    this.tagMemo = getTagMemoService()
+    // 获取 SemanticGroup 单例
+    this.semanticGroupService = SemanticGroupService.getInstance()
+    logger.debug('KnowledgeService initialized with TagMemo and SemanticGroup integration')
   }
 
   private initStorageDir = (): void => {
@@ -668,7 +691,95 @@ class KnowledgeService {
     { search, base }: { search: string; base: KnowledgeBaseParams }
   ): Promise<KnowledgeSearchResult[]> {
     const ragApplication = await this.getRagApplication(base)
-    return await ragApplication.search(search)
+    let enhancedQuery = search
+    let timeContext: { hasTime: boolean; ranges: Array<{ start: string; end: string }> } | undefined
+
+    // 1. 时间表达式解析 (如果启用)
+    if (this.enableTimeExpressionParsing && hasTimeExpression(search)) {
+      try {
+        const timeRanges = parseTimeExpressions(search)
+        if (timeRanges.length > 0) {
+          timeContext = {
+            hasTime: true,
+            ranges: timeRanges.map((r) => ({
+              start: r.start.toISOString(),
+              end: r.end.toISOString()
+            }))
+          }
+          logger.debug('Time expressions parsed', {
+            query: search,
+            timeRanges: timeContext.ranges
+          })
+        }
+      } catch (error) {
+        logger.warn('Time expression parsing failed', error as Error)
+      }
+    }
+
+    // 2. 语义组扩展查询 (如果启用)
+    if (this.enableSemanticGroupExpansion) {
+      try {
+        // 分词
+        const queryTokens = search
+          .toLowerCase()
+          .split(/[\s,;.!?，；。！？]+/)
+          .filter((t) => t.length > 0)
+
+        // 扩展
+        const expandedTokens = this.semanticGroupService.expandQueryTokens(queryTokens)
+
+        if (expandedTokens.length > 0) {
+          // 将扩展词添加到查询中 (使用 OR 语义)
+          enhancedQuery = `${search} ${expandedTokens.slice(0, 5).join(' ')}`
+          logger.debug('Query expanded with semantic groups', {
+            originalQuery: search,
+            expandedTokens: expandedTokens.slice(0, 5),
+            enhancedQuery
+          })
+        }
+      } catch (error) {
+        logger.warn('Semantic group expansion failed', error as Error)
+      }
+    }
+
+    // 3. 执行搜索 (使用增强查询)
+    let results = await ragApplication.search(enhancedQuery)
+
+    // 4. 如果有时间上下文，记录日志供调试使用
+    // 注意: 不修改 results.metadata，因为类型不兼容
+    if (timeContext && timeContext.hasTime && results.length > 0) {
+      logger.debug('Search executed with time context', {
+        resultCount: results.length,
+        timeRanges: timeContext.ranges
+      })
+      // 时间过滤可以在后续版本中基于文档创建时间实现
+    }
+
+    // 5. 应用 TagMemo 增强 (如果启用)
+    if (this.enableTagMemoEnhancement && results.length > 0) {
+      try {
+        // 1. 从搜索结果初始化共现矩阵 (增量学习)
+        await this.tagMemo.initializeFromSearchResults(results)
+
+        // 2. 从查询中提取标签
+        const queryTags = this.tagMemo.extractTagsFromQuery(search)
+
+        // 3. 应用 TagMemo 增强
+        if (queryTags.length > 0) {
+          results = await this.tagMemo.applyTagBoost(search, queryTags, results)
+          logger.debug('TagMemo enhancement applied', {
+            queryTags,
+            resultCount: results.length,
+            knowledgeBase: base.id
+          })
+        }
+      } catch (error) {
+        // TagMemo 增强失败不应影响原始搜索结果
+        logger.warn('TagMemo enhancement failed, returning original results', error as Error)
+      }
+    }
+
+    return results
   }
 
   @TraceMethod({ spanName: 'rerank', tag: 'Knowledge' })
@@ -693,7 +804,45 @@ class KnowledgeService {
     userId: string
   ): Promise<FileMetadata> => {
     let fileToProcess: FileMetadata = file
-    if (base.preprocessProvider && file.ext.toLowerCase() === '.pdf') {
+    const fileExt = file.ext.toLowerCase()
+
+    // Fashion knowledge base: handle images with FashionPreprocessProvider
+    if (base.knowledgeType === 'fashion') {
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp']
+      const dataExtensions = ['.csv', '.tsv']
+
+      if (imageExtensions.includes(fileExt) || dataExtensions.includes(fileExt)) {
+        try {
+          const FashionPreprocessProvider = require('@main/knowledge/preprocess/FashionPreprocessProvider').default
+          const fashionProvider = new FashionPreprocessProvider({ id: 'fashion', name: 'Fashion' })
+
+          // Check if already processed
+          const alreadyProcessed = await fashionProvider.checkIfAlreadyProcessed(file)
+          if (alreadyProcessed) {
+            logger.debug(`Fashion file already processed, using cached result: ${file.path}`)
+            return alreadyProcessed
+          }
+
+          // Process file
+          logger.debug(`Starting Fashion processing for: ${file.path}`)
+          const { processedFile } = await fashionProvider.parseFile(item.id, file)
+          fileToProcess = processedFile
+          const mainWindow = windowService.getMainWindow()
+          mainWindow?.webContents.send('file-preprocess-finished', {
+            itemId: item.id,
+            type: 'fashion'
+          })
+        } catch (err) {
+          logger.error(`Fashion processing failed: ${err}`)
+          // Fall back to original file for non-critical failures
+          logger.warn(`Using original file for: ${file.path}`)
+        }
+        return fileToProcess
+      }
+    }
+
+    // Standard preprocessing for PDF with configured provider
+    if (base.preprocessProvider && fileExt === '.pdf') {
       try {
         const provider = new PreprocessProvider(base.preprocessProvider.provider, userId)
         const filePath = fileStorage.getFilePathById(file)
@@ -739,6 +888,30 @@ class KnowledgeService {
       logger.error(`Failed to check quota: ${err}`)
       throw new Error(`Failed to check quota: ${err}`)
     }
+  }
+
+  // ==================== TagMemo 配置方法 ====================
+
+  /**
+   * 启用/禁用 TagMemo 增强
+   */
+  public setTagMemoEnhancement(enabled: boolean): void {
+    this.enableTagMemoEnhancement = enabled
+    logger.info('TagMemo enhancement', { enabled })
+  }
+
+  /**
+   * 获取 TagMemo 统计信息
+   */
+  public getTagMemoStats(): { mode: string; tagCount: number; relationCount: number; documentCount: number } {
+    return this.tagMemo.getStats()
+  }
+
+  /**
+   * 获取 TagMemo 服务实例 (用于高级操作)
+   */
+  public getTagMemoService(): TagMemoService {
+    return this.tagMemo
   }
 }
 

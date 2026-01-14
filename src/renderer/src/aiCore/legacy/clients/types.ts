@@ -19,6 +19,32 @@ import type { CompletionsParams, GenericChunk } from '../middleware/schemas'
 import type { CompletionsContext } from '../middleware/types'
 
 /**
+ * Supported custom parameter value types
+ */
+export type CustomParameterValue = string | number | boolean | object | null | undefined
+
+/**
+ * Typed custom parameters interface
+ * Use this instead of Record<string, any> for better type safety
+ */
+export interface TypedCustomParameters {
+  [key: string]: CustomParameterValue
+}
+
+/**
+ * Request metadata for transformer
+ * Contains additional information about the request
+ */
+export interface TransformMetadata {
+  timeout?: number
+  retryCount?: number
+  enableCache?: boolean
+  requestId?: string
+  startTime?: number
+  [key: string]: unknown
+}
+
+/**
  * 原始流监听器接口
  */
 export interface RawStreamListener<TRawChunk = SdkRawChunk> {

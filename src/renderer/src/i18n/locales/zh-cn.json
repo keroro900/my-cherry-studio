@@ -531,6 +531,13 @@
     "search": "搜索助手",
     "settings": {
       "default_model": "默认模型",
+      "image": {
+        "aspect_ratio": "宽高比",
+        "batch_count": "批量生成",
+        "model": "图片模型",
+        "size": "图片尺寸",
+        "title": "图片设置"
+      },
       "knowledge_base": {
         "label": "知识库设置",
         "recognition": {
@@ -645,6 +652,13 @@
       "assistant": {
         "description": "日常对话和快速问答",
         "title": "添加助手"
+      },
+      "image_assistant": {
+        "create_custom": "自定义创建",
+        "description": "图片生成和编辑",
+        "from_preset": "从预设选择",
+        "select_title": "选择图片助手类型",
+        "title": "添加图片助手"
       },
       "option": {
         "title": "选择添加类型"
@@ -1184,6 +1198,7 @@
     "back": "返回",
     "browse": "浏览",
     "cancel": "取消",
+    "characters": "个字符",
     "chat": "聊天",
     "clear": "清除",
     "close": "关闭",
@@ -1232,6 +1247,8 @@
     "models": "模型",
     "more": "更多",
     "name": "名称",
+    "no_data": "暂无数据",
+    "no_description": "暂无描述",
     "no_results": "无结果",
     "none": "无",
     "off": "关闭",
@@ -1271,6 +1288,7 @@
     "subscribe": "订阅",
     "success": "成功",
     "swap": "交换",
+    "toggle_sidebar": "切换侧边栏",
     "topics": "话题",
     "unknown": "未知",
     "unnamed": "未命名",
@@ -1432,6 +1450,29 @@
     "title": "文件",
     "type": "类型"
   },
+  "flowLock": {
+    "click_to_lock": "点击锁定当前话题",
+    "confirm_lock": "锁定",
+    "create_lock": "锁定话题",
+    "deviation_redirect": "请回到当前话题讨论",
+    "deviation_warning": "您的消息可能偏离了当前话题",
+    "deviations": "偏离次数",
+    "extend": "延长5分钟",
+    "extended": "已延长 5 分钟",
+    "keywords": "关键词",
+    "keywords_label": "关键词 (可选，用逗号分隔)",
+    "keywords_placeholder": "输入相关关键词，如: React, 组件, 状态管理",
+    "lock_created": "话题已锁定",
+    "lock_failed": "锁定失败",
+    "lock_topic": "锁定话题",
+    "max_deviations": "最大允许",
+    "remaining": "剩余",
+    "topic_name": "话题名称",
+    "topic_placeholder": "输入要锁定的话题...",
+    "topic_required": "请输入话题名称",
+    "unlock": "解锁",
+    "unlocked": "已解锁"
+  },
   "gpustack": {
     "keep_alive_time": {
       "description": "模型在内存中保持的时间（默认：5 分钟）",
@@ -1439,6 +1480,71 @@
       "title": "保持活跃时间"
     },
     "title": "GPUStack"
+  },
+  "groupchat": {
+    "abbr": "群聊",
+    "active": "进行中",
+    "add_assistant": "添加助手",
+    "agent_error": "助手 {{name}} 响应出错: {{error}}",
+    "agents": "成员",
+    "create": "新建",
+    "delete_confirm": "确定删除此会话？",
+    "empty": "暂无群聊会话",
+    "end": "结束",
+    "errors": {
+      "api_error": "API 请求失败: {{status}} - {{message}}",
+      "auth_error": "API Key 无效或已过期",
+      "json_parse_error": "服务器返回了非 JSON 格式的响应",
+      "network_error": "网络连接失败",
+      "timeout": "请求超时",
+      "unknown": "未知错误"
+    },
+    "idle": "空闲",
+    "input_placeholder": "输入消息，使用 @名称 提及特定助手...",
+    "messages": "条消息",
+    "new_session": "新群聊",
+    "participants": "人",
+    "send_error": "发送失败",
+    "settings": {
+      "add_tag": "+ 标签",
+      "add_tag_tip": "添加标签（用于自然随机模式权重）",
+      "avoid_topics": "回避话题",
+      "avoid_topics_placeholder": "助手应该避免讨论的话题",
+      "collab_stats": "协作统计",
+      "enabled": "启用群聊",
+      "enabled_tip": "允许此助手加入群聊会话",
+      "expertise": "专业领域",
+      "expertise_examples": "例如: AI, 编程, 设计, 产品管理",
+      "expertise_placeholder": "输入专业领域标签，按回车添加",
+      "expertise_tip": "助手的专业领域标签，用于智能匹配和发言决策",
+      "info": "配置此助手在多Agent群聊中的行为和角色",
+      "invite_prompt_template": "邀请提示词模板",
+      "invite_prompt_template_placeholder": "例如: 请 {{VCPChatAgentName}} 分享你的观点（可选，支持 {{VCPChatAgentName}} 占位符）",
+      "invite_prompt_template_tip": "邀请发言模式下使用的提示词模板，支持 {{VCPChatAgentName}} 占位符替换为被邀请的 Agent 名称",
+      "keywords": "触发关键词",
+      "keywords_placeholder": "输入触发关键词，按回车添加",
+      "keywords_tip": "当对话中出现这些关键词时，助手更可能被邀请发言",
+      "max_response_length": "最大回复长度",
+      "member_tags": "成员标签",
+      "member_tags_tip": "用于自然随机模式权重计算，标签相同的成员会有更高的协作概率",
+      "preferred_topics": "偏好话题",
+      "preferred_topics_placeholder": "助手更愿意参与的话题类型",
+      "priority": "发言优先级",
+      "priority_tip": "优先级越高，在多人竞争发言时越优先 (1-100)",
+      "role": "群聊角色",
+      "speaking_preferences": "发言偏好",
+      "title": "群聊设置",
+      "unified_model": "统一模型",
+      "unified_model_placeholder": "选择统一使用的模型",
+      "use_unified_model": "使用统一模型",
+      "use_unified_model_tip": "启用后，所有成员使用统一的模型进行对话，便于控制成本和一致性"
+    },
+    "start": "开始群聊",
+    "start_first": "请先开始群聊",
+    "stats": {
+      "unavailable": "统计数据不可用"
+    },
+    "title": "群聊"
   },
   "history": {
     "continue_chat": "继续聊天",
@@ -1457,223 +1563,6 @@
     },
     "title": "话题搜索"
   },
-  "image_studio": {
-    "aspect_ratio": "宽高比",
-    "advanced_settings": "高级设置",
-    "batch_count": "批量数量",
-    "seed": "随机种子",
-    "seed_placeholder": "留空则随机",
-    "optional": "可选",
-    "ecom": {
-      "add_image": "添加图片",
-      "bottom_image": "下装",
-      "enable_back": "生成背面图",
-      "enable_detail": "生成细节图",
-      "garment_desc": "服装描述",
-      "garment_desc_placeholder": "请描述服装特点...",
-      "image_settings": "图片设置",
-      "images": "服装图片",
-      "layout": "布局模式",
-      "layout_flat": "平铺展示",
-      "layout_hanging": "悬挂展示",
-      "layout_model": "模特穿搭",
-      "output_options": "输出选项",
-      "style": "风格预设",
-      "style_auto": "自动",
-      "style_minimal": "简约",
-      "style_premium": "高端",
-      "top_image": "上装"
-    },
-    "prompt": {
-      "title": "提示词设置",
-      "optimize": "优化提示词",
-      "system": "系统提示词",
-      "system_placeholder": "设置生成图片的系统指令...",
-      "negative": "反向提示词",
-      "negative_placeholder": "描述不希望出现的元素..."
-    },
-    "output": {
-      "main_image": "主图",
-      "back_image": "背面图",
-      "model_image": "模特图",
-      "pattern_image": "图案大图",
-      "seamless_image": "无缝图",
-      "detail_image": "细节图",
-      "image": "输出图"
-    },
-    "generate": "生成",
-    "generating": "生成中...",
-    "image_settings": "图片设置",
-    "image_size": "图片尺寸",
-    "model": {
-      "age_adult": "成人",
-      "age_big_kid": "大童",
-      "age_group": "年龄段",
-      "age_small_kid": "小童",
-      "clothes_image": "服装图片",
-      "gender": "性别",
-      "gender_female": "女",
-      "gender_male": "男",
-      "model_settings": "模特设置",
-      "pose": "姿态风格",
-      "pose_commercial": "商业",
-      "pose_dynamic": "动感",
-      "pose_fashion": "时尚",
-      "pose_natural": "自然",
-      "scene": "场景",
-      "scene_indoor": "室内家居",
-      "scene_outdoor": "户外",
-      "scene_solid": "纯色背景",
-      "scene_urban": "城市街景",
-      "scene_studio": "摄影棚",
-      "upload_clothes": "上传服装图片",
-      "top_clothes": "上装",
-      "bottom_clothes": "下装",
-      "accessory": "配饰",
-      "add_clothes": "添加服装",
-      "model_reference": "模特参考图",
-      "upload_model_ref": "上传模特参考图",
-      "model_ref_hint": "可选，用于保持模特一致性",
-      "ethnicity": "人种",
-      "ethnicity_asian": "亚洲人",
-      "ethnicity_caucasian": "欧美人",
-      "ethnicity_african": "非洲人",
-      "ethnicity_mixed": "混血",
-      "scene_pose": "场景与姿态",
-      "output_options": "输出选项",
-      "keep_background": "保持原背景",
-      "show_full_body": "显示全身",
-      "style_desc": "风格描述",
-      "style_desc_placeholder": "描述你想要的模特风格..."
-    },
-    "modules": {
-      "ecom": "电商实拍",
-      "model": "模特换装",
-      "pattern": "图案设计"
-    },
-    "no_project": "暂无项目",
-    "no_tasks": "暂无任务",
-    "no_versions": "暂无版本",
-    "pattern": {
-      "batch": "批量设置",
-      "batch_size": "批量数量",
-      "color_auto": "自动",
-      "color_bright": "明亮",
-      "color_contrast": "高对比",
-      "color_dark": "深色",
-      "color_soft": "柔和",
-      "color_high_contrast": "高对比",
-      "color_tone": "色调风格",
-      "density": "图案密度",
-      "density_dense": "密集",
-      "density_medium": "适中",
-      "density_sparse": "稀疏",
-      "mode": "生成模式",
-      "mode_a": "元素重组",
-      "mode_a_desc": "参考图+提示词",
-      "mode_b": "纯无缝化",
-      "mode_b_desc": "仅参考图",
-      "mode_c": "设计大师",
-      "mode_c_desc": "纯文本生成",
-      "output_pattern": "仅无缝图",
-      "output_set": "套装：大图+无缝",
-      "output_type": "输出类型",
-      "prompt": "提示词",
-      "prompt_placeholder": "描述你想要的图案...",
-      "ref": "参考图",
-      "ref_1": "参考图 1",
-      "ref_2": "参考图 2",
-      "reference": "参考图",
-      "add_ref": "添加参考图",
-      "settings": "图案设置",
-      "type": "图案类型",
-      "type_abstract": "抽象",
-      "type_cartoon": "卡通",
-      "type_floral": "花卉",
-      "type_geometric": "几何",
-      "type_seamless": "无缝",
-      "type_half_drop": "半滴式",
-      "type_brick": "砖块式",
-      "type_mirror": "镜像式",
-      "style_preset": "风格预设",
-      "style_floral": "花卉",
-      "style_geometric": "几何",
-      "style_abstract": "抽象",
-      "style_cartoon": "卡通",
-      "style_nature": "自然",
-      "style_tribal": "民族",
-      "style_watercolor": "水彩",
-      "style_vintage": "复古",
-      "style_modern": "现代",
-      "style_minimalist": "极简",
-      "design_prompt": "设计描述",
-      "design_prompt_placeholder": "描述你想要的图案设计...",
-      "color_prompt": "配色描述",
-      "color_prompt_placeholder": "描述你想要的配色方案...",
-      "tile_scale": "平铺缩放"
-    },
-    "select_model": "选择模型",
-    "select_provider": "选择服务商",
-    "canvas": {
-      "empty": "请从画廊选择图片或生成新图片",
-      "hint": "在左侧配置参数后点击生成",
-      "loading": "加载中...",
-      "no_output": "暂无输出结果",
-      "generate_hint": "点击左下角的生成按钮开始",
-      "zoom_in": "放大",
-      "zoom_out": "缩小",
-      "reset_zoom": "重置缩放",
-      "download": "下载",
-      "download_all": "下载全部",
-      "fullscreen": "全屏"
-    },
-    "gallery": {
-      "version_history": "版本历史",
-      "task_queue": "任务队列",
-      "empty_versions": "暂无版本",
-      "empty_tasks": "暂无任务"
-    },
-    "sidebar": {
-      "generate": "生成",
-      "generating": "生成中..."
-    },
-    "task": {
-      "status": {
-        "queued": "等待中",
-        "running": "生成中",
-        "completed": "已完成",
-        "failed": "失败",
-        "cancelled": "已取消",
-        "paused": "已暂停"
-      },
-      "type": {
-        "generate": "生成",
-        "regenerate": "重新生成",
-        "local_edit": "局部编辑"
-      },
-      "actions": {
-        "pause": "暂停",
-        "resume": "继续",
-        "cancel": "取消",
-        "retry": "重试"
-      },
-      "queue": "任务队列",
-      "cancelled": "已取消",
-      "completed": "已完成",
-      "failed": "失败",
-      "paused": "已暂停",
-      "queued": "等待中",
-      "running": "生成中"
-    },
-    "version": {
-      "title": "版本历史",
-      "view": "查看",
-      "rollback": "回滚到此版本",
-      "rollback_success": "已回滚到版本 v{{version}}",
-      "compare": "版本对比"
-    },
-    "upload_to_start": "上传图片开始"
-  },
   "html_artifacts": {
     "capture": {
       "label": "捕获页面",
@@ -1685,6 +1574,336 @@
     "generating": "生成中",
     "preview": "预览",
     "split": "分屏"
+  },
+  "image_studio": {
+    "advanced_settings": "高级设置",
+    "aspect_ratio": "宽高比",
+    "batch_count": "批量生成",
+    "canvas": {
+      "download": "下载",
+      "download_all": "下载全部",
+      "ecom_hint": "上传产品图片，AI 生成专业电商图",
+      "ecom_title": "电商实拍",
+      "empty": "请从画廊选择图片或生成新图片",
+      "feature_ai": "AI 智能生成",
+      "feature_export": "多格式导出",
+      "fullscreen": "全屏",
+      "generate_hint": "配置参数后点击生成按钮",
+      "hint": "拖拽图片到此处，或点击上传",
+      "loading": "加载中...",
+      "model_hint": "上传服装图片，AI 为您生成模特试穿效果",
+      "model_title": "模特换装",
+      "no_output": "暂无输出",
+      "pattern_hint": "上传图案参考，AI 生成无缝图案",
+      "pattern_title": "图案设计",
+      "reset_zoom": "重置缩放",
+      "zoom_in": "放大",
+      "zoom_out": "缩小"
+    },
+    "ecom": {
+      "add_image": "添加图片",
+      "background": {
+        "gradient": "渐变",
+        "label": "背景风格",
+        "scene": "场景",
+        "transparent": "透明",
+        "white": "纯白"
+      },
+      "bottom_image": "下装图",
+      "enable_back": "生成背面图",
+      "enable_detail": "生成细节图",
+      "garment_desc": "服装描述",
+      "garment_desc_placeholder": "描述服装特点...",
+      "image_n": "图片{{n}}",
+      "images": "产品图片",
+      "layout": {
+        "all": "全部图片",
+        "back": "背面图",
+        "detail": "细节图",
+        "label": "布局模式",
+        "main": "主图"
+      },
+      "layout_flat": "平铺",
+      "layout_hanging": "悬挂",
+      "layout_model": "模特拍摄",
+      "output": {
+        "format": "输出格式",
+        "label": "输出设置",
+        "quality": "质量",
+        "size": "输出尺寸"
+      },
+      "output_options": "输出选项",
+      "prompt": {
+        "label": "附加提示词",
+        "placeholder": "输入附加生成提示词..."
+      },
+      "style": {
+        "custom": "自定义",
+        "label": "风格预设",
+        "luxury": "奢华",
+        "natural": "自然",
+        "simple": "简洁",
+        "tech": "科技"
+      },
+      "style_auto": "自动",
+      "style_minimal": "极简",
+      "style_premium": "高端",
+      "title": "电商图片",
+      "top_image": "上装图",
+      "upload": {
+        "formats": "支持 JPG, PNG, WebP",
+        "hint": "拖拽或点击上传",
+        "label": "上传产品图片"
+      }
+    },
+    "gallery": {
+      "empty_tasks": "暂无任务",
+      "empty_versions": "暂无版本",
+      "task_queue": "任务队列",
+      "title": "画廊",
+      "version_history": "版本历史"
+    },
+    "image_settings": "图片设置",
+    "image_size": "图片尺寸",
+    "model": {
+      "accessory": "配饰",
+      "add_clothes": "添加服装",
+      "age_adult": "成人",
+      "age_big_kid": "大童",
+      "age_group": "年龄段",
+      "age_small_kid": "小童",
+      "bottom_clothes": "下装",
+      "clothes_image": "服装图片",
+      "ethnicity": "肤色",
+      "ethnicity_african": "非洲",
+      "ethnicity_asian": "亚洲",
+      "ethnicity_caucasian": "欧美",
+      "ethnicity_mixed": "混血",
+      "gender": "性别",
+      "gender_female": "女",
+      "gender_male": "男",
+      "keep_background": "保留背景",
+      "model_ref_hint": "可选，上传参考模特",
+      "model_reference": "模特参考",
+      "model_settings": "模特设置",
+      "output_options": "输出选项",
+      "pose": "姿态",
+      "pose_commercial": "商业",
+      "pose_dynamic": "动感",
+      "pose_fashion": "时尚",
+      "pose_natural": "自然",
+      "scene": "场景",
+      "scene_indoor": "室内",
+      "scene_outdoor": "室外",
+      "scene_pose": "场景与姿态",
+      "scene_solid": "纯色背景",
+      "scene_studio": "摄影棚",
+      "scene_urban": "都市街景",
+      "show_full_body": "全身展示",
+      "style_desc": "风格描述",
+      "style_desc_placeholder": "描述期望的风格效果...",
+      "top_clothes": "上装",
+      "upload_model_ref": "上传模特图片"
+    },
+    "model_fitting": {
+      "age": {
+        "label": "年龄范围",
+        "mature": "36-50",
+        "middle": "26-35",
+        "young": "18-25"
+      },
+      "clothes": {
+        "formats": "支持 JPG, PNG, WebP",
+        "hint": "上传要试穿的服装图片",
+        "label": "上传服装"
+      },
+      "model": {
+        "child": "儿童",
+        "female": "女性",
+        "label": "模特类型",
+        "male": "男性"
+      },
+      "pose": {
+        "dynamic": "动感",
+        "label": "姿态",
+        "sitting": "坐姿",
+        "standing": "站姿",
+        "walking": "行走"
+      },
+      "scene": {
+        "indoor": "室内",
+        "label": "场景",
+        "outdoor": "室外",
+        "street": "街景",
+        "studio": "摄影棚"
+      },
+      "title": "模特换装"
+    },
+    "module_list": {
+      "create_preset": "创建预设",
+      "title": "图片工坊"
+    },
+    "modules": {
+      "ecom": "电商实拍",
+      "ecom_desc": "商品图片智能生成",
+      "model": "模特换装",
+      "model_desc": "AI模特穿搭展示",
+      "pattern": "图案设计",
+      "pattern_desc": "无缝图案与纹理"
+    },
+    "optional": "可选",
+    "pattern": {
+      "color_tone": {
+        "cool": "冷色调",
+        "label": "色调",
+        "neutral": "中性",
+        "vibrant": "鲜艳",
+        "warm": "暖色调"
+      },
+      "density": {
+        "dense": "密集",
+        "label": "图案密度",
+        "medium": "中等",
+        "sparse": "稀疏"
+      },
+      "mode": {
+        "label": "生成模式",
+        "modeA": "模式A - 基于参考",
+        "modeB": "模式B - 基于描述",
+        "modeC": "模式C - 混合"
+      },
+      "output_type": {
+        "label": "输出类型",
+        "poster": "海报",
+        "seamless": "无缝图案",
+        "tshirt": "T恤印花"
+      },
+      "reference": {
+        "hint": "上传参考图片（可选）",
+        "label": "参考图片"
+      },
+      "style_preset": {
+        "count": "{{count}} 个预设可用",
+        "label": "风格预设",
+        "select": "选择风格..."
+      },
+      "title": "图案设计"
+    },
+    "prompt": {
+      "negative": "反向提示词",
+      "negative_placeholder": "描述不希望出现的元素...",
+      "optimize": "优化提示词",
+      "system": "系统提示词",
+      "system_placeholder": "设置生成图片的系统指令...",
+      "title": "提示词设置"
+    },
+    "prompt_enhancer": {
+      "tooltip": "智能优化提示词以提升生成效果"
+    },
+    "seed": "随机种子",
+    "seed_placeholder": "留空则随机",
+    "select_model": "选择模型",
+    "select_provider": "选择服务商",
+    "settings": {
+      "advanced": "高级设置",
+      "age_adult": "成人",
+      "age_big_kid": "大童",
+      "age_group": "年龄段",
+      "age_small_kid": "小童",
+      "aspect_ratio": "宽高比",
+      "basic": "基本设置",
+      "batch_count": "批量生成",
+      "color_prompt": "颜色提示词",
+      "color_prompt_placeholder": "描述颜色偏好...",
+      "density": "密度",
+      "density_dense": "密集",
+      "density_medium": "中等",
+      "density_sparse": "稀疏",
+      "design_prompt": "设计提示词",
+      "design_prompt_placeholder": "描述图案设计...",
+      "enable_back": "生成背面图",
+      "enable_detail": "生成细节图",
+      "garment_description": "服装描述",
+      "garment_description_placeholder": "描述服装特点...",
+      "gender": "性别",
+      "gender_female": "女",
+      "gender_male": "男",
+      "generation_model": "图片生成模型",
+      "image_size": "图片尺寸",
+      "layout": "布局模式",
+      "layout_flat": "平铺",
+      "layout_hanging": "悬挂",
+      "layout_model": "模特拍摄",
+      "model": "模型选择",
+      "negative_prompt": "负面提示词",
+      "negative_prompt_placeholder": "不希望出现的内容...",
+      "pattern_brick": "砖块",
+      "pattern_half_drop": "半落",
+      "pattern_mirror": "镜像",
+      "pattern_seamless": "无缝",
+      "pattern_type": "图案类型",
+      "prompt": "提示词",
+      "seed": "随机种子",
+      "seed_placeholder": "留空则随机",
+      "select_model": "选择模型",
+      "style_auto": "自动",
+      "style_description": "风格描述",
+      "style_description_placeholder": "描述期望的风格...",
+      "style_minimal": "极简",
+      "style_premium": "高端",
+      "style_preset": "风格预设",
+      "system_prompt": "系统提示词",
+      "system_prompt_placeholder": "输入系统提示词...",
+      "title": "设置",
+      "use_system_prompt": "使用系统提示词"
+    },
+    "sidebar": {
+      "generate": "生成",
+      "generating": "生成中...",
+      "preset_market": "预设市场",
+      "title": "配置"
+    },
+    "task": {
+      "actions": {
+        "cancel": "取消",
+        "pause": "暂停",
+        "resume": "继续",
+        "retry": "重试"
+      },
+      "batch": {
+        "cancel_all_queued": "取消全部队列",
+        "retry_all_failed": "重试全部失败"
+      },
+      "status": {
+        "cancelled": "已取消",
+        "completed": "已完成",
+        "failed": "失败",
+        "paused": "已暂停",
+        "queued": "等待中",
+        "running": "生成中"
+      },
+      "type": {
+        "generate": "生成",
+        "local_edit": "局部编辑",
+        "regenerate": "重新生成"
+      }
+    },
+    "title": "图片工坊",
+    "types": {
+      "ecom": "电商图片",
+      "ecom_desc": "上传产品图片，AI 生成专业电商图片",
+      "generate": "图片生成",
+      "generate_desc": "根据文字描述生成图片",
+      "model": "模特试穿",
+      "model_desc": "上传服装图片，AI 生成模特试穿效果",
+      "pattern": "图案设计",
+      "pattern_desc": "上传图案参考，AI 生成无缝图案"
+    },
+    "version": {
+      "compare": "版本对比",
+      "current": "当前版本",
+      "rollback": "回滚到此版本"
+    }
   },
   "import": {
     "chatgpt": {
@@ -1887,6 +2106,37 @@
     "add_success": "记忆添加成功",
     "add_user": "添加用户",
     "add_user_failed": "添加用户失败",
+    "advanced": {
+      "backends": "记忆后端",
+      "backends_desc": "不同后端适用于不同场景",
+      "clear_backend": "清空",
+      "clear_confirm_content": "确定要清空 {{backend}} 后端的所有记忆吗？此操作不可撤销。",
+      "clear_confirm_title": "清空记忆",
+      "clear_failed": "清空记忆失败",
+      "clear_success": "记忆已清空",
+      "deepmemo_desc": "基于 Tantivy 的全文搜索",
+      "diary": "日记",
+      "diary_desc": "基于日记的记忆存储",
+      "diary_name": "日记名称",
+      "diary_name_placeholder": "输入日记名称...",
+      "lightmemo_desc": "基于 BM25 的快速关键词搜索",
+      "meshmemo_desc": "基于向量的语义搜索，支持网格连接",
+      "no_results": "未找到结果",
+      "refresh_stats": "刷新统计",
+      "results": "结果",
+      "search": "搜索测试",
+      "search_btn": "搜索",
+      "search_desc": "跨不同后端测试搜索",
+      "search_failed": "搜索失败",
+      "search_placeholder": "输入搜索内容...",
+      "tag_boost": "标签权重",
+      "tagmemo_desc": "基于标签的记忆组织",
+      "tagmemo_settings": "标签记忆设置",
+      "title": "高级记忆",
+      "unified": "统一",
+      "use_rrf": "使用 RRF"
+    },
+    "advanced_settings": "高级设置",
     "all_users": "所有用户",
     "cannot_delete_default_user": "不能删除默认用户",
     "configure_memory_first": "请先配置记忆设置",
@@ -1910,8 +2160,10 @@
     "edit_memory": "编辑记忆",
     "embedding_dimensions": "嵌入维度",
     "embedding_model": "嵌入模型",
+    "embedding_model_required": "请先配置嵌入模型才能启用全局记忆",
     "enable_global_memory_first": "请先启用全局记忆",
     "end_date": "结束日期",
+    "extracted_tags": "提取的标签",
     "global_memory": "全局记忆",
     "global_memory_description": "需要开启助手设置中的全局记忆才能使用",
     "global_memory_disabled_desc": "要使用记忆功能，请先在助手设置中启用全局记忆。",
@@ -1919,7 +2171,9 @@
     "global_memory_enabled": "全局记忆已启用",
     "go_to_memory_page": "前往记忆页面",
     "initial_memory_content": "欢迎！这是您的第一条记忆。",
+    "initialized_success": "初始化成功",
     "llm_model": "LLM 模型",
+    "llm_model_required": "请先配置语言模型才能启用全局记忆",
     "load_failed": "加载记忆失败",
     "loading": "正在加载记忆...",
     "loading_memories": "正在加载记忆...",
@@ -1928,6 +2182,7 @@
     "memory": "条记忆",
     "memory_content": "记忆内容",
     "memory_placeholder": "输入记忆内容...",
+    "native_modules": "原生模块",
     "new_user_id": "新用户ID",
     "new_user_id_placeholder": "输入唯一的用户ID",
     "no_matching_memories": "未找到匹配的记忆",
@@ -1961,6 +2216,10 @@
     "stored_memories": "已存储记忆",
     "switch_user": "切换用户",
     "switch_user_confirm": "将用户上下文切换到 {{user}}？",
+    "tag_count": "标签数量",
+    "test_features": "测试功能",
+    "test_results": "测试结果",
+    "testing": "正在测试功能...",
     "time": "时间",
     "title": "全局记忆",
     "total_memories": "条记忆",
@@ -1982,7 +2241,25 @@
     "user_memories_reset": "{{user}} 的所有记忆已重置",
     "user_switch_failed": "切换用户失败",
     "user_switched": "用户上下文已切换到 {{user}}",
-    "users": "用户"
+    "users": "用户",
+    "vector_backend": {
+      "libsql": "LibSQL",
+      "libsql_desc": "SQLite 持久化存储，兼容性好",
+      "memory": "内存",
+      "memory_desc": "内存存储，用于开发/测试",
+      "performance_high": "高",
+      "performance_low": "低",
+      "performance_medium": "中",
+      "persistent": "持久化",
+      "title": "向量后端",
+      "tooltip": "选择向量数据库后端。更改后需要重建索引。",
+      "usearch": "USearch",
+      "usearch_desc": "高性能 HNSW，npm 预编译二进制",
+      "vexus": "Vexus",
+      "vexus_desc": "Rust 原生 (vexus-lite)，最高性能",
+      "volatile": "易失性",
+      "warning": "切换后端需要重建索引"
+    }
   },
   "message": {
     "agents": {
@@ -2221,7 +2498,8 @@
       "invoking": "调用中",
       "pending": "等待中",
       "preview": "预览",
-      "raw": "原始"
+      "raw": "原始",
+      "tool_call": "工具调用"
     },
     "topic": {
       "added": "话题添加成功"
@@ -3993,6 +4271,8 @@
     "developer": {
       "enable_developer_mode": "启用开发者模式",
       "help": "启用开发者模式后，将可以使用调用链功能查看模型调用过程的数据流。",
+      "showvcp_debug": "VCP 调试面板",
+      "showvcp_debug_help": "启用后将在屏幕左下角显示 VCP 调用调试面板，用于监控知识库检索、Agent 上下文注入等 VCP 功能的实时状态。",
       "title": "开发者模式"
     },
     "display": {
@@ -4020,6 +4300,10 @@
           "top": "顶部"
         },
         "title": "导航栏设置"
+      },
+      "presets": {
+        "manage": "管理预设",
+        "title": "预设主题"
       },
       "sidebar": {
         "chat": {
@@ -4183,6 +4467,7 @@
         "browser": "通过 Chrome DevTools 协议控制隐藏的 Electron 窗口，支持打开 URL、执行单行 JS、重置会话",
         "didi_mcp": "一个集成了滴滴 MCP 服务器实现，提供网约车服务包括地图搜索、价格预估、订单管理和司机跟踪。仅支持中国大陆地区。需要配置 DIDI_API_KEY 环境变量",
         "dify_knowledge": "Dify 的 MCP 服务器实现，提供了一个简单的 API 来与 Dify 进行交互。需要配置 Dify Key",
+        "fashion": "时尚 AI 服务 - 提供时尚趋势分析、服装属性提取、知识库搜索和设计建议。集成 Cherry Studio 的 AI 提供商进行图像分析和生成",
         "fetch": "用于获取 URL 网页内容的 MCP 服务器",
         "filesystem": "实现文件系统操作的模型上下文协议（MCP）的 Node.js 服务器。需要配置允许访问的目录",
         "mcp_auto_install": "自动安装 MCP 服务（测试版）",
@@ -4277,6 +4562,7 @@
           "title": "认证成功"
         }
       },
+      "plugin_config": "配置",
       "prompts": {
         "arguments": "参数",
         "availablePrompts": "可用提示",
@@ -4383,7 +4669,8 @@
       "updateError": "更新服务器失败",
       "updateSuccess": "服务器更新成功",
       "url": "URL",
-      "user": "用户"
+      "user": "用户",
+      "vcpPlugins": "VCP 插件"
     },
     "messages": {
       "divider": {
@@ -4626,6 +4913,9 @@
         "tip": "控制模型输出的详细程度",
         "title": "详细程度"
       }
+    },
+    "pluginStore": {
+      "title": "插件商店"
     },
     "privacy": {
       "enable_privacy_mode": "匿名发送错误报告和数据统计",
@@ -5181,17 +5471,164 @@
       "show": "显示托盘图标",
       "title": "托盘"
     },
+    "vcpToolbox": {
+      "actions": {
+        "initFailed": "VCPToolBox 初始化失败",
+        "initSuccess": "VCPToolBox 初始化成功",
+        "initialize": "初始化"
+      },
+      "badge": "74+ 插件",
+      "configUpdateFailed": "配置更新失败",
+      "debug": {
+        "debugMode": "调试模式",
+        "debugModeHelp": "启用后将输出详细的调试日志",
+        "showVCPOutput": "显示 VCP 输出",
+        "showVCPOutputHelp": "在对话中显示 VCP 工具调用的详细输出",
+        "title": "调试设置"
+      },
+      "knowledge": {
+        "diaryList": "日记本列表",
+        "initKnowledge": "初始化知识库",
+        "initKnowledgeFailed": "知识库初始化失败",
+        "initKnowledgeSuccess": "知识库初始化成功",
+        "initializing": "初始化中...",
+        "noData": "暂无数据，请先初始化知识库",
+        "pathConfig": {
+          "browse": "浏览",
+          "rootPath": "知识库根路径",
+          "rootPathHelp": "存放日记和知识库文件的目录",
+          "selectDirectory": "选择目录...",
+          "title": "路径配置",
+          "vectorDimension": "向量维度",
+          "vectorDimensionHelp": "嵌入向量的维度，取决于使用的嵌入模型",
+          "vectorStorePath": "向量存储路径",
+          "vectorStorePathHelp": "存放向量索引数据的目录"
+        },
+        "stats": {
+          "diaryCount": "日记本",
+          "totalChunks": "文本块",
+          "totalFiles": "文件数",
+          "totalTags": "标签数"
+        },
+        "title": "知识库状态"
+      },
+      "loading": "加载中...",
+      "loop": {
+        "apiRetries": "API 重试次数",
+        "apiRetriesHelp": "API 调用失败时的重试次数",
+        "apiRetryDelay": "API 重试延迟 (ms)",
+        "apiRetryDelayHelp": "重试之间的延迟时间（毫秒）",
+        "maxNonStream": "非流式最大循环次数",
+        "maxNonStreamHelp": "非流式响应时的最大工具调用循环次数",
+        "maxStream": "流式模式最大循环次数",
+        "maxStreamHelp": "流式响应时的最大工具调用循环次数",
+        "title": "VCP 循环设置"
+      },
+      "notAvailable": {
+        "description": "未找到 VCPToolBox 模块，请确保已正确安装",
+        "title": "VCPToolBox 不可用"
+      },
+      "plugins": {
+        "columns": {
+          "name": "名称",
+          "status": "状态",
+          "type": "类型",
+          "version": "版本"
+        },
+        "disabled": "禁用",
+        "enabled": "启用",
+        "noPlugins": "暂无插件",
+        "noPluginsHelp": "请先初始化 VCPToolBox",
+        "refresh": "刷新",
+        "reload": "重新加载插件",
+        "reloadFailed": "插件重新加载失败",
+        "reloadSuccess": "插件重新加载成功",
+        "title": "VCP 插件列表",
+        "types": {
+          "asynchronous": "异步",
+          "hybridservice": "混合服务",
+          "messagePreprocessor": "预处理",
+          "service": "服务",
+          "static": "静态",
+          "synchronous": "同步"
+        }
+      },
+      "status": {
+        "initialized": "已初始化",
+        "notAvailable": "不可用",
+        "notInitialized": "未初始化"
+      },
+      "tabs": {
+        "general": "基础设置",
+        "knowledge": "知识库",
+        "plugins": "插件管理"
+      },
+      "title": "VCPToolBox"
+    },
     "wallpaper": {
+      "advanced": {
+        "title": "壁纸高级设置"
+      },
       "blur": "模糊度",
       "brightness": "亮度",
       "builtin": {
         "gradient": "渐变壁纸"
       },
+      "category": {
+        "anime": "动漫壁纸",
+        "gradient": "渐变壁纸"
+      },
+      "custom": "自定义壁纸",
+      "customSource": {
+        "hint": "更换壁纸来源会覆盖预设中的壁纸图片",
+        "title": "自定义壁纸来源"
+      },
+      "display": {
+        "title": "显示参数"
+      },
       "displayMode": "显示模式",
+      "effects": {
+        "chatBubble": {
+          "accentLine": "强调线",
+          "accentLineColor": "强调线颜色",
+          "shadow": "阴影效果",
+          "title": "聊天气泡装饰"
+        },
+        "codeBlock": {
+          "backgroundColor": "背景色",
+          "borderColor": "边框色",
+          "title": "代码块样式"
+        },
+        "contentOverlay": {
+          "endColor": "遮罩结束色",
+          "startColor": "遮罩起始色",
+          "title": "内容遮罩"
+        },
+        "enabled": "启用",
+        "inputBar": {
+          "backgroundColor": "背景色",
+          "borderColor": "边框色",
+          "focusColor": "聚焦色",
+          "title": "输入栏样式"
+        },
+        "reset": "重置效果",
+        "sidebarGlass": {
+          "blurAmount": "模糊度",
+          "endColor": "渐变结束色",
+          "saturation": "饱和度",
+          "startColor": "渐变起始色",
+          "tintColor": "色调",
+          "title": "侧边栏玻璃效果"
+        },
+        "title": "效果设置"
+      },
       "enable": "启用壁纸",
       "excludeWorkflow": {
         "label": "工作流中禁用壁纸",
         "tip": "工作流模块需要清晰的画布，建议保持启用"
+      },
+      "hint": {
+        "disabled": "请先在「预设主题」中选择一个壁纸预设来启用壁纸功能"
       },
       "local": {
         "file": "本地文件",
@@ -5205,6 +5642,39 @@
         "tile": "平铺"
       },
       "opacity": "透明度",
+      "preset": {
+        "anime_dreamy": "梦幻少女",
+        "anime_fantasy": "奇幻冒险",
+        "anime_landscape": "动漫风景",
+        "anime_ocean": "海洋少女",
+        "anime_top": "热门动漫",
+        "blue_archive": "碧蓝档案",
+        "chainsaw_man": "链锯人",
+        "chainsaw_power": "链锯人 - 帕瓦",
+        "cyber_anime": "赛博朋克",
+        "fate_saber": "Fate - 阿尔托莉雅",
+        "fate_sakura": "Fate 间桐樱",
+        "genshin_impact": "原神",
+        "gojo_satoru": "咒术回战 - 五条悟",
+        "gradient_dark": "渐变深色",
+        "gradient_light": "渐变浅色",
+        "honkai_impact": "崩坏3",
+        "honkai_starrail": "崩坏：星穹铁道",
+        "jujutsu_kaisen": "咒术回战",
+        "makima": "链锯人 - 玛奇玛",
+        "my_hero_academia": "我的英雄学院",
+        "nier_automata": "尼尔：机械纪元",
+        "pink_anime": "粉色少女",
+        "rain_anime": "雨中漫步",
+        "spy_family": "间谍过家家",
+        "starry_night": "星空夜景",
+        "sunset_anime": "日落黄昏",
+        "vocaloid": "初音未来"
+      },
+      "presets": {
+        "none": "不使用壁纸预设",
+        "title": "预设主题"
+      },
       "reset": "重置参数",
       "resetToDefault": "恢复默认",
       "source": {
@@ -5226,6 +5696,7 @@
   },
   "title": {
     "apps": "小程序",
+    "canvas": "画布",
     "code": "Code",
     "files": "文件",
     "home": "首页",
@@ -5396,6 +5867,353 @@
     "noReleaseNotes": "暂无更新日志",
     "saveDataError": "保存数据失败，请重试",
     "title": "更新提示"
+  },
+  "vcp": {
+    "advanced_editor": {
+      "description": "Tar/Var/Sar 变量管理、测试预览、依赖分析、TVStxt 文件管理",
+      "title": "高级变量编辑器"
+    },
+    "agents": {
+      "create": "新建助手",
+      "create_blank": "空白助手",
+      "create_first": "创建第一个助手",
+      "delete_confirm": "确定删除此助手？",
+      "empty": "暂无助手",
+      "from_library": "从助手库选择",
+      "groupchat": "群聊",
+      "groupchat_config": "群聊配置",
+      "groupchat_enabled": "群聊就绪",
+      "groupchat_only": "仅群聊",
+      "has_greeting": "有问候",
+      "has_memory": "有记忆",
+      "has_personality": "有人设",
+      "import": "导入 VCP Agent",
+      "no_description": "暂无描述",
+      "no_results": "未找到匹配的助手",
+      "search": "搜索助手...",
+      "settings": "设置",
+      "total": "助手总数",
+      "with_memory": "有记忆",
+      "with_profile": "有人设"
+    },
+    "collaboration": {
+      "allowed_agents": "允许的代理",
+      "allowed_agents_desc": "指定此代理可以与哪些代理协作",
+      "allowed_agents_placeholder": "输入代理 ID，用逗号分隔",
+      "blocked_agents": "屏蔽的代理",
+      "blocked_agents_placeholder": "输入屏蔽的代理 ID，用逗号分隔",
+      "can_delegate": "可以委派任务",
+      "can_delegate_desc": "允许此代理将任务委派给其他代理",
+      "can_initiate": "可以发起协作",
+      "can_initiate_desc": "允许此代理与其他代理发起协作",
+      "info": "配置此代理在群聊中与其他代理协作的方式",
+      "max_tasks": "最大并发任务数",
+      "message_prefix": "消息前缀",
+      "message_prefix_desc": "协作时添加到消息前的前缀",
+      "message_prefix_placeholder": "例如：[代理名称]：",
+      "response_style": "响应风格",
+      "style_adaptive": "自适应",
+      "style_concise": "简洁",
+      "style_detailed": "详细",
+      "title": "协作设置"
+    },
+    "dailynote": {
+      "click_to_edit": "点击编辑",
+      "no_preview": "无预览",
+      "note_count": "{{count}} 篇日记",
+      "notebook_name": "{{name}}的日记本",
+      "sort_mtime_asc": "最早修改",
+      "sort_mtime_desc": "最近修改",
+      "sort_name_asc": "名称升序",
+      "sort_name_desc": "名称降序",
+      "stats_count": "{{count}} 篇",
+      "stats_notebook": "日记本:",
+      "stats_total": "共:",
+      "time_hours_ago": "{{n}} 小时前",
+      "time_just_now": "刚刚",
+      "time_minutes_ago": "{{n}} 分钟前"
+    },
+    "dashboard": {
+      "agents": {
+        "description": "统一管理所有助手/智能体，支持 VCP 人格配置和群聊协作。",
+        "title": "助手管理"
+      },
+      "coming_soon": "功能开发中，敬请期待。",
+      "groupchat": {
+        "description": "管理多 Agent 群聊会话，配置发言模式、成员标签、统一模型等。",
+        "go_to_chat": "前往群聊",
+        "title": "群聊管理",
+        "unified_entry": "统一入口"
+      },
+      "menu": {
+        "agents": "Agent 管理",
+        "dailynote": "日记",
+        "forum": "论坛",
+        "groupchat": "群聊管理",
+        "plugins": "插件管理",
+        "settings": "全局设置",
+        "tavern": "酒馆",
+        "templates": "模板管理",
+        "variables": "变量管理",
+        "workbench": "工作台"
+      },
+      "settings": {
+        "description": "VCP 系统全局配置，包括默认模型、变量前缀、插件路径等。",
+        "title": "全局设置"
+      },
+      "templates": {
+        "description": "管理 VCP 提示词模板，支持变量插值和模板渲染。",
+        "title": "模板管理"
+      },
+      "title": "VCP 控制台",
+      "variables": {
+        "description": "管理 VCP 提示词变量，支持全局、Agent、会话三种作用域。",
+        "title": "变量管理"
+      }
+    },
+    "forum": {
+      "author": "作者",
+      "author_placeholder": "输入作者署名",
+      "board": "板块",
+      "board_all": "全部板块",
+      "board_chat": "闲聊划水板块",
+      "board_feedback": "需求反馈板块",
+      "board_tech": "VCP技术板块",
+      "content_placeholder": "输入帖子内容，支持 Markdown",
+      "create_post": "创建帖子",
+      "fill_required": "请填写必填项",
+      "image": "图片",
+      "loading": "加载中...",
+      "new_post": "发帖",
+      "no_posts": "暂无帖子",
+      "post_content": "内容 (Markdown)",
+      "post_created": "帖子创建成功",
+      "post_title": "标题",
+      "replies": "回复",
+      "reply_list": "回复列表",
+      "reply_placeholder": "输入回复内容...",
+      "reply_sent": "回复成功",
+      "search_placeholder": "搜索帖子...",
+      "send_reply": "发送回复",
+      "title": "VCP 论坛",
+      "title_placeholder": "输入帖子标题"
+    },
+    "memory": {
+      "title": "记忆设置"
+    },
+    "plugin": {
+      "author": "作者",
+      "available": "可用插件",
+      "category": {
+        "ai": "AI",
+        "builtin_service": "内置服务",
+        "code": "代码",
+        "diary": "日记",
+        "file": "文件",
+        "image": "图像",
+        "network": "网络",
+        "search": "搜索",
+        "service": "服务",
+        "utility": "工具",
+        "video": "视频"
+      },
+      "commands": "命令列表",
+      "config_title": "插件配置",
+      "configure": "配置",
+      "details": "插件详情",
+      "disabled": "已禁用",
+      "disabled_success": "插件已禁用",
+      "distributed": "分布式",
+      "enabled": "已启用",
+      "enabled_success": "插件已启用",
+      "info_tooltip": "查看插件详情",
+      "install": "安装",
+      "installed": "已安装",
+      "load_error": "加载插件列表失败",
+      "loading": "加载中...",
+      "no_commands": "暂无命令",
+      "no_config": "此插件无需配置",
+      "no_description": "暂无描述",
+      "no_plugins": "暂无插件",
+      "no_readme": "暂无说明",
+      "no_search_results": "未找到匹配的插件",
+      "no_system_prompt": "暂无系统提示词",
+      "open_window": "独立窗口",
+      "readme": "说明文档",
+      "refresh": "刷新",
+      "requires_config": "需要配置",
+      "search_placeholder": "搜索插件...",
+      "store": "插件商店",
+      "system_prompt": "系统提示词",
+      "system_prompt_loaded": "已加载插件系统提示词",
+      "system_prompt_placeholder": "可选的系统提示词",
+      "tab_all": "全部",
+      "tab_distributed": "分布式",
+      "test": "测试",
+      "test_error": "执行失败",
+      "test_success": "执行成功，耗时 {{time}}ms",
+      "test_tooltip": "测试执行此插件",
+      "testing": "正在测试 {{name}}...",
+      "title": "VCP 插件管理",
+      "toggle_error": "切换状态失败",
+      "total": "总数",
+      "uninstall": "卸载",
+      "update": "更新",
+      "version": "版本"
+    },
+    "profile": {
+      "add_dialogue": "添加对话",
+      "background": "背景",
+      "background_desc": "描述代理的背景故事或上下文",
+      "background_placeholder": "输入代理的背景故事...",
+      "example_dialogues": "示例对话",
+      "greeting": "问候语",
+      "greeting_placeholder": "输入代理的问候语...",
+      "info": "配置代理的个性和沟通风格",
+      "no_dialogues": "暂无示例对话",
+      "personality": "个性",
+      "personality_desc": "描述代理的个性特征",
+      "personality_placeholder": "例如：友好、专业、好奇...",
+      "title": "档案设置",
+      "tone": "沟通语气",
+      "tone_casual": "随意",
+      "tone_formal": "正式",
+      "tone_placeholder": "选择沟通语气",
+      "tone_playful": "活泼",
+      "tone_professional": "专业",
+      "traits": "性格特征",
+      "traits_placeholder": "输入性格特征，用逗号分隔"
+    },
+    "sar": {
+      "create_failed": "创建失败",
+      "create_success": "Sar 配置创建成功",
+      "delete_failed": "删除失败",
+      "delete_success": "Sar 配置删除成功"
+    },
+    "settings": {
+      "agent_desc": "描述",
+      "agent_name": "名称",
+      "agent_preview": "Agent 预览",
+      "clean_failed": "清理日志失败",
+      "debug": "调试设置",
+      "description": "配置 VCP Agent 以启用智能上下文注入功能",
+      "info_desc": "选择一个 VCP Agent 后，系统会根据 Agent 的配置自动注入相关上下文（如知识库检索结果、日记内容等）到对话中。",
+      "info_title": "VCP 上下文注入",
+      "knowledge": "知识库设置",
+      "logs": "日志设置",
+      "logs_cleaned": "日志已清理",
+      "loop": "VCP 循环设置",
+      "no_agents": "暂无 VCP Agent，请先在 VCP 管理中创建",
+      "plugins": "插件管理",
+      "plugins_refreshed": "插件列表已刷新",
+      "preprocessor": "预处理器排序",
+      "refresh_failed": "刷新插件失败",
+      "select_agent": "选择 VCP Agent",
+      "select_agent_first": "请先选择 VCP Agent",
+      "select_placeholder": "选择一个 VCP Agent",
+      "system_prompt": "系统提示词",
+      "title": "VCP Agent",
+      "variables": "变量"
+    },
+    "templates": {
+      "category": "分类",
+      "category_agent": "Agent 模板",
+      "category_custom": "自定义模板",
+      "category_system": "系统模板",
+      "content": "内容",
+      "content_required": "请输入模板内容",
+      "create": "新建模板",
+      "create_first": "创建第一个模板",
+      "create_success": "模板创建成功",
+      "delete_confirm": "确定删除此模板？",
+      "delete_failed": "删除失败",
+      "delete_success": "模板删除成功",
+      "description": "描述",
+      "edit": "编辑模板",
+      "empty": "暂无模板",
+      "list": "模板列表",
+      "load_failed": "加载模板失败",
+      "name": "模板名",
+      "name_required": "请输入模板名",
+      "no_results": "未找到匹配的模板",
+      "preview": "预览",
+      "save_failed": "保存失败",
+      "search": "搜索模板...",
+      "total": "模板总数",
+      "update_success": "模板更新成功",
+      "usage_title": "模板使用说明",
+      "variables": "变量"
+    },
+    "test": {
+      "input_required": "请输入测试文本"
+    },
+    "tvstxt": {
+      "create": "创建 TVStxt 文件",
+      "create_failed": "创建失败",
+      "create_success": "文件创建成功",
+      "must_be_txt": "文件名必须以 .txt 结尾",
+      "name_required": "请输入文件名",
+      "save_failed": "保存失败",
+      "save_success": "文件保存成功"
+    },
+    "variables": {
+      "category": "类型",
+      "create": "新建变量",
+      "create_success": "变量创建成功",
+      "delete_confirm": "确定删除此变量？",
+      "delete_failed": "删除失败",
+      "delete_success": "变量删除成功",
+      "description": "描述",
+      "empty": "暂无变量",
+      "load_failed": "加载变量失败",
+      "name": "变量名",
+      "no_results": "未找到匹配的变量",
+      "save_failed": "保存失败",
+      "scope": "作用域",
+      "search": "搜索变量...",
+      "tab_user": "用户变量",
+      "total": "变量总数",
+      "types_title": "变量类型说明",
+      "update_success": "变量更新成功",
+      "user_variables": "用户变量",
+      "value": "值"
+    },
+    "workbench": {
+      "clear": "清空",
+      "columns": {
+        "actions": "操作",
+        "duration": "耗时",
+        "name": "名称",
+        "source": "来源",
+        "status": "状态",
+        "time": "时间",
+        "type": "类型"
+      },
+      "description": "查看和管理 VCP 工具调用记录",
+      "filter": {
+        "assistant": "助手",
+        "status": "状态",
+        "tool": "工具",
+        "type": "类型"
+      },
+      "refresh": "刷新",
+      "search": "搜索工具调用...",
+      "selectCall": "选择一条调用记录查看详情",
+      "stats": {
+        "avgTime": "平均耗时",
+        "crew": "Crew 活动",
+        "pending": "待处理",
+        "successRate": "成功率",
+        "tools": "工具数",
+        "total": "总调用"
+      },
+      "tabs": {
+        "calls": "调用记录",
+        "logs": "日志",
+        "tasks": "任务"
+      },
+      "title": "VCP 工作台"
+    }
   },
   "warning": {
     "missing_provider": "供应商不存在，已回退到默认供应商 {{provider}}。这可能导致问题。"

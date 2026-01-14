@@ -27,9 +27,11 @@ import styled from 'styled-components'
 
 import ChatNavbar from './ChatNavbar'
 import AgentSessionInputbar from './Inputbar/AgentSessionInputbar'
+import GroupChatInputbar from './Inputbar/GroupChatInputbar'
 import Inputbar from './Inputbar/Inputbar'
 import AgentSessionMessages from './Messages/AgentSessionMessages'
 import ChatNavigation from './Messages/ChatNavigation'
+import GroupChatMessages from './Messages/GroupChatMessages'
 import Messages from './Messages/Messages'
 import Tabs from './Tabs'
 
@@ -51,7 +53,8 @@ const Chat: FC<Props> = (props) => {
   const { isTopNavbar } = useNavbarPosition()
   const chatMaxWidth = useChatMaxWidth()
   const { chat } = useRuntime()
-  const { activeTopicOrSession, activeAgentId, activeSessionIdMap } = chat
+  const { activeTopicOrSession, activeAgentId, activeSessionIdMap, activeGroupChatSessionId, groupChatAssistantIds } =
+    chat
   const activeSessionId = activeAgentId ? activeSessionIdMap[activeAgentId] : null
   const { apiServer } = useSettings()
   const sessionAgentId = activeTopicOrSession === 'session' ? activeAgentId : null
@@ -235,6 +238,21 @@ const Chat: FC<Props> = (props) => {
                     )}
                     {messageNavigation === 'buttons' && <ChatNavigation containerId="messages" />}
                     <AgentSessionInputbar agentId={activeAgentId} sessionId={activeSessionId} />
+                  </>
+                )}
+                {activeTopicOrSession === 'groupchat' && !activeGroupChatSessionId && (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Alert
+                      type="info"
+                      message={t('groupchat.create_session_hint', '创建群聊会话开始多Agent对话')}
+                      style={{ margin: '5px 16px' }}
+                    />
+                  </div>
+                )}
+                {activeTopicOrSession === 'groupchat' && activeGroupChatSessionId && (
+                  <>
+                    <GroupChatMessages sessionId={activeGroupChatSessionId} />
+                    <GroupChatInputbar sessionId={activeGroupChatSessionId} assistantIds={groupChatAssistantIds} />
                   </>
                 )}
                 {isMultiSelectMode && <MultiSelectActionPopup topic={props.activeTopic} />}

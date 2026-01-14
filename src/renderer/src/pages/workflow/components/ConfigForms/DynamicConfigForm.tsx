@@ -101,7 +101,9 @@ function FieldRenderer({
 
   switch (field.type) {
     case 'text':
-      return <FormInput value={value ?? field.default ?? ''} onChange={handleTextChange} placeholder={field.placeholder} />
+      return (
+        <FormInput value={value ?? field.default ?? ''} onChange={handleTextChange} placeholder={field.placeholder} />
+      )
 
     case 'textarea':
       return (

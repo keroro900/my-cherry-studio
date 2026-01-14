@@ -10,8 +10,8 @@
 
 import { loggerService } from '@logger'
 
-import type { NodeDefinition, PortDefinition } from '../base/types'
 import { nodeRegistry } from '../base'
+import type { NodeDefinition, PortDefinition } from '../base/types'
 import { CustomNodeExecutor } from './CustomNodeExecutor'
 import type { CustomNodeDefinition, CustomNodeStorage, CustomPortConfig } from './types'
 import { createDefaultCustomNodeDefinition, validateCustomNodeDefinition } from './types'

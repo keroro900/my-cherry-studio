@@ -53,9 +53,7 @@ const PaintingsList: FC<PaintingsListProps> = ({
             <PlusOutlined />
           </CollapsedNewButton>
         </Tooltip>
-        {paintings.length > 0 && (
-          <CollapsedCount>{paintings.length}</CollapsedCount>
-        )}
+        {paintings.length > 0 && <CollapsedCount>{paintings.length}</CollapsedCount>}
       </CollapsedContainer>
     )
   }

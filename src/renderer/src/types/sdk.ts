@@ -109,11 +109,90 @@ export type ReasoningEffortOptionalParams = {
 export type OpenAISdkParams = OpenAIParamsPurified & ReasoningEffortOptionalParams & OpenAIModalities & OpenAIExtraBody
 
 // OpenRouter may include additional fields like cost
-export type OpenAISdkRawChunk =
-  | (OpenAI.Chat.Completions.ChatCompletionChunk & { usage?: OpenAI.CompletionUsage & { cost?: number } })
-  | ({
-      _request_id?: string | null | undefined
-    } & OpenAI.ChatCompletion & { usage?: OpenAI.CompletionUsage & { cost?: number } })
+/**
+ * Extended OpenAI usage with cost tracking
+ */
+export interface ExtendedOpenAIUsage extends OpenAI.CompletionUsage {
+  cost?: number
+}
+
+/**
+ * Citation from web search or URL context
+ */
+export interface OpenAICitation {
+  type: string
+  url?: string
+  title?: string
+  text?: string
+  start_index?: number
+  end_index?: number
+}
+
+/**
+ * Web search result from various providers
+ */
+export interface OpenAIWebSearchResult {
+  url: string
+  title?: string
+  content?: string
+  snippet?: string
+}
+
+/**
+ * Search info container (used by some providers like Zhipu)
+ */
+export interface OpenAISearchInfo {
+  search_results?: OpenAIWebSearchResult[]
+}
+
+/**
+ * URL citation annotation
+ */
+export interface OpenAIUrlCitationAnnotation {
+  type: 'url_citation'
+  url_citation?: {
+    url: string
+    title?: string
+    start_index?: number
+    end_index?: number
+  }
+}
+
+/**
+ * Extended OpenAI delta with reasoning content support
+ * Supports various providers' reasoning formats
+ */
+export interface ExtendedOpenAIDelta extends OpenAI.Chat.Completions.ChatCompletionChunk.Choice.Delta {
+  reasoning_content?: string
+  reasoning?: string
+}
+
+/**
+ * Extended OpenAI chunk with provider-specific fields
+ * Supports citations, web search results, and other provider extensions
+ */
+export interface ExtendedOpenAISdkRawChunk extends OpenAI.Chat.Completions.ChatCompletionChunk {
+  usage?: ExtendedOpenAIUsage
+  citations?: OpenAICitation[]
+  search_results?: OpenAIWebSearchResult[]
+  web_search?: OpenAIWebSearchResult[]
+  search_info?: OpenAISearchInfo
+  annotations?: OpenAIUrlCitationAnnotation[]
+}
+
+/**
+ * Extended OpenAI completion with provider-specific fields
+ */
+export interface ExtendedOpenAIChatCompletion extends OpenAI.ChatCompletion {
+  _request_id?: string | null | undefined
+  usage?: ExtendedOpenAIUsage
+  citations?: OpenAICitation[]
+  search_results?: OpenAIWebSearchResult[]
+  web_search?: OpenAIWebSearchResult[]
+  search_info?: OpenAISearchInfo
+}
+
+export type OpenAISdkRawChunk = ExtendedOpenAISdkRawChunk | ExtendedOpenAIChatCompletion
 
 export type OpenAISdkRawOutput = Stream<OpenAI.Chat.Completions.ChatCompletionChunk> | OpenAI.ChatCompletion
 export type OpenAISdkRawContentSource =

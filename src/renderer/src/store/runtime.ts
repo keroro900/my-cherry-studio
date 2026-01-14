@@ -29,14 +29,18 @@ export interface ChatState {
   /** UI state. Map agent id to active session id.
    *  null represents no active session  */
   activeSessionIdMap: Record<string, string | null>
-  /** meanwhile active Assistants or Agents */
-  activeTopicOrSession: 'topic' | 'session'
+  /** meanwhile active Assistants or Agents or GroupChat */
+  activeTopicOrSession: 'topic' | 'session' | 'groupchat'
   /** topic ids that are currently being renamed */
   renamingTopics: string[]
   /** topic ids that are newly renamed */
   newlyRenamedTopics: string[]
   /** is a session waiting for updating/deleting. undefined and false share same semantics.  */
   sessionWaiting: Record<string, boolean>
+  /** 群聊会话 ID */
+  activeGroupChatSessionId: string | null
+  /** 群聊参与的 Assistant IDs */
+  groupChatAssistantIds: string[]
 }
 
 export interface WebSearchState {
@@ -111,7 +115,9 @@ const initialState: RuntimeState = {
     activeSessionIdMap: {},
     renamingTopics: [],
     newlyRenamedTopics: [],
-    sessionWaiting: {}
+    sessionWaiting: {},
+    activeGroupChatSessionId: null,
+    groupChatAssistantIds: []
   },
   websearch: {
     activeSearches: {}
@@ -182,8 +188,22 @@ const runtimeSlice = createSlice({
       const { agentId, sessionId } = action.payload
       state.chat.activeSessionIdMap[agentId] = sessionId
     },
-    setActiveTopicOrSessionAction: (state, action: PayloadAction<'topic' | 'session'>) => {
+    setActiveTopicOrSessionAction: (state, action: PayloadAction<'topic' | 'session' | 'groupchat'>) => {
       state.chat.activeTopicOrSession = action.payload
+    },
+    setActiveGroupChatSessionId: (state, action: PayloadAction<string | null>) => {
+      state.chat.activeGroupChatSessionId = action.payload
+    },
+    setGroupChatAssistantIds: (state, action: PayloadAction<string[]>) => {
+      state.chat.groupChatAssistantIds = action.payload
+    },
+    addGroupChatAssistant: (state, action: PayloadAction<string>) => {
+      if (!state.chat.groupChatAssistantIds.includes(action.payload)) {
+        state.chat.groupChatAssistantIds.push(action.payload)
+      }
+    },
+    removeGroupChatAssistant: (state, action: PayloadAction<string>) => {
+      state.chat.groupChatAssistantIds = state.chat.groupChatAssistantIds.filter((id) => id !== action.payload)
     },
     setRenamingTopics: (state, action: PayloadAction<string[]>) => {
       state.chat.renamingTopics = action.payload
@@ -230,6 +250,10 @@ export const {
   setActiveAgentId,
   setActiveSessionIdAction,
   setActiveTopicOrSessionAction,
+  setActiveGroupChatSessionId,
+  setGroupChatAssistantIds,
+  addGroupChatAssistant,
+  removeGroupChatAssistant,
   setRenamingTopics,
   setNewlyRenamedTopics,
   setSessionWaitingAction,

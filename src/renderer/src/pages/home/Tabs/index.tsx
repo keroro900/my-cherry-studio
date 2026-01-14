@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import Assistants from './AssistantsTab'
+import GroupChatTab from './GroupChatTab'
+import SettingsTab from './SettingsTab'
 import Topics from './TopicsTab'
 
 interface Props {
@@ -114,6 +116,9 @@ const HomeTabs: FC<Props> = ({
           <TabItem $active={tab === 'topic'} onClick={() => setTab('topic')}>
             {t('common.topics')}
           </TabItem>
+          <TabItem $active={tab === 'groupchat'} onClick={() => setTab('groupchat')}>
+            {t('groupchat.abbr', '群聊')}
+          </TabItem>
           <TabItem $active={tab === 'settings'} onClick={() => setTab('settings')}>
             {t('settings.title')}
           </TabItem>
@@ -148,6 +153,8 @@ const HomeTabs: FC<Props> = ({
             position={position}
           />
         )}
+        {tab === 'groupchat' && <GroupChatTab />}
+        {tab === 'settings' && <SettingsTab assistant={activeAssistant} />}
       </TabContent>
     </Container>
   )

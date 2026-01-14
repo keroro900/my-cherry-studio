@@ -16,7 +16,6 @@ class SpanCacheService implements TraceCache {
   private topicMap: Map<string, string> = new Map<string, string>()
   private fileDir: string
   private cache: Map<string, SpanEntity> = new Map<string, SpanEntity>()
-  pri
 
   constructor() {
     this.fileDir = path.join(os.homedir(), HOME_CHERRY_DIR, 'trace')
@@ -330,7 +329,17 @@ class SpanCacheService implements TraceCache {
     const writeOperations = spans
       .filter((span) => span.topicId)
       .map(async (span) => {
-        await fs.appendFile(filePath, JSON.stringify(span) + '\n')
+        try {
+          // JSON.stringify 应该已经正确转义换行符，但为保险起见进行检查
+          const jsonLine = JSON.stringify(span)
+          // 验证 JSON 不包含未转义的换行符
+          if (jsonLine.includes('\n')) {
+            logger.warn('JSON output contains unescaped newline, sanitizing', { spanId: span.id })
+          }
+          await fs.appendFile(filePath, jsonLine + '\n')
+        } catch (e) {
+          logger.error('Failed to serialize span', { spanId: span.id, error: e })
+        }
       })
 
     await Promise.all(writeOperations)
@@ -344,35 +353,47 @@ class SpanCacheService implements TraceCache {
     }
 
     try {
-      const fileHandle = await fs.open(filePath, 'r')
-      const stream = fileHandle.createReadStream()
-      const chunks: string[] = []
-
-      for await (const chunk of stream) {
-        chunks.push(chunk.toString())
-      }
-      await fileHandle.close()
+      // 直接读取文件内容，显式指定 UTF-8 编码
+      const content = await fs.readFile(filePath, { encoding: 'utf8' })
 
       // 使用生成器逐行处理
       const parseLines = function* (text: string) {
-        for (const line of text.split('\n')) {
-          const trimmed = line.trim()
+        const lines = text.split('\n')
+        let parseErrors = 0
+        for (let i = 0; i < lines.length; i++) {
+          const trimmed = lines[i].trim()
           if (trimmed) {
             try {
+              // 跳过明显的乱码行（包含替换字符 U+FFFD 或 锟斤拷）
+              if (trimmed.includes('\uFFFD') || trimmed.includes('锟')) {
+                parseErrors++
+                if (parseErrors <= 1) {
+                  logger.warn(`跳过损坏的数据行 (行 ${i + 1})：检测到编码错误`)
+                }
+                continue
+              }
               yield JSON.parse(trimmed) as SpanEntity
             } catch (e) {
-              logger.error(`JSON解析失败: ${trimmed}`, e as Error)
+              parseErrors++
+              // 截断日志输出，避免超长内容刷屏
+              const truncated = trimmed.length > 200 ? trimmed.slice(0, 200) + '...[truncated]' : trimmed
+              if (parseErrors <= 3) {
+                logger.warn(`JSON解析失败 (行 ${i + 1}): ${truncated}`)
+              } else if (parseErrors === 4) {
+                logger.warn(`JSON解析错误过多，后续错误将被静默忽略`)
+              }
+              // 继续处理其他行
             }
           }
         }
       }
 
-      return Array.from(parseLines(chunks.join('')))
+      return Array.from(parseLines(content))
         .filter((span) => span.topicId === topicId && span.traceId === traceId && span.modelName)
         .filter((span) => !modelName || span.modelName === modelName)
     } catch (err) {
-      logger.error('Error parsing JSON:', err as Error)
-      throw err
+      logger.error('Error reading span history file:', err as Error)
+      return [] // 返回空数组而不是抛出错误，避免影响整体功能
     }
   }
 

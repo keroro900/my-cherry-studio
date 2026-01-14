@@ -34,6 +34,11 @@ import type { BlockManager } from './messageStreaming'
 const logger = loggerService.withContext('RendererKnowledgeService')
 
 export const getKnowledgeBaseParams = (base: KnowledgeBase): KnowledgeBaseParams => {
+  // Guard against undefined model
+  if (!base.model) {
+    throw new Error('KnowledgeBase model is required but was undefined')
+  }
+
   const rerankProvider = getProviderByModel(base.rerankModel)
   const aiProvider = new ModernAiProvider(base.model)
   const rerankAiProvider = new AiProvider(rerankProvider)
@@ -95,6 +100,7 @@ export const getKnowledgeBaseParams = (base: KnowledgeBase): KnowledgeBaseParams
       baseURL: rerankHost
     },
     documentCount: base.documentCount,
+    knowledgeType: base.knowledgeType,
     preprocessProvider: updatedPreprocessProvider
   }
 }
@@ -469,4 +475,295 @@ export const createKnowledgeReferencesBlock = async ({
 
   // 返回引用块
   return citationBlock
+}
+
+// ==================== VCP 增强检索 ====================
+
+/**
+ * VCP 增强搜索结果
+ */
+export interface VCPSearchResult {
+  content: string
+  score: number
+  metadata?: Record<string, unknown>
+}
+
+/**
+ * VCP增强知识库检索
+ * 支持时间感知、语义组、TagMemo等高级功能
+ *
+ * @param params - 检索参数
+ * @returns 检索结果列表
+ */
+export async function vcpEnhancedSearch(params: {
+  knowledgeBaseId: string
+  query: string
+  mode?: 'rag' | 'fulltext' | 'threshold_rag' | 'threshold_fulltext'
+  modifiers?: {
+    time?: boolean
+    group?: boolean
+    tagMemo?: number
+    topK?: number
+    threshold?: number
+  }
+}): Promise<VCPSearchResult[]> {
+  try {
+    const result = await window.electron.ipcRenderer.invoke('vcp:search:enhanced', params)
+
+    if (result.success && result.items) {
+      logger.debug('VCP enhanced search completed', {
+        knowledgeBaseId: params.knowledgeBaseId,
+        mode: params.mode,
+        resultCount: result.items.length
+      })
+      return result.items
+    }
+
+    if (!result.success) {
+      logger.warn('VCP enhanced search failed', { message: result.message })
+    }
+
+    return []
+  } catch (error) {
+    logger.error('VCP enhanced search error:', error as Error)
+    return []
+  }
+}
+
+/**
+ * 获取知识库列表
+ * 用于 VCP 声明语法的名称解析
+ */
+export async function vcpListKnowledgeBases(): Promise<Array<{ id: string; name: string; description?: string }>> {
+  try {
+    const result = await window.electron.ipcRenderer.invoke('vcp:knowledge:list')
+    if (result.success && result.bases) {
+      return result.bases
+    }
+    return []
+  } catch (error) {
+    logger.error('Failed to list knowledge bases:', error as Error)
+    return []
+  }
+}
+
+/**
+ * 日记条目同步结果
+ */
+export interface DiarySyncEntry {
+  id: string
+  content: string
+  sourceUrl: string
+  metadata: {
+    characterName: string
+    date: string
+    title?: string
+    tags: string[]
+  }
+}
+
+/**
+ * 准备日记条目用于同步到知识库
+ * 从主进程获取格式化的日记条目，准备进行向量化
+ *
+ * @param params - 同步参数
+ * @returns 准备好的日记条目列表
+ */
+export async function prepareDiaryForSync(params: {
+  entryIds?: string[]
+  syncAll?: boolean
+}): Promise<{ success: boolean; entries: DiarySyncEntry[]; message: string }> {
+  try {
+    const result = await window.electron.ipcRenderer.invoke('vcp:diary:syncToKnowledge', params)
+
+    if (result.success) {
+      logger.info('Diary entries prepared for sync', {
+        count: result.entries?.length || 0
+      })
+    }
+
+    return {
+      success: result.success,
+      entries: result.entries || [],
+      message: result.message || ''
+    }
+  } catch (error) {
+    logger.error('Failed to prepare diary entries for sync:', error as Error)
+    return { success: false, entries: [], message: String(error) }
+  }
+}
+
+// ==================== 统一记忆集成 (Integrated Memory) ====================
+
+/**
+ * 统一记忆搜索结果
+ */
+export interface IntegratedMemoryResult {
+  id: string
+  content: string
+  score: number
+  backend: string
+  type: 'knowledge' | 'diary' | 'memory' | 'lightmemo' | 'deepmemo' | 'meshmemo'
+  matchedTags?: string[]
+  metadata?: Record<string, unknown>
+  learning?: {
+    appliedWeight: number
+    rawScore: number
+    matchedLearningTags: string[]
+  }
+}
+
+/**
+ * 统一知识库和记忆搜索
+ * 整合 KnowledgeBase 搜索 + IntegratedMemory 搜索，提供统一结果
+ *
+ * @param params - 搜索参数
+ * @returns 合并的搜索结果
+ */
+export async function unifiedKnowledgeAndMemorySearch(params: {
+  query: string
+  assistant?: Assistant
+  knowledgeBaseIds?: string[]
+  memoryBackends?: Array<'diary' | 'memory' | 'lightmemo' | 'deepmemo' | 'meshmemo'>
+  topK?: number
+  threshold?: number
+  topicId?: string
+}): Promise<{
+  knowledgeResults: KnowledgeReference[]
+  memoryResults: IntegratedMemoryResult[]
+  combined: Array<KnowledgeReference | IntegratedMemoryResult>
+}> {
+  const { query, assistant, knowledgeBaseIds, memoryBackends, topK = 10, threshold = 0.1, topicId } = params
+
+  const results = {
+    knowledgeResults: [] as KnowledgeReference[],
+    memoryResults: [] as IntegratedMemoryResult[],
+    combined: [] as Array<KnowledgeReference | IntegratedMemoryResult>
+  }
+
+  try {
+    // 并行执行知识库搜索和记忆搜索
+    const [kbResults, memResults] = await Promise.all([
+      // 知识库搜索
+      (async () => {
+        const baseIds = knowledgeBaseIds || assistant?.knowledge_bases?.map((b) => b.id) || []
+        if (baseIds.length === 0) return []
+
+        return processKnowledgeSearch(
+          {
+            knowledge: {
+              question: [query],
+              rewrite: query
+            }
+          },
+          baseIds,
+          topicId || 'unified-search'
+        )
+      })(),
+
+      // 统一记忆搜索
+      (async () => {
+        try {
+          const response = await window.api.integratedMemory.intelligentSearch({
+            query,
+            options: {
+              backends: memoryBackends || ['diary', 'memory', 'lightmemo', 'deepmemo'],
+              topK,
+              threshold,
+              applyLearning: true,
+              recordQuery: true
+            }
+          })
+
+          if (response.success && response.results) {
+            return response.results.map((r) => ({
+              id: r.id,
+              content: r.content,
+              score: r.score,
+              backend: r.backend,
+              type: r.backend as IntegratedMemoryResult['type'],
+              matchedTags: r.matchedTags,
+              metadata: r.metadata,
+              learning: r.learning
+            }))
+          }
+          return []
+        } catch (error) {
+          logger.warn('Integrated memory search failed, continuing with KB results only', error as Error)
+          return []
+        }
+      })()
+    ])
+
+    results.knowledgeResults = kbResults
+    results.memoryResults = memResults
+
+    // 合并结果 (按分数排序)
+    const allResults: Array<(KnowledgeReference | IntegratedMemoryResult) & { sortScore: number }> = [
+      ...kbResults.map((r) => ({ ...r, sortScore: 1.0 })), // KB结果优先
+      ...memResults.map((r) => ({ ...r, sortScore: r.score }))
+    ]
+
+    allResults.sort((a, b) => b.sortScore - a.sortScore)
+    results.combined = allResults.slice(0, topK * 2) // 返回 2x topK 结果
+
+    logger.debug('Unified knowledge and memory search completed', {
+      query: query.slice(0, 50),
+      kbResultCount: kbResults.length,
+      memResultCount: memResults.length,
+      combinedCount: results.combined.length
+    })
+  } catch (error) {
+    logger.error('Unified knowledge and memory search failed', error as Error)
+  }
+
+  return results
+}
+
+/**
+ * 为助手增强知识库搜索
+ * 在原有知识库搜索基础上，添加统一记忆搜索结果
+ */
+export async function enhancedAssistantKnowledgeSearch(params: {
+  assistant: Assistant
+  query: string
+  topicId: string
+  includeMemory?: boolean
+}): Promise<KnowledgeReference[]> {
+  const { assistant, query, topicId, includeMemory = true } = params
+
+  // 基础知识库搜索
+  const knowledgeBaseIds = assistant.knowledge_bases?.map((b) => b.id)
+  if (!knowledgeBaseIds?.length && !includeMemory) {
+    return []
+  }
+
+  const { knowledgeResults, memoryResults } = await unifiedKnowledgeAndMemorySearch({
+    query,
+    assistant,
+    knowledgeBaseIds,
+    topicId
+  })
+
+  // 如果不需要记忆，直接返回知识库结果
+  if (!includeMemory) {
+    return knowledgeResults
+  }
+
+  // 将记忆结果转换为 KnowledgeReference 格式
+  const memoryAsReferences: KnowledgeReference[] = memoryResults.map((m, idx) => ({
+    id: knowledgeResults.length + idx + 1,
+    content: m.content,
+    sourceUrl: `memory://${m.backend}/${m.id}`,
+    type: 'memory' as const,
+    metadata: {
+      ...m.metadata,
+      backend: m.backend,
+      matchedTags: m.matchedTags,
+      learning: m.learning
+    }
+  }))
+
+  // 合并结果
+  return [...knowledgeResults, ...memoryAsReferences]
 }

@@ -7,7 +7,9 @@ import {
   getNotesDir,
   getTempDir,
   readTextFileWithAutoEncoding,
-  scanDir
+  scanDir,
+  scanDirGeneric,
+  type ScanDirOptions
 } from '@main/utils/file'
 import { documentExts, imageExts, KB, MB } from '@shared/config/constant'
 import type { FileMetadata, NotesTreeNode } from '@types'
@@ -888,6 +890,25 @@ class FileStorage {
       return await scanDir(dirPath)
     } catch (error) {
       logger.error('Failed to get directory structure:', error as Error)
+      throw error
+    }
+  }
+
+  /**
+   * 获取目录结构（通用版本，支持自定义选项）
+   * @param dirPath 目录路径
+   * @param options 扫描选项
+   * @returns 文件树结构
+   */
+  public getDirectoryStructureGeneric = async (
+    _: Electron.IpcMainInvokeEvent,
+    dirPath: string,
+    options?: ScanDirOptions
+  ): Promise<NotesTreeNode[]> => {
+    try {
+      return await scanDirGeneric(dirPath, options)
+    } catch (error) {
+      logger.error('Failed to get directory structure (generic):', error as Error)
       throw error
     }
   }

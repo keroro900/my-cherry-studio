@@ -3123,6 +3123,8 @@ const migrateConfig = {
           provider.type = 'ollama'
         }
       })
+      // Add Fashion preprocess provider
+      addPreprocessProviders(state, 'fashion')
       logger.info('migrate 190 success')
       return state
     } catch (error) {
@@ -3138,6 +3140,15 @@ const migrateConfig = {
           provider.anthropicApiHost = 'https://api.tokenflux.ai/anthropic'
         }
       })
+      // Add canvas icon to sidebar if not present
+      if (state.settings && state.settings.sidebarIcons) {
+        if (
+          !state.settings.sidebarIcons.visible.includes('canvas') &&
+          !state.settings.sidebarIcons.disabled.includes('canvas')
+        ) {
+          state.settings.sidebarIcons.visible = [...state.settings.sidebarIcons.visible, 'canvas']
+        }
+      }
       logger.info('migrate 191 success')
       return state
     } catch (error) {

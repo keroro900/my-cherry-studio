@@ -6,6 +6,8 @@ import { IpcChannel } from '@shared/IpcChannel'
 import { windowService } from '../services/WindowService'
 import { app } from './app'
 import { config } from './config'
+import type { UnifiedWebSocketServer } from './websocket'
+import { createAgentSyncPlugin, createVCPLogPlugin, getWebSocketServer, LogLevel } from './websocket'
 
 const logger = loggerService.withContext('ApiServer')
 
@@ -15,6 +17,7 @@ const GLOBAL_KEEPALIVE_TIMEOUT_MS = 60_000
 
 export class ApiServer {
   private server: ReturnType<typeof createServer> | null = null
+  private wsServer: UnifiedWebSocketServer | null = null
 
   async start(): Promise<void> {
     if (this.server && this.server.listening) {
@@ -35,10 +38,13 @@ export class ApiServer {
     this.server = createServer(app)
     this.applyServerTimeouts(this.server)
 
+    // Attach WebSocket server
+    await this.attachWebSocket()
+
     // Start server
     return new Promise((resolve, reject) => {
       this.server!.listen(port, host, () => {
-        logger.info('API server started', { host, port })
+        logger.info('API server started', { host, port, websocket: '/ws' })
 
         // Notify renderer that API server is ready
         const mainWindow = windowService.getMainWindow()
@@ -57,6 +63,33 @@ export class ApiServer {
     })
   }
 
+  /**
+   * 附加 WebSocket 服务器
+   */
+  private async attachWebSocket(): Promise<void> {
+    if (!this.server) return
+
+    this.wsServer = getWebSocketServer()
+    this.wsServer.attach(this.server)
+
+    // 注册内置插件
+    try {
+      // VCP 日志插件
+      const logPlugin = createVCPLogPlugin({
+        minLevel: LogLevel.INFO
+      })
+      await this.wsServer.registerPlugin(logPlugin)
+
+      // Agent 同步插件
+      const agentSyncPlugin = createAgentSyncPlugin()
+      await this.wsServer.registerPlugin(agentSyncPlugin)
+
+      logger.info('WebSocket plugins registered')
+    } catch (error) {
+      logger.error('Failed to register WebSocket plugins', { error: String(error) })
+    }
+  }
+
   private applyServerTimeouts(server: ReturnType<typeof createServer>): void {
     server.requestTimeout = GLOBAL_REQUEST_TIMEOUT_MS
     server.headersTimeout = Math.max(GLOBAL_HEADERS_TIMEOUT_MS, server.requestTimeout + 1_000)
@@ -65,6 +98,12 @@ export class ApiServer {
   }
 
   async stop(): Promise<void> {
+    // 关闭 WebSocket 服务器
+    if (this.wsServer) {
+      await this.wsServer.close()
+      this.wsServer = null
+    }
+
     if (!this.server) return
 
     return new Promise((resolve) => {
@@ -90,6 +129,13 @@ export class ApiServer {
     logger.debug('isRunning check', { hasServer, isListening, result })
 
     return result
+  }
+
+  /**
+   * 获取 WebSocket 服务器实例
+   */
+  getWebSocketServer(): UnifiedWebSocketServer | null {
+    return this.wsServer
   }
 }
 

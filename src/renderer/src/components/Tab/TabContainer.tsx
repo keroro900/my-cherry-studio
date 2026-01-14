@@ -19,6 +19,9 @@ import { classNames } from '@renderer/utils'
 import { Tooltip } from 'antd'
 import type { LRUCache } from 'lru-cache'
 import {
+  Boxes,
+  Camera,
+  FileEdit,
   FileSearch,
   Folder,
   Home,
@@ -32,6 +35,7 @@ import {
   Sparkle,
   Sun,
   Terminal,
+  Workflow,
   X
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -104,6 +108,14 @@ const getTabIcon = (
       return <Settings size={14} />
     case 'code':
       return <Terminal size={14} />
+    case 'workflow':
+      return <Workflow size={14} />
+    case 'image-studio':
+      return <Camera size={14} />
+    case 'canvas':
+      return <FileEdit size={14} />
+    case 'vcp':
+      return <Boxes size={14} />
     default:
       return null
   }

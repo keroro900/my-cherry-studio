@@ -19,6 +19,11 @@ export type PortDataType = 'image' | 'images' | 'video' | 'text' | 'json' | 'any
 /**
  * 节点端口定义
  */
+/**
+ * 端口定义 (NodePort 的别名)
+ */
+export type PortDefinition = NodePort
+
 export interface NodePort {
   id: string
   label: string
@@ -31,7 +36,17 @@ export interface NodePort {
 /**
  * 节点分类
  */
-export type NodeCategory = 'input' | 'ai' | 'image' | 'video' | 'flow' | 'output' | 'external' | 'custom' | 'text' | 'fashion'
+export type NodeCategory =
+  | 'input'
+  | 'ai'
+  | 'image'
+  | 'video'
+  | 'flow'
+  | 'output'
+  | 'external'
+  | 'custom'
+  | 'text'
+  | 'fashion'
 
 /**
  * 节点元数据
@@ -60,6 +75,8 @@ export interface NodeConfigField {
     | 'number'
     | 'select'
     | 'checkbox'
+    | 'color'
+    | 'code'
     | 'model-selector'
     | 'image-upload'
     | 'folder-selector'

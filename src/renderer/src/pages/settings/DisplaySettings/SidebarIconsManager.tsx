@@ -7,8 +7,10 @@ import { setSidebarIcons } from '@renderer/store/settings'
 import type { SidebarIcon } from '@renderer/types'
 import { message } from 'antd'
 import {
+  Boxes,
   Camera,
   Code,
+  FileEdit,
   FileSearch,
   Folder,
   Languages,
@@ -127,7 +129,9 @@ const SidebarIconsManager: FC<SidebarIconsManagerProps> = ({
         notes: <NotepadText size={16} />,
         code_tools: <Code size={16} />,
         workflow: <Workflow size={16} />,
-        image_studio: <Camera size={16} />
+        image_studio: <Camera size={16} />,
+        canvas: <FileEdit size={16} />,
+        vcp_dashboard: <Boxes size={16} />
       }) satisfies Record<SidebarIcon, ReactNode>,
     []
   )

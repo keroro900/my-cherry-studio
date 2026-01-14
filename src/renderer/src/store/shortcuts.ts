@@ -140,6 +140,13 @@ const initialState: ShortcutsState = {
       editable: false,
       enabled: true,
       system: true
+    },
+    {
+      key: 'global_plugin_search',
+      shortcut: ['CommandOrControl', 'Shift', 'P'],
+      editable: true,
+      enabled: true,
+      system: false
     }
   ]
 }

@@ -13,6 +13,8 @@ export function getPreprocessProviderLogo(providerId: PreprocessProviderId) {
       return MinerULogo
     case 'open-mineru':
       return MinerULogo
+    case 'fashion':
+      return undefined // Fashion provider uses default icon
     default:
       return undefined
   }
@@ -43,6 +45,12 @@ export const PREPROCESS_PROVIDER_CONFIG: Record<PreprocessProviderId, Preprocess
     websites: {
       official: 'https://github.com/opendatalab/MinerU/',
       apiKey: 'https://github.com/opendatalab/MinerU/'
+    }
+  },
+  fashion: {
+    websites: {
+      official: 'https://ai.google.dev/',
+      apiKey: 'https://aistudio.google.com/apikey'
     }
   }
 }

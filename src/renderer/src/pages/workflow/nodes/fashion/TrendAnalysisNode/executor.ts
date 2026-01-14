@@ -5,14 +5,14 @@
  * 基于知识库数据分析服装趋势，生成设计建议
  */
 
-import { WorkflowAiService } from '../../../services/WorkflowAiService'
-import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
-import type { NodeExecutionContext, NodeExecutionResult } from '../../../types/core'
 import {
-  TrendAnalysisPromptBuilder,
-  type TrendAnalysisConfig
+  type TrendAnalysisConfig,
+  TrendAnalysisPromptBuilder
 } from '../../../prompts/builders/TrendAnalysisPromptBuilder'
 import { extractAndParseJson } from '../../../prompts/utils/jsonExtractor'
+import { WorkflowAiService } from '../../../services/WorkflowAiService'
+import type { NodeExecutionContext, NodeExecutionResult } from '../../../types/core'
+import { BaseNodeExecutor } from '../../base/BaseNodeExecutor'
 
 /**
  * 趋势分析节点配置
