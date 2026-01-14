@@ -21,6 +21,7 @@ import mcp from './mcp'
 import memory from './memory'
 import messageBlocksReducer from './messageBlock'
 import migrate from './migrate'
+import { vectorSyncMiddleware } from './middleware'
 import minapps from './minapps'
 import newMessagesReducer from './newMessage'
 import { setNotesPath } from './note'
@@ -257,7 +258,9 @@ const store = configureStore({
       immutableCheck: {
         ignoredPaths: ['workflow']
       }
-    }).concat(storeSyncService.createMiddleware())
+    })
+      .concat(vectorSyncMiddleware)
+      .concat(storeSyncService.createMiddleware())
   },
   devTools: true
 })

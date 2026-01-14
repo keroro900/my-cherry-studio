@@ -2,9 +2,26 @@
  * 搜索编排插件
  *
  * 功能：
- * 1. onRequestStart: 智能意图识别 - 分析是否需要网络搜索、知识库搜索、记忆搜索
+ * 1. onRequestStart: 智能意图识别 - 分析是否需要网络搜索、知识库搜索
  * 2. transformParams: 根据意图分析结果动态添加对应的工具
  * 3. onRequestEnd: 自动记忆存储
+ *
+ * === VCP 统一路径集成 (Phase 1) ===
+ *
+ * 记忆功能已迁移到 VCP BuiltinServices:
+ * - 删除 builtin_memory_search SDK 工具
+ * - AI 通过 VCP 文本工具访问记忆功能:
+ *   - Memory:LightSearch - 搜索记忆
+ *   - Memory:CreateMemory - 创建记忆
+ *   - Memory:DeepSearch, Memory:WaveRAGSearch 等
+ *
+ * 保留的 SDK 工具:
+ * - builtin_knowledge_search: 知识库搜索（意图识别后添加）
+ * - builtin_web_search: 网络搜索（意图识别后添加）
+ *
+ * @see IntegratedMemoryService.ts (VCP 记忆服务)
+ * @see KnowledgeSearchTool.ts
+ * @see WebSearchTool.ts
  */
 import { type AiRequestContext, definePlugin } from '@cherrystudio/ai-core'
 import { loggerService } from '@logger'
@@ -26,7 +43,6 @@ import { isEmpty } from 'lodash'
 
 import { MemoryProcessor } from '../../services/MemoryProcessor'
 import { knowledgeSearchTool } from '../tools/KnowledgeSearchTool'
-import { memorySearchTool } from '../tools/MemorySearchTool'
 import { webSearchToolWithPreExtractedKeywords } from '../tools/WebSearchTool'
 
 const logger = loggerService.withContext('SearchOrchestrationPlugin')
@@ -352,12 +368,12 @@ export const searchOrchestrationPlugin = (assistant: Assistant, topicId: string)
           }
         }
 
-        // 🧠 记忆搜索工具配置
-        const globalMemoryEnabled = selectGlobalMemoryEnabled(store.getState())
-        if (globalMemoryEnabled && assistant.enableMemory) {
-          // logger.info('🧠 Adding memory search tool')
-          params.tools['builtin_memory_search'] = memorySearchTool()
-        }
+        // 🧠 记忆功能已迁移到 VCP BuiltinServices
+        // AI 通过 VCP 文本工具访问记忆功能:
+        // - Memory:LightSearch - 搜索记忆
+        // - Memory:CreateMemory - 创建记忆
+        // - Memory:DeepSearch, Memory:WaveRAGSearch 等
+        // 不再使用 SDK builtin_memory_search 工具，避免与 VCP 工具冲突
 
         // logger.info('🔧 Tools configured:', Object.keys(params.tools))
         return params

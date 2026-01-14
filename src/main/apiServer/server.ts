@@ -7,7 +7,13 @@ import { windowService } from '../services/WindowService'
 import { app } from './app'
 import { config } from './config'
 import type { UnifiedWebSocketServer } from './websocket'
-import { createAgentSyncPlugin, createVCPLogPlugin, getWebSocketServer, LogLevel } from './websocket'
+import {
+  createAgentSyncPlugin,
+  createDistributedPlugin,
+  createVCPLogPlugin,
+  getWebSocketServer,
+  LogLevel
+} from './websocket'
 
 const logger = loggerService.withContext('ApiServer')
 
@@ -84,7 +90,17 @@ export class ApiServer {
       const agentSyncPlugin = createAgentSyncPlugin()
       await this.wsServer.registerPlugin(agentSyncPlugin)
 
-      logger.info('WebSocket plugins registered')
+      // VCP 分布式服务插件
+      const distributedPlugin = createDistributedPlugin({
+        toolCallTimeoutMs: 60000,
+        heartbeatTimeoutMs: 90000,
+        broadcastServerChanges: true
+      })
+      await this.wsServer.registerPlugin(distributedPlugin)
+
+      logger.info('WebSocket plugins registered', {
+        plugins: ['VCPLogPlugin', 'AgentSyncPlugin', 'DistributedPlugin']
+      })
     } catch (error) {
       logger.error('Failed to register WebSocket plugins', { error: String(error) })
     }

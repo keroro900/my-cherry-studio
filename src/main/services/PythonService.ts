@@ -1,8 +1,15 @@
 import { randomUUID } from 'node:crypto'
 
-import { ipcMain } from 'electron'
-
 import { windowService } from './WindowService'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronIpcMain: typeof import('electron').ipcMain | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electronIpcMain = require('electron').ipcMain
+} catch {
+  // electron 未就绪
+}
 
 interface PythonExecutionRequest {
   id: string
@@ -37,8 +44,12 @@ export class PythonService {
   }
 
   private setupIpcHandlers() {
+    if (!electronIpcMain) {
+      return
+    }
+
     // Handle responses from renderer
-    ipcMain.on('python-execution-response', (_, response: PythonExecutionResponse) => {
+    electronIpcMain.on('python-execution-response', (_, response: PythonExecutionResponse) => {
       const request = this.pendingRequests.get(response.id)
       if (request) {
         this.pendingRequests.delete(response.id)

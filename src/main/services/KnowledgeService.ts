@@ -18,13 +18,13 @@ import path from 'node:path'
 
 import type { RAGApplication } from '@cherrystudio/embedjs'
 import { RAGApplicationBuilder } from '@cherrystudio/embedjs'
-import { LibSqlDb } from '@cherrystudio/embedjs-libsql'
 import { SitemapLoader } from '@cherrystudio/embedjs-loader-sitemap'
 import { WebLoader } from '@cherrystudio/embedjs-loader-web'
 import { loggerService } from '@logger'
 import Embeddings from '@main/knowledge/embedjs/embeddings/Embeddings'
 import { addFileLoader } from '@main/knowledge/embedjs/loader'
 import { NoteLoader } from '@main/knowledge/embedjs/loader/noteLoader'
+import { UnifiedVectorDatabase } from '@main/knowledge/unified/UnifiedVectorDatabase'
 import PreprocessProvider from '@main/knowledge/preprocess/PreprocessProvider'
 import Reranker from '@main/knowledge/reranker/Reranker'
 import { getTagMemoService, type TagMemoService } from '@main/knowledge/tagmemo'
@@ -106,7 +106,7 @@ class KnowledgeService {
   private processingItemCount = 0
   private knowledgeItemProcessingQueueMappingPromise: Map<LoaderTaskOfSet, () => void> = new Map()
   private ragApplications: Map<string, RAGApplication> = new Map()
-  private dbInstances: Map<string, LibSqlDb> = new Map()
+  private vectorDatabases: Map<string, UnifiedVectorDatabase> = new Map()
   private static MAXIMUM_WORKLOAD = 80 * MB
   private static MAXIMUM_PROCESSING_ITEM_COUNT = 30
   private static ERROR_LOADER_RETURN: LoaderReturn = {
@@ -161,10 +161,10 @@ class KnowledgeService {
         logger.debug(`Cleaned up RAG application for id: ${id}`)
       }
 
-      // Remove database instance reference
-      if (this.dbInstances.has(id)) {
-        this.dbInstances.delete(id)
-        logger.debug(`Removed database instance reference for id: ${id}`)
+      // Remove vector database instance reference
+      if (this.vectorDatabases.has(id)) {
+        this.vectorDatabases.delete(id)
+        logger.debug(`Removed vector database instance reference for id: ${id}`)
       }
     } catch (error) {
       logger.warn(`Failed to cleanup resources for id: ${id}`, error as Error)
@@ -273,18 +273,22 @@ class KnowledgeService {
       dimensions
     })
     try {
-      const dbPath = this.getDbPath(id)
-      const libSqlDb = new LibSqlDb({ path: dbPath })
-      // Save database instance for later closing
-      this.dbInstances.set(id, libSqlDb)
+      // 使用 UnifiedVectorDatabase 替代 LibSqlDb
+      const vectorDb = new UnifiedVectorDatabase(id)
+      await vectorDb.init({ dimensions })
+
+      // 保存 vector database 实例引用
+      this.vectorDatabases.set(id, vectorDb)
 
       ragApplication = await new RAGApplicationBuilder()
         .setModel('NO_MODEL')
         .setEmbeddingModel(embeddings)
-        .setVectorDatabase(libSqlDb)
+        .setVectorDatabase(vectorDb)
         .setSearchResultCount(documentCount || 30)
         .build()
       this.ragApplications.set(id, ragApplication)
+
+      logger.info('RAGApplication created with UnifiedVectorDatabase', { id, dimensions })
     } catch (e) {
       logger.error('Failed to create RAGApplication:', e as Error)
       throw new Error(`Failed to create RAGApplication: ${e}`)
@@ -805,41 +809,6 @@ class KnowledgeService {
   ): Promise<FileMetadata> => {
     let fileToProcess: FileMetadata = file
     const fileExt = file.ext.toLowerCase()
-
-    // Fashion knowledge base: handle images with FashionPreprocessProvider
-    if (base.knowledgeType === 'fashion') {
-      const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp']
-      const dataExtensions = ['.csv', '.tsv']
-
-      if (imageExtensions.includes(fileExt) || dataExtensions.includes(fileExt)) {
-        try {
-          const FashionPreprocessProvider = require('@main/knowledge/preprocess/FashionPreprocessProvider').default
-          const fashionProvider = new FashionPreprocessProvider({ id: 'fashion', name: 'Fashion' })
-
-          // Check if already processed
-          const alreadyProcessed = await fashionProvider.checkIfAlreadyProcessed(file)
-          if (alreadyProcessed) {
-            logger.debug(`Fashion file already processed, using cached result: ${file.path}`)
-            return alreadyProcessed
-          }
-
-          // Process file
-          logger.debug(`Starting Fashion processing for: ${file.path}`)
-          const { processedFile } = await fashionProvider.parseFile(item.id, file)
-          fileToProcess = processedFile
-          const mainWindow = windowService.getMainWindow()
-          mainWindow?.webContents.send('file-preprocess-finished', {
-            itemId: item.id,
-            type: 'fashion'
-          })
-        } catch (err) {
-          logger.error(`Fashion processing failed: ${err}`)
-          // Fall back to original file for non-critical failures
-          logger.warn(`Using original file for: ${file.path}`)
-        }
-        return fileToProcess
-      }
-    }
 
     // Standard preprocessing for PDF with configured provider
     if (base.preprocessProvider && fileExt === '.pdf') {

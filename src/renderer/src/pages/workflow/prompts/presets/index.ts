@@ -36,22 +36,3 @@ export { ETHNICITY_PRESETS, getEthnicityPreset, getEthnicityPresetKeys } from '.
 
 // 姿势预设
 export { getPosePreset, getPosePresetKeys, POSE_PRESETS } from './pose'
-
-// Fashion 服装品类预设
-export {
-  FASHION_CATEGORY_PRESETS,
-  type FashionCategoryPreset,
-  getFashionCategoryOptions,
-  getFashionCategoryPreset,
-  getFashionCategoryPresetKeys
-} from './fashionCategory'
-
-// Fashion 趋势维度预设
-export {
-  buildDimensionAnalysisPrompt,
-  getTrendDimensionOptions,
-  getTrendDimensionPreset,
-  getTrendDimensionPresetKeys,
-  TREND_DIMENSION_PRESETS,
-  type TrendDimensionPreset
-} from './trendDimension'

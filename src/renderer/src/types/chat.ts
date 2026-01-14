@@ -14,6 +14,8 @@ export type InputBarToolType =
   | 'clear_topic'
   | 'toggle_expand'
   | 'new_context'
+  | 'emoji'
+  | 'sticker'
   // Agent Session tools
   | 'create_session'
   | 'slash_commands'

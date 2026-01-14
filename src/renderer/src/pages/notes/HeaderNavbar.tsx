@@ -63,6 +63,60 @@ const HeaderNavbar = ({ notesTree, getCurrentNoteContent, onToggleStar, onExpand
     })
   }, [])
 
+  // RAG 语法参考弹窗
+  const handleShowRagSyntax = useCallback(() => {
+    GeneralPopup.show({
+      title: t('notes.rag_syntax_reference', 'RAG 语法参考'),
+      content: (
+        <div style={{ padding: '16px 0' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600 }}>{t('notes.rag_syntax', '语法')}</th>
+                <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600 }}>{t('notes.rag_description', '说明')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { syntax: '{{日记本}}', desc: t('notes.rag_fulltext', '全文注入') },
+                { syntax: '[[日记本]]', desc: t('notes.rag_rag', 'RAG 片段检索') },
+                { syntax: '<<日记本>>', desc: t('notes.rag_threshold_fulltext', '阈值全文') },
+                { syntax: '《《日记本》》', desc: t('notes.rag_threshold_rag', '阈值 RAG') },
+                { syntax: '[[日记本::Time]]', desc: t('notes.rag_time', '时间感知过滤') },
+                { syntax: '[[日记本::TagMemo0.7]]', desc: t('notes.rag_tagmemo', '标签共现增强') },
+                { syntax: '[[日记本::Rerank]]', desc: t('notes.rag_rerank', '精排重排序') },
+                { syntax: '[[日记本::Group(a,b)]]', desc: t('notes.rag_group', '语义组过滤') },
+                { syntax: '[[日记本::AIMemo]]', desc: t('notes.rag_aimemo', 'AI 综合召回') },
+                { syntax: '[[日记本::TopK5]]', desc: t('notes.rag_topk', '限制返回数量') },
+                { syntax: '[[日记本:1.5]]', desc: t('notes.rag_k_multiplier', '动态 K 值倍数') }
+              ].map((item, index) => (
+                <tr key={index} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                  <td style={{ padding: '8px 12px' }}>
+                    <code style={{
+                      background: 'var(--color-background-soft)',
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      color: 'var(--color-primary)',
+                      fontFamily: 'monospace'
+                    }}>
+                      {item.syntax}
+                    </code>
+                  </td>
+                  <td style={{ padding: '8px 12px', color: 'var(--color-text-2)' }}>{item.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ marginTop: 16, padding: '0 12px', fontSize: 12, color: 'var(--color-text-3)' }}>
+            {t('notes.rag_tip', '提示：在助手的系统提示词中使用这些语法，AI 会自动检索相关日记内容')}
+          </div>
+        </div>
+      ),
+      footer: null,
+      width: 550
+    })
+  }, [t])
+
   const handleBreadcrumbClick = useCallback(
     (item: { treePath: string; isFolder: boolean }) => {
       if (item.isFolder && onExpandPath) {
@@ -144,6 +198,8 @@ const HeaderNavbar = ({ notesTree, getCurrentNoteContent, onToggleStar, onExpand
           handleCopyContent()
         } else if (item.showSettingsPopup) {
           handleShowSettings()
+        } else if (item.showRagSyntaxPopup) {
+          handleShowRagSyntax()
         } else if (item.action) {
           item.action(settings, updateSettings)
         }

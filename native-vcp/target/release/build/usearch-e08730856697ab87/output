@@ -1,0 +1,372 @@
+cargo:rerun-if-changed=rust/lib.rs
+cargo:CXXBRIDGE_PREFIX=usearch
+cargo:CXXBRIDGE_DIR0=E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out\cxxbridge\include
+cargo:CXXBRIDGE_DIR1=E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out\cxxbridge\crate
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+OPT_LEVEL = Some(3)
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_ENCODED_RUSTFLAGS = Some()
+cargo:rerun-if-env-changed=VCINSTALLDIR
+VCINSTALLDIR = None
+cargo:rerun-if-env-changed=VSTEL_MSBuildProjectFullPath
+VSTEL_MSBuildProjectFullPath = None
+cargo:rerun-if-env-changed=VCToolsVersion
+VCToolsVersion = None
+cargo:rerun-if-env-changed=VSCMD_ARG_VCVARS_SPECTRE
+VSCMD_ARG_VCVARS_SPECTRE = None
+cargo:rerun-if-env-changed=WindowsSdkDir
+WindowsSdkDir = None
+cargo:rerun-if-env-changed=WindowsSDKVersion
+WindowsSDKVersion = None
+cargo:rerun-if-env-changed=LIB
+LIB = None
+PATH = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps;E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release;C:\Users\Administrator\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;E:\1\cherry\ai-workflow\cherry-studio\native-vcp\node_modules\.bin;E:\1\cherry\ai-workflow\cherry-studio\node_modules\.bin;E:\1\cherry\ai-workflow\node_modules\.bin;E:\1\cherry\node_modules\.bin;E:\1\node_modules\.bin;E:\node_modules\.bin;C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\run-script\lib\node-gyp-bin;C:\Users\Administrator\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\Administrator\bin;C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Scripts;C:\Users\Administrator\AppData\Local\Programs\Python\Python312;C:\Users\Administrator\AppData\Local\Programs\Python\Python310\Scripts;C:\Users\Administrator\AppData\Local\Programs\Python\Python310;C:\Users\Administrator\AppData\Local\Programs\cursor\resources\app\bin;H:\lora\python_embeded\Scripts;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\libnvvp;C:\Program Files\ImageMagick-7.1.1-Q16-HDRI;D:\VMware\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\dotnet;C:\Program Files\Git\cmd;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;E:\ComfyUI_FKAI_2024\python_embeded\Scripts;C:\Program Files\NVIDIA Corporation\Nsight Compute 2024.3.1;C:\Users\Administrator\AppData\Local\Programs\Python\Launcher;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Users\Administrator\AppData\Local\GitHubDesktop\bin;C:\Users\Administrator\AppData\Loc;E:\鐖琝chrome-headless-shell-win64\chromedriver-win64;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64;C:\Program Files\Microsoft SQL Server\150\Tools\Binn;C:\Program Files\nodejs;C:\Program Files\PuTTY;C:\Program Files\cursor\resources\app\bin;C:\Users\Administrator\.cargo\bin;C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Scripts;C:\Users\Administrator\AppData\Local\Programs\Python\Python312;C:\Users\Administrator\AppData\Local\Programs\Python\Python310\Scripts;C:\Users\Administrator\AppData\Local\Programs\Python\Python310;C:\Users\Administrator\AppData\Local\Programs\Python\Launcher;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Users\Administrator\AppData\Local\GitHubDesktop\bin;C:\Users\Administrator\AppData\Local\Programs\Ollama;C:\Users\Administrator\AppData\Local\Programs\cursor\resources\app\bin;E:\鐖琝chrome-headless-shell-win64\chromedriver-win64;C:\Users\Administrator\AppData\Roaming\npm;C:\Users\Administrator\AppData\Local\Programs\Windsurf\bin;CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1;C:\Users\Administrator\AppData\Local\Programs\Antigravity\bin;C:\Users\Administrator\AppData\Local\Programs\Kiro\bin;E:\Trae\resources\app\bin\lib;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl;C:\Users\Administrator\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin)
+cargo:rerun-if-env-changed=INCLUDE
+INCLUDE = None
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXX_x86_64-pc-windows-msvc
+CXX_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=CXX_x86_64_pc_windows_msvc
+CXX_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_CXX
+HOST_CXX = None
+cargo:rerun-if-env-changed=CXX
+CXX = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+DEBUG = Some(false)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+OUT_DIR = Some(E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out)
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_pc_windows_msvc
+CXXFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-pc-windows-msvc
+CXXFLAGS_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+lib.rs.cc
+lib.c
+lib.cpp
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1530): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1530): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1530): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1567): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1567): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1567): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1569): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1569): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1569): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1608): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1608): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1608): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1611): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1611): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1611): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1761): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1761): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1761): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1786): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1786): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1786): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1787): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1787): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1787): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1788): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1788): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1788): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1216): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1216): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1216): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1252): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1252): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1252): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1304): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1305): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1302): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1308): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1309): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1306): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\elementwise.h(1482): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(522): error C2440: “函数”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(523): error C2440: “函数”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(524): error C2440: “函数”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(525): error C2440: “函数”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(526): error C2440: “函数”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(516): error C2440: “初始化”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(521): error C2440: “初始化”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(534): error C2440: “初始化”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(578): error C2440: “函数”: 无法从“int”转换为“__m512h”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(563): error C2440: “初始化”: 无法从“int”转换为“__m512h”
+exit code: 2
+cargo:warning=ToolExecError: command did not execute successfully (status code exit code: 2): "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\include" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\crate" "-I" "include" "-I" "rust" "-I" "fp16/include" "-I" "simsimd/include" "-W0" "/std:c++17" "/O2" "/fp:fast" "/EHsc" "/MD" "/permissive-" "/sdl-" "-DUSEARCH_USE_OPENMP=0" "-DUSEARCH_USE_FP16LIB=1" "-DUSEARCH_USE_SIMSIMD=1" "-DSIMSIMD_DYNAMIC_DISPATCH=1" "-DSIMSIMD_NATIVE_BF16=0" "-DSIMSIMD_NATIVE_F16=0" "-D_ALLOW_RUNTIME_LIBRARY_MISMATCH" "-D_ALLOW_POINTER_TO_CONST_MISMATCH" "-DSIMSIMD_TARGET_HASWELL=1" "-DSIMSIMD_TARGET_SKYLAKE=1" "-DSIMSIMD_TARGET_ICE=1" "-DSIMSIMD_TARGET_GENOA=1" "-DSIMSIMD_TARGET_SAPPHIRE=1" "-FoE:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\82d4108f828e816a-lib.o" "-c" "simsimd/c/lib.c"C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1649): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1692): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1693): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1735): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1736): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1649): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1692): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1693): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1735): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1736): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1832): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1859): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1860): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1861): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1832): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1859): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1860): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1861): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1389): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1429): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1468): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1521): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1522): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1389): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1429): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1468): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1521): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1522): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\elementwise.h(1481): error C3861: “_cvtss_sh”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\elementwise.h(1481): error C3861: “_cvtss_sh”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(516): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(521): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(522): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(523): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(524): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(525): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(526): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(534): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(556): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(563): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(578): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(593): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(516): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(521): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(522): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(523): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(524): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(525): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(526): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(534): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(556): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(563): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(578): error C3861: “_mm512_set1_ph”: 找不到标识符
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\probability.h(593): error C3861: “_mm512_reduce_add_ph”: 找不到标识符
+
+exit code: 2
+cargo:warning=ToolExecError: command did not execute successfully (status code exit code: 2): "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\include" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\crate" "-I" "include" "-I" "rust" "-I" "fp16/include" "-I" "simsimd/include" "-W0" "/std:c++17" "/O2" "/fp:fast" "/EHsc" "/MD" "/permissive-" "/sdl-" "-DUSEARCH_USE_OPENMP=0" "-DUSEARCH_USE_FP16LIB=1" "-DUSEARCH_USE_SIMSIMD=1" "-DSIMSIMD_DYNAMIC_DISPATCH=1" "-DSIMSIMD_NATIVE_BF16=0" "-DSIMSIMD_NATIVE_F16=0" "-D_ALLOW_RUNTIME_LIBRARY_MISMATCH" "-D_ALLOW_POINTER_TO_CONST_MISMATCH" "-DSIMSIMD_TARGET_HASWELL=1" "-DSIMSIMD_TARGET_SKYLAKE=1" "-DSIMSIMD_TARGET_ICE=1" "-DSIMSIMD_TARGET_GENOA=1" "-DSIMSIMD_TARGET_SAPPHIRE=1" "-FoE:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\ba83c78745fdfcbe-lib.rs.o" "-c" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\sources\\usearch\\rust\\lib.rs.cc"
+exit code: 2
+cargo:warning=ToolExecError: command did not execute successfully (status code exit code: 2): "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\include" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\crate" "-I" "include" "-I" "rust" "-I" "fp16/include" "-I" "simsimd/include" "-W0" "/std:c++17" "/O2" "/fp:fast" "/EHsc" "/MD" "/permissive-" "/sdl-" "-DUSEARCH_USE_OPENMP=0" "-DUSEARCH_USE_FP16LIB=1" "-DUSEARCH_USE_SIMSIMD=1" "-DSIMSIMD_DYNAMIC_DISPATCH=1" "-DSIMSIMD_NATIVE_BF16=0" "-DSIMSIMD_NATIVE_F16=0" "-D_ALLOW_RUNTIME_LIBRARY_MISMATCH" "-D_ALLOW_POINTER_TO_CONST_MISMATCH" "-DSIMSIMD_TARGET_HASWELL=1" "-DSIMSIMD_TARGET_SKYLAKE=1" "-DSIMSIMD_TARGET_ICE=1" "-DSIMSIMD_TARGET_GENOA=1" "-DSIMSIMD_TARGET_SAPPHIRE=1" "-FoE:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\f78cd73f79ce0bf6-lib.o" "-c" "rust/lib.cpp"
+lib.cpp
+lib.rs.cc
+lib.c
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1530): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1530): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1530): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1567): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1567): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1567): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1569): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1569): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1569): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1608): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1608): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1608): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1611): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1611): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\dot.h(1611): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1761): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1761): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1761): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1786): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1786): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1786): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1787): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1787): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1787): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1788): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1788): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\spatial.h(1788): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1216): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1216): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1216): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1252): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1252): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1252): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1304): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1305): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1302): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1308): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1309): error C2440: “类型强制转换”: 无法从“__m512i”转换为“__m512bh”
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\usearch-2.22.0\simsimd\include\simsimd\curved.h(1306): error C2168: “_mm512_dpbf16_ps”: 内部函数的实参太少
+cargo:warning=Failed to compile with all SIMD backends...exit code: 2
+cargo:warning=ToolExecError: command did not execute successfully (status code exit code: 2): "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\include" "-I" "E:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\cxxbridge\\crate" "-I" "include" "-I" "rust" "-I" "fp16/include" "-I" "simsimd/include" "-W0" "/std:c++17" "/O2" "/fp:fast" "/EHsc" "/MD" "/permissive-" "/sdl-" "-DUSEARCH_USE_OPENMP=0" "-DUSEARCH_USE_FP16LIB=1" "-DUSEARCH_USE_SIMSIMD=1" "-DSIMSIMD_DYNAMIC_DISPATCH=1" "-DSIMSIMD_NATIVE_BF16=0" "-DSIMSIMD_NATIVE_F16=0" "-D_ALLOW_RUNTIME_LIBRARY_MISMATCH" "-D_ALLOW_POINTER_TO_CONST_MISMATCH" "-DSIMSIMD_TARGET_HASWELL=1" "-DSIMSIMD_TARGET_SKYLAKE=1" "-DSIMSIMD_TARGET_ICE=1" "-DSIMSIMD_TARGET_GENOA=1" "-FoE:\\1\\cherry\\ai-workflow\\cherry-studio\\native-vcp\\target\\release\\build\\usearch-e08730856697ab87\\out\\82d4108f828e816a-lib.o" "-c" "simsimd/c/lib.c"
+exit code: 0
+exit code: 0
+cargo:warning=Failed to compile after disabling "SIMSIMD_TARGET_SAPPHIRE", trying next configuration...
+lib.rs.cc
+lib.cpp
+lib.c
+exit code: 0
+exit code: 0
+exit code: 0
+cargo:rerun-if-env-changed=AR_x86_64-pc-windows-msvc
+AR_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=AR_x86_64_pc_windows_msvc
+AR_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+cargo:rerun-if-env-changed=ARFLAGS
+ARFLAGS = None
+cargo:rerun-if-env-changed=HOST_ARFLAGS
+HOST_ARFLAGS = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64_pc_windows_msvc
+ARFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64-pc-windows-msvc
+ARFLAGS_x86_64-pc-windows-msvc = None
+cargo:rustc-link-lib=static=usearch
+cargo:rustc-link-search=native=E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\build\usearch-e08730856697ab87\out
+cargo:rerun-if-changed=rust/lib.rs
+cargo:rerun-if-changed=rust/lib.cpp
+cargo:rerun-if-changed=rust/lib.hpp
+cargo:rerun-if-changed=include/index_plugins.hpp
+cargo:rerun-if-changed=include/index_dense.hpp
+cargo:rerun-if-changed=include/usearch/index.hpp

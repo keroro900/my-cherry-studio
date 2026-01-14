@@ -9509,7 +9509,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/yauzl@npm:^2.9.1":
+"@types/yauzl@npm:^2.10.3, @types/yauzl@npm:^2.9.1":
   version: 2.10.3
   resolution: "@types/yauzl@npm:2.10.3"
   dependencies:
@@ -10637,6 +10637,7 @@ __metadata:
     "@types/uuid": "npm:^10.0.0"
     "@types/word-extractor": "npm:^1"
     "@types/ws": "npm:^8.18.1"
+    "@types/yauzl": "npm:^2.10.3"
     "@typescript/native-preview": "npm:latest"
     "@uiw/codemirror-extensions-langs": "npm:^4.25.1"
     "@uiw/codemirror-themes-all": "npm:^4.25.1"
@@ -10834,6 +10835,7 @@ __metadata:
     xterm: "npm:^5.3.0"
     y-protocols: "npm:^1.0.6"
     yaml: "npm:^2.8.1"
+    yauzl: "npm:^3.2.0"
     yjs: "npm:^13.6.27"
     youtubei.js: "npm:^15.0.1"
     zipread: "npm:^1.3.3"
@@ -28277,6 +28279,16 @@ __metadata:
     buffer-crc32: "npm:~0.2.3"
     fd-slicer: "npm:~1.1.0"
   checksum: 10c0/f265002af7541b9ec3589a27f5fb8f11cf348b53cc15e2751272e3c062cd73f3e715bc72d43257de71bbaecae446c3f1b14af7559e8ab0261625375541816422
+  languageName: node
+  linkType: hard
+
+"yauzl@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "yauzl@npm:3.2.0"
+  dependencies:
+    buffer-crc32: "npm:~0.2.3"
+    pend: "npm:~1.2.0"
+  checksum: 10c0/7b40b3dc46b95761a2a764391d257a11f494d365875af73a1b48fe16d4bd103dd178612e60168d12a0e59a8ba4f6411a15a5e8871d5a5f78255d6cc1ce39ee62
   languageName: node
   linkType: hard
 

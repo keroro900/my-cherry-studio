@@ -1,12 +1,28 @@
 import { titleBarOverlayDark, titleBarOverlayLight } from '@main/config'
 import { isMac } from '@main/constant'
 import { randomUUID } from 'crypto'
-import { app, BrowserView, BrowserWindow, nativeTheme } from 'electron'
+import type { BrowserView, BrowserWindow } from 'electron'
 import TurndownService from 'turndown'
 
 import { SESSION_KEY_DEFAULT, SESSION_KEY_PRIVATE, TAB_BAR_HEIGHT } from './constants'
 import { TAB_BAR_HTML } from './tabbar-html'
 import { logger, type TabInfo, userAgent, type WindowInfo } from './types'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+let ElectronBrowserView: typeof import('electron').BrowserView | undefined
+let ElectronBrowserWindow: typeof import('electron').BrowserWindow | undefined
+let electronNativeTheme: typeof import('electron').nativeTheme | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const electron = require('electron')
+  electronApp = electron.app
+  ElectronBrowserView = electron.BrowserView
+  ElectronBrowserWindow = electron.BrowserWindow
+  electronNativeTheme = electron.nativeTheme
+} catch {
+  // electron 未就绪
+}
 
 /**
  * Controller for managing browser windows via Chrome DevTools Protocol (CDP).
@@ -26,16 +42,18 @@ export class CdpBrowserController {
     this.turndownService = new TurndownService()
 
     // Listen for theme changes and update all tab bars
-    nativeTheme.on('updated', () => {
-      const isDark = nativeTheme.shouldUseDarkColors
-      for (const windowInfo of this.windows.values()) {
-        if (windowInfo.tabBarView && !windowInfo.tabBarView.webContents.isDestroyed()) {
-          windowInfo.tabBarView.webContents.executeJavaScript(`window.setTheme(${isDark})`).catch(() => {
-            // Ignore errors if tab bar is not ready
-          })
+    if (electronNativeTheme) {
+      electronNativeTheme.on('updated', () => {
+        const isDark = electronNativeTheme?.shouldUseDarkColors
+        for (const windowInfo of this.windows.values()) {
+          if (windowInfo.tabBarView && !windowInfo.tabBarView.webContents.isDestroyed()) {
+            windowInfo.tabBarView.webContents.executeJavaScript(`window.setTheme(${isDark})`).catch(() => {
+              // Ignore errors if tab bar is not ready
+            })
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   private getWindowKey(privateMode: boolean): string {
@@ -47,8 +65,11 @@ export class CdpBrowserController {
   }
 
   private async ensureAppReady() {
-    if (!app.isReady()) {
-      await app.whenReady()
+    if (!electronApp) {
+      throw new Error('Electron app not available')
+    }
+    if (!electronApp.isReady()) {
+      await electronApp.whenReady()
     }
   }
 
@@ -301,7 +322,10 @@ export class CdpBrowserController {
   }
 
   private createTabBarView(windowInfo: WindowInfo): BrowserView {
-    const tabBarView = new BrowserView({
+    if (!ElectronBrowserView) {
+      throw new Error('ElectronBrowserView not available')
+    }
+    const tabBarView = new ElectronBrowserView({
       webPreferences: {
         contextIsolation: false,
         sandbox: false,
@@ -322,7 +346,7 @@ export class CdpBrowserController {
         logger.debug('Platform init failed', { error, windowKey: windowInfo.windowKey })
       })
       // Initialize theme
-      const isDark = nativeTheme.shouldUseDarkColors
+      const isDark = electronNativeTheme?.shouldUseDarkColors
       tabBarView.webContents.executeJavaScript(`window.setTheme(${isDark})`).catch((error) => {
         logger.debug('Theme init failed', { error, windowKey: windowInfo.windowKey })
       })
@@ -340,16 +364,20 @@ export class CdpBrowserController {
   ): Promise<BrowserWindow> {
     await this.ensureAppReady()
 
+    if (!ElectronBrowserWindow) {
+      throw new Error('ElectronBrowserWindow not available')
+    }
+
     const partition = this.getPartition(privateMode)
 
-    const win = new BrowserWindow({
+    const win = new ElectronBrowserWindow({
       show: showWindow,
       width: 1200,
       height: 800,
       ...(isMac
         ? {
             titleBarStyle: 'hidden',
-            titleBarOverlay: nativeTheme.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight,
+            titleBarOverlay: electronNativeTheme?.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight,
             trafficLightPosition: { x: 8, y: 13 }
           }
         : {
@@ -452,7 +480,11 @@ export class CdpBrowserController {
     const tabId = randomUUID()
     const partition = this.getPartition(privateMode)
 
-    const view = new BrowserView({
+    if (!ElectronBrowserView) {
+      throw new Error('ElectronBrowserView not available')
+    }
+
+    const view = new ElectronBrowserView({
       webPreferences: {
         contextIsolation: true,
         sandbox: true,
@@ -600,8 +632,8 @@ export class CdpBrowserController {
    * @param showWindow - If true, shows the browser window (default: false)
    * @returns Object containing the current URL, page title, and tab ID after navigation
    */
-  public async open(url: string, timeout = 10000, privateMode = false, newTab = false, showWindow = false) {
-    const { tabId: actualTabId, tab } = await this.getTab(privateMode, undefined, newTab, showWindow)
+  public async open(url: string, timeout = 10000, privateMode = false, newTab = false, showWindow = false, tabId?: string) {
+    const { tabId: actualTabId, tab } = await this.getTab(privateMode, tabId, newTab, showWindow)
     const view = tab.view
     const windowKey = this.getWindowKey(privateMode)
 
@@ -793,11 +825,12 @@ export class CdpBrowserController {
     timeout = 10000,
     privateMode = false,
     newTab = false,
-    showWindow = false
+    showWindow = false,
+    tabId?: string
   ): Promise<{ tabId: string; content: string | object }> {
-    const { tabId } = await this.open(url, timeout, privateMode, newTab, showWindow)
+    const { tabId: resultTabId } = await this.open(url, timeout, privateMode, newTab, showWindow, tabId)
 
-    const { tab } = await this.getTab(privateMode, tabId, false, showWindow)
+    const { tab } = await this.getTab(privateMode, resultTabId, false, showWindow)
     const dbg = tab.view.webContents.debugger
     const windowKey = this.getWindowKey(privateMode)
 
@@ -842,7 +875,7 @@ export class CdpBrowserController {
         content = rawContent
       }
 
-      return { tabId, content }
+      return { tabId: resultTabId, content }
     } finally {
       if (timeoutHandle) clearTimeout(timeoutHandle)
     }

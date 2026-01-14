@@ -10,7 +10,6 @@ import type { Content, FunctionCall, Part, Tool } from '@google/genai'
 import { Type as GeminiSchemaType } from '@google/genai'
 import { loggerService } from '@logger'
 import { isFunctionCallingModel, isVisionModel } from '@renderer/config/models'
-import i18n from '@renderer/i18n'
 import {
   handleGetTaskStatusToolCall,
   handleInvokeAgentToolCallWithAsync
@@ -457,7 +456,7 @@ export function parseToolUse(
   mcpTools: MCPTool[],
   startIdx: number = 0
 ): (Omit<ToolUseResponse, 'tool'> & { tool: MCPTool })[] {
-  if (!content || !mcpTools || mcpTools.length === 0) {
+  if (!content) {
     return []
   }
 
@@ -492,11 +491,26 @@ export function parseToolUse(
       parsedArgs = toolArgs
     }
     // Logger.log(`Parsed arguments for tool "${toolName}":`, parsedArgs)
-    const mcpTool = mcpTools.find((tool) => tool.id === toolName || tool.name === toolName)
+    let mcpTool = mcpTools.find((tool) => tool.id === toolName || tool.name === toolName)
+
+    // VCP 统一协议支持：如果在 mcpTools 中找不到工具，创建一个 VCP 虚拟工具
+    // 这样可以支持 AI 使用 <tool_use> 格式调用 VCP 内置服务
+    // 实际执行时会通过 VCP 统一 API 路由到正确的服务
     if (!mcpTool) {
-      logger.error(`Tool "${toolName}" not found in MCP tools`)
-      window.toast.error(i18n.t('settings.mcp.errors.toolNotFound', { name: toolName }))
-      continue
+      logger.debug(`Tool "${toolName}" not found in MCP tools, creating VCP virtual tool`)
+
+      // 创建 VCP 虚拟工具，标记为内置工具以便特殊处理
+      // serverId 设为 'vcp' 表示这是一个 VCP 协议工具
+      mcpTool = {
+        id: toolName,
+        name: toolName,
+        serverId: 'vcp',
+        serverName: 'VCP Plugin',
+        description: `VCP Tool: ${toolName}`,
+        inputSchema: { type: 'object' },
+        type: 'mcp',
+        isBuiltIn: false // 不是真正的内置工具，让它走 callMCPTool 路径
+      }
     }
 
     // Add to tools array

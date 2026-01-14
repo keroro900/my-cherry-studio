@@ -56,9 +56,9 @@
   visibility: visible;
 }
 
-/* ========== Handle 样式优化 v4.0 ========== */
+/* ========== Handle 样式优化 v5.0 ========== */
 /* 限定在 .workflow-root 作用域内 */
-/* 新设计：内嵌式菱形端口，更小更精致 */
+/* 新设计：圆形端口，现代简洁 */
 
 /* 基础 Handle 样式 - 由 DynamicHandles 组件控制 */
 .workflow-root .react-flow__handle {
@@ -68,11 +68,11 @@
   box-shadow: none;
 }
 
-/* Handle 连接时的样式 - 增强发光效果 */
+/* Handle 连接时的样式 - 圆形放大 + 发光效果 */
 .workflow-root .react-flow__handle.connecting,
 .workflow-root .react-flow__handle.connectingfrom,
 .workflow-root .react-flow__handle.connectingto {
-  transform: rotate(45deg) scale(1.3);
+  transform: scale(1.3);
   box-shadow: 0 0 12px var(--handle-color, rgba(24, 144, 255, 0.6));
 }
 
@@ -88,17 +88,17 @@
   filter: grayscale(100%);
 }
 
-/* ========== 实时连线预览样式 v4.0 ========== */
+/* ========== 实时连线预览样式 v5.0 ========== */
 /* 限定在 .workflow-root 作用域内 */
-/* 兼容的 Handle - 绿色发光效果（适配菱形设计） */
+/* 兼容的 Handle - 绿色发光效果（圆形设计） */
 .workflow-root .react-flow__handle.handle-compatible {
   border-color: #4ade80;
   background: #4ade80;
   box-shadow:
     0 0 12px rgba(74, 222, 128, 0.8),
     0 0 24px rgba(74, 222, 128, 0.4);
-  transform: rotate(45deg) scale(1.4);
-  animation: pulse-compatible-diamond 1.2s ease-in-out infinite;
+  transform: scale(1.4);
+  animation: pulse-compatible-circle 1.2s ease-in-out infinite;
   z-index: 100;
 }
 
@@ -107,23 +107,23 @@
   opacity: 0.2;
   cursor: not-allowed;
   filter: grayscale(100%);
-  transform: rotate(45deg) scale(0.8);
+  transform: scale(0.8);
 }
 
-/* 兼容 Handle 脉冲动画 - 菱形版本 */
-@keyframes pulse-compatible-diamond {
+/* 兼容 Handle 脉冲动画 - 圆形版本 */
+@keyframes pulse-compatible-circle {
   0%,
   100% {
     box-shadow:
       0 0 12px rgba(74, 222, 128, 0.8),
       0 0 24px rgba(74, 222, 128, 0.4);
-    transform: rotate(45deg) scale(1.4);
+    transform: scale(1.4);
   }
   50% {
     box-shadow:
       0 0 16px rgba(74, 222, 128, 1),
       0 0 32px rgba(74, 222, 128, 0.6);
-    transform: rotate(45deg) scale(1.5);
+    transform: scale(1.5);
   }
 }
 
@@ -163,6 +163,25 @@
 @keyframes edge-flow {
   from {
     stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Edge 处理中状态 - 更快的流动动画 + 发光效果 */
+.workflow-root .react-flow__edge[data-processing='true'] path,
+.workflow-root .react-flow__edge.processing path {
+  stroke: var(--workflow-theme-success, #52c41a) !important;
+  stroke-width: 4px !important;
+  stroke-dasharray: 8 4;
+  animation: edge-processing 0.4s linear infinite;
+  filter: drop-shadow(0 0 6px var(--workflow-theme-success, #52c41a));
+}
+
+@keyframes edge-processing {
+  from {
+    stroke-dashoffset: 12;
   }
   to {
     stroke-dashoffset: 0;
@@ -423,4 +442,182 @@
 
 .workflow-root .react-flow__pane:active {
   cursor: grabbing;
+}
+
+/* ========== 数据类型颜色系统 v2.0 ========== */
+/* 基于数据类型的边和 Handle 颜色编码 */
+
+/* 数据类型颜色变量 */
+.workflow-root {
+  --datatype-text: #58a6ff;
+  --datatype-image: #a371f7;
+  --datatype-images: #f778ba;
+  --datatype-video: #f85149;
+  --datatype-json: #3fb950;
+  --datatype-boolean: #d29922;
+  --datatype-number: #79c0ff;
+  --datatype-any: #8b949e;
+}
+
+/* 数据类型边样式 - 带渐变动画 */
+.workflow-root .react-flow__edge[data-datatype='text'] .react-flow__edge-path {
+  stroke: var(--datatype-text);
+}
+
+.workflow-root .react-flow__edge[data-datatype='image'] .react-flow__edge-path {
+  stroke: var(--datatype-image);
+}
+
+.workflow-root .react-flow__edge[data-datatype='images'] .react-flow__edge-path {
+  stroke: var(--datatype-images);
+}
+
+.workflow-root .react-flow__edge[data-datatype='video'] .react-flow__edge-path {
+  stroke: var(--datatype-video);
+}
+
+.workflow-root .react-flow__edge[data-datatype='json'] .react-flow__edge-path {
+  stroke: var(--datatype-json);
+}
+
+.workflow-root .react-flow__edge[data-datatype='boolean'] .react-flow__edge-path {
+  stroke: var(--datatype-boolean);
+}
+
+.workflow-root .react-flow__edge[data-datatype='number'] .react-flow__edge-path {
+  stroke: var(--datatype-number);
+}
+
+.workflow-root .react-flow__edge[data-datatype='any'] .react-flow__edge-path {
+  stroke: var(--datatype-any);
+}
+
+/* ========== 增强连线动画 v2.0 ========== */
+
+/* 流动光点动画 */
+@keyframes edge-glow-flow {
+  0% {
+    stroke-dashoffset: 20;
+    filter: drop-shadow(0 0 2px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 2px currentColor);
+  }
+}
+
+/* 激活的边 - 数据正在传输 */
+.workflow-root .react-flow__edge.active .react-flow__edge-path,
+.workflow-root .react-flow__edge[data-active='true'] .react-flow__edge-path {
+  stroke-dasharray: 8 4;
+  animation: edge-glow-flow 0.8s linear infinite;
+}
+
+/* 成功完成的边 - 短暂高亮 */
+.workflow-root .react-flow__edge[data-status='success'] .react-flow__edge-path {
+  stroke: var(--workflow-theme-success, #3fb950);
+  filter: drop-shadow(0 0 8px var(--workflow-theme-success, #3fb950));
+  animation: edge-success-pulse 0.6s ease-out;
+}
+
+@keyframes edge-success-pulse {
+  0% {
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px var(--workflow-theme-success, #3fb950));
+  }
+  50% {
+    stroke-width: 5px;
+    filter: drop-shadow(0 0 12px var(--workflow-theme-success, #3fb950));
+  }
+  100% {
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px var(--workflow-theme-success, #3fb950));
+  }
+}
+
+/* ========== Handle 增强交互 v2.0 ========== */
+
+/* Handle 悬停时的工具提示准备 */
+.workflow-root .react-flow__handle {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  z-index: 10;
+}
+
+/* Handle 悬停效果 - 放大 + 发光 */
+.workflow-root .react-flow__handle:hover {
+  transform: scale(1.25);
+  z-index: 100;
+}
+
+/* Handle 数据类型颜色 */
+.workflow-root .react-flow__handle[data-datatype='text'] {
+  --handle-color: var(--datatype-text);
+}
+
+.workflow-root .react-flow__handle[data-datatype='image'] {
+  --handle-color: var(--datatype-image);
+}
+
+.workflow-root .react-flow__handle[data-datatype='images'] {
+  --handle-color: var(--datatype-images);
+}
+
+.workflow-root .react-flow__handle[data-datatype='video'] {
+  --handle-color: var(--datatype-video);
+}
+
+.workflow-root .react-flow__handle[data-datatype='json'] {
+  --handle-color: var(--datatype-json);
+}
+
+.workflow-root .react-flow__handle[data-datatype='boolean'] {
+  --handle-color: var(--datatype-boolean);
+}
+
+.workflow-root .react-flow__handle[data-datatype='number'] {
+  --handle-color: var(--datatype-number);
+}
+
+.workflow-root .react-flow__handle[data-datatype='any'] {
+  --handle-color: var(--datatype-any);
+}
+
+/* Handle 悬停时显示数据类型发光 */
+.workflow-root .react-flow__handle:hover {
+  box-shadow: 0 0 10px var(--handle-color, currentColor);
+}
+
+/* ========== Pro-Dark 主题特定样式 ========== */
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__background-pattern.dots {
+  fill: rgba(110, 118, 129, 0.3);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__background-pattern.lines {
+  stroke: rgba(48, 54, 61, 0.6);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__selection {
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px dashed #58a6ff;
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__connection-path {
+  stroke: #d29922 !important;
+  filter: drop-shadow(0 0 8px rgba(210, 153, 34, 0.8)) !important;
+}
+
+/* ========== 无障碍和焦点样式 ========== */
+
+.workflow-root .react-flow__node:focus-visible {
+  outline: 2px solid var(--workflow-theme-primary, #58a6ff);
+  outline-offset: 2px;
+}
+
+.workflow-root .react-flow__edge:focus-visible .react-flow__edge-path {
+  stroke-width: 4px;
+  filter: drop-shadow(0 0 8px currentColor);
 }

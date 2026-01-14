@@ -47,19 +47,8 @@ export type {
 } from '../nodes/definitions'
 
 // Re-export values (enums, constants, functions)
-export {
-  getAllNodeTypes,
-  getNodeDefinition,
-  getNodesByCategory,
-  isValidNodeType,
-  /**
-   * @deprecated 请使用 NodeRegistryAdapter 代替
-   * @see NodeRegistryAdapter.getNodeDefinition()
-   * @see NodeRegistryAdapter.getAllNodeTypes()
-   */
-  NODE_REGISTRY,
-  WorkflowNodeType
-} from '../nodes/definitions'
+// Note: NODE_REGISTRY has been removed. Use NodeRegistryAdapter instead.
+export { getAllNodeTypes, getNodeDefinition, getNodesByCategory, isValidNodeType, WorkflowNodeType } from '../nodes/definitions'
 
 // 推荐使用的现代 API
 export { NodeRegistryAdapter } from '../nodes/base/NodeRegistryAdapter'

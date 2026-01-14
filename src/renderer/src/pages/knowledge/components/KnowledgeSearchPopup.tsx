@@ -1,6 +1,7 @@
 import { loggerService } from '@logger'
 import { HStack } from '@renderer/components/Layout'
 import { TopView } from '@renderer/components/TopView'
+import SearchResultFeedback from '@renderer/components/VCP/SearchResultFeedback'
 import { searchKnowledgeBase } from '@renderer/services/KnowledgeService'
 import type { FileMetadata, KnowledgeBase, KnowledgeSearchResult } from '@renderer/types'
 import type { InputRef } from 'antd'
@@ -126,9 +127,26 @@ const PopupContainer: React.FC<Props> = ({ base, resolve }) => {
         ) : (
           <List
             dataSource={results}
-            renderItem={(item) => (
+            renderItem={(item, index) => (
               <List.Item>
-                <SearchItemRenderer item={item} searchKeyword={searchKeyword} />
+                <SearchItemWrapper>
+                  <SearchItemRenderer item={item} searchKeyword={searchKeyword} />
+                  {/* 搜索结果反馈 */}
+                  {searchKeyword && (
+                    <FeedbackWrapper>
+                      <SearchResultFeedback
+                        result={{
+                          id: item.metadata.uniqueId || `${base.id}-${index}`,
+                          query: searchKeyword,
+                          score: item.score,
+                          source: 'knowledge',
+                          tags: item.metadata.tags || []
+                        }}
+                        compact
+                      />
+                    </FeedbackWrapper>
+                  )}
+                </SearchItemWrapper>
               </List.Item>
             )}
           />
@@ -168,6 +186,18 @@ const SearchIcon = styled.div`
       background-color: var(--color-background-mute);
     }
   }
+`
+
+const SearchItemWrapper = styled.div`
+  width: 100%;
+  position: relative;
+`
+
+const FeedbackWrapper = styled.div`
+  position: absolute;
+  top: 12px;
+  right: 80px;
+  z-index: 10;
 `
 
 const TopViewKey = 'KnowledgeSearchPopup'

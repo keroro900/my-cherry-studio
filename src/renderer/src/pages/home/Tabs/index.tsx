@@ -5,7 +5,7 @@ import { useShowTopics } from '@renderer/hooks/useStore'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { useAppDispatch } from '@renderer/store'
 import { setActiveAgentId, setActiveTopicOrSessionAction } from '@renderer/store/runtime'
-import type { Assistant, Topic } from '@renderer/types'
+import { createDefaultCollaboration, type Assistant, type Topic } from '@renderer/types'
 import type { Tab } from '@renderer/types/chat'
 import { classNames, uuid } from '@renderer/utils'
 import type { FC } from 'react'
@@ -70,7 +70,11 @@ const HomeTabs: FC<Props> = ({
   }
 
   const onCreateDefaultAssistant = () => {
-    const assistant = { ...defaultAssistant, id: uuid() }
+    const assistant = {
+      ...defaultAssistant,
+      id: uuid(),
+      collaboration: defaultAssistant.collaboration || createDefaultCollaboration() // 确保协作配置存在
+    }
     addAssistant(assistant)
     setActiveAssistant(assistant)
     dispatch(setActiveAgentId(null))

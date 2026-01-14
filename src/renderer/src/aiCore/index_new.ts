@@ -27,7 +27,7 @@ import { SUPPORTED_IMAGE_ENDPOINT_LIST } from '@renderer/utils'
 import { buildClaudeCodeSystemModelMessage } from '@shared/anthropic'
 import { gateway, type LanguageModel, type Provider as AiSdkProvider, wrapLanguageModel } from 'ai'
 
-import AiSdkToChunkAdapter from './chunk/AiSdkToChunkAdapter'
+import AiSdkToChunkAdapter, { type ContinueConversationCallback, type VCPToolExecutionResultForContinuation } from './chunk/AiSdkToChunkAdapter'
 import LegacyAiProvider from './legacy/index'
 import type { CompletionsParams, CompletionsResult } from './legacy/middleware/schemas'
 import type { AiSdkMiddlewareConfig } from './middleware/AiSdkMiddlewareBuilder'
@@ -361,7 +361,85 @@ export default class ModernAiProvider {
     // 创建带有中间件的执行器
     if (config.onChunk) {
       const accumulate = this.model!.supported_text_delta !== false // true and undefined
-      const adapter = new AiSdkToChunkAdapter(config.onChunk, config.mcpTools, accumulate, config.enableWebSearch)
+
+      // 创建递归调用回调函数
+      // 当 VCP 工具执行完成后，此函数会被调用以继续 AI 对话
+      const continueConversation: ContinueConversationCallback = async (
+        toolResults: VCPToolExecutionResultForContinuation[]
+      ): Promise<string> => {
+        logger.info('[VCP Continuation] Starting recursive AI call with tool results', {
+          toolCount: toolResults.length,
+          tools: toolResults.map(r => r.toolName)
+        })
+
+        // 格式化工具结果为 AI 可理解的格式
+        const toolResultsText = toolResults.map(r => {
+          const statusTag = r.success ? 'SUCCESS' : 'ERROR'
+          return `<<<[TOOL_RESULT]>>>\ntool_name:「始」${r.toolName}「末」\nstatus:「始」${statusTag}「末」\nresult:「始」${r.output}「末」\n<<<[END_TOOL_RESULT]>>>`
+        }).join('\n\n')
+
+        // 构建新的消息，包含工具结果
+        // 需要确保 messages 存在才能添加工具结果
+        if (!params.messages) {
+          logger.warn('[VCP Continuation] No messages in params, cannot continue conversation')
+          return ''
+        }
+
+        // 创建新的 adapter 用于处理递归调用的流
+        // 注意：不传入 continueConversation 回调，防止无限递归
+        // 传入 topicId 和 modelName 用于 span 追踪
+        const recursiveAdapter = new AiSdkToChunkAdapter(
+          config.onChunk!,
+          config.mcpTools,
+          accumulate,
+          config.enableWebSearch,
+          undefined, // onSessionUpdate
+          undefined, // getSessionWasCleared
+          undefined, // abortSignal
+          undefined, // continueConversation - 不传入，防止无限递归
+          config.topicId,
+          config.assistant.model?.name
+        )
+
+        // 构建递归调用参数，添加工具结果作为新的用户消息
+        const recursiveParams = {
+          ...params,
+          messages: [
+            ...params.messages,
+            {
+              role: 'user' as const,
+              content: `${toolResultsText}\n\n请根据上述工具执行结果继续回复用户。`
+            }
+          ],
+          model,
+          experimental_context: { onChunk: config.onChunk }
+        }
+
+        // 发起递归 AI 调用
+        const recursiveStreamResult = await executor.streamText(recursiveParams as any)
+
+        // 处理递归调用的流
+        const recursiveFinalText = await recursiveAdapter.processStream(recursiveStreamResult)
+
+        logger.info('[VCP Continuation] Recursive AI call completed', {
+          resultLength: recursiveFinalText?.length || 0
+        })
+
+        return recursiveFinalText
+      }
+
+      const adapter = new AiSdkToChunkAdapter(
+        config.onChunk,
+        config.mcpTools,
+        accumulate,
+        config.enableWebSearch,
+        undefined, // onSessionUpdate
+        undefined, // getSessionWasCleared
+        undefined, // abortSignal
+        continueConversation,
+        config.topicId,
+        config.assistant.model?.name
+      )
 
       const streamResult = await executor.streamText({
         ...params,

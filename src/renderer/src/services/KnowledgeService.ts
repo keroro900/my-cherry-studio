@@ -66,6 +66,13 @@ export const getKnowledgeBaseParams = (base: KnowledgeBase): KnowledgeBaseParams
   } else if (actualProvider.id === SystemProviderIds.ollama) {
     // LangChain生态不需要/api结尾的URL
     baseURL = baseURL.replace(/\/api$/, '')
+  } else if (actualProvider.id === 'jina' || actualProvider.id === '302ai') {
+    // Jina API 和 302.AI 需要 /v1 前缀
+    // 例如: https://api.jina.ai -> https://api.jina.ai/v1
+    // 例如: https://api.302.ai -> https://api.302.ai/v1
+    if (!baseURL.includes('/v1')) {
+      baseURL = baseURL + '/v1'
+    }
   }
 
   logger.info(`Knowledge base ${base.name} using baseURL: ${baseURL}`)

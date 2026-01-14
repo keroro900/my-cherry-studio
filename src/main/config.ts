@@ -1,10 +1,16 @@
 import { isDev, isWin } from '@main/constant'
-import { app } from 'electron'
 
 import { getDataPath } from './utils'
 
-if (isDev) {
-  app.setPath('userData', app.getPath('userData') + 'Dev')
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { app } = require('electron')
+  if (isDev && app) {
+    app.setPath('userData', app.getPath('userData') + 'Dev')
+  }
+} catch {
+  // electron 未就绪
 }
 
 export const DATA_PATH = getDataPath()

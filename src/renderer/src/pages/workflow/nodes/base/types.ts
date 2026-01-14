@@ -46,7 +46,7 @@ export type NodeCategory =
   | 'external'
   | 'custom'
   | 'text'
-  | 'fashion'
+  | 'quality'
 
 /**
  * 节点元数据

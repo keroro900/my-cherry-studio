@@ -19,19 +19,39 @@ import ruRU from './translate/ru-ru.json'
 
 const logger = loggerService.withContext('I18N')
 
+const deepMerge = <T extends Record<string, unknown>>(base: T, override: T): T => {
+  const result: Record<string, unknown> = { ...base }
+  for (const [key, overrideValue] of Object.entries(override)) {
+    const baseValue = result[key]
+    if (
+      baseValue &&
+      overrideValue &&
+      typeof baseValue === 'object' &&
+      typeof overrideValue === 'object' &&
+      !Array.isArray(baseValue) &&
+      !Array.isArray(overrideValue)
+    ) {
+      result[key] = deepMerge(baseValue as Record<string, unknown>, overrideValue as Record<string, unknown>)
+    } else {
+      result[key] = overrideValue
+    }
+  }
+  return result as T
+}
+
 const resources = Object.fromEntries(
   [
     ['en-US', enUS],
-    ['ja-JP', jaJP],
-    ['ru-RU', ruRU],
     ['zh-CN', zhCN],
-    ['zh-TW', zhTW],
-    ['de-DE', deDE],
-    ['el-GR', elGR],
-    ['es-ES', esES],
-    ['fr-FR', frFR],
-    ['pt-PT', ptPT],
-    ['ro-RO', roRO]
+    ['zh-TW', deepMerge(zhCN, zhTW)],
+    ['de-DE', deepMerge(enUS, deDE)],
+    ['el-GR', deepMerge(enUS, elGR)],
+    ['es-ES', deepMerge(enUS, esES)],
+    ['fr-FR', deepMerge(enUS, frFR)],
+    ['ja-JP', deepMerge(enUS, jaJP)],
+    ['pt-PT', deepMerge(enUS, ptPT)],
+    ['ro-RO', deepMerge(enUS, roRO)],
+    ['ru-RU', deepMerge(enUS, ruRU)]
   ].map(([locale, translation]) => [locale, { translation }])
 )
 

@@ -118,16 +118,6 @@ export {
 // 导出输出节点
 export { OutputExecutor, OutputNode } from './output/OutputNode'
 
-// 导出 Fashion 节点
-export {
-  FashionKnowledgeExecutor,
-  FashionKnowledgeNode,
-  GarmentAnalysisExecutor,
-  GarmentAnalysisNode,
-  TrendAnalysisExecutor,
-  TrendAnalysisNode
-} from './fashion'
-
 // 导出质量守护节点
 export {
   AutoOptimizeExecutor,
@@ -164,8 +154,6 @@ import { HttpRequestNode } from './external/HttpRequestNode'
 import { MusicGenerationNode } from './external/MusicGenerationNode'
 import { RunningHubNode } from './external/RunningHubNode'
 import { WebSearchNode } from './external/WebSearchNode'
-// Fashion 节点导入
-import { FashionKnowledgeNode, GarmentAnalysisNode, TrendAnalysisNode } from './fashion'
 import {
   CodeExecutorNode,
   ConditionNode,
@@ -290,11 +278,6 @@ export async function registerBuiltinNodes(): Promise<void> {
   nodeRegistry.register(LoopNode, 'builtin')
   nodeRegistry.register(LoopIndexNode, 'builtin')
   nodeRegistry.register(LoopListNode, 'builtin')
-
-  // Fashion 节点
-  nodeRegistry.register(GarmentAnalysisNode, 'builtin')
-  nodeRegistry.register(FashionKnowledgeNode, 'builtin')
-  nodeRegistry.register(TrendAnalysisNode, 'builtin')
 
   // 质量守护节点
   nodeRegistry.register(QualityCheckNode, 'builtin')

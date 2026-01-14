@@ -1,0 +1,10 @@
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\sketches_ddsketch-6a839d3c58ac23be.d: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\config.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\ddsketch.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\store.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\libsketches_ddsketch-6a839d3c58ac23be.rlib: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\config.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\ddsketch.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\store.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\libsketches_ddsketch-6a839d3c58ac23be.rmeta: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\config.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\ddsketch.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\store.rs
+
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\lib.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\config.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\ddsketch.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sketches-ddsketch-0.2.2\src\store.rs:

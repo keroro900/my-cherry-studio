@@ -118,6 +118,10 @@ class WorkflowIpcBridgeService {
   /**
    * 注册节点执行处理器
    * 处理来自 VCP WorkflowBridge 的节点执行请求
+   *
+   * IPC 通信模式:
+   * 1. Main → Renderer: webContents.send('workflow:execute-node', request)
+   * 2. Renderer → Main: ipcRenderer.send('workflow:node-result:xxx', result)
    */
   private registerExecuteNodeHandler(): void {
     const { ipcRenderer } = window.require?.('electron') || {}
@@ -146,11 +150,16 @@ class WorkflowIpcBridgeService {
         try {
           const result = await this.executeNode(request.nodeType, request.inputs, request.config)
 
-          // 发送结果回 Main 进程
-          ipcRenderer.invoke(`workflow:node-result:${request.requestId}`, result)
+          // 发送结果回 Main 进程 - 使用 send 而不是 invoke
+          ipcRenderer.send(`workflow:node-result:${request.requestId}`, {
+            success: result.status === 'success',
+            outputs: result.outputs,
+            error: result.errorMessage,
+            duration: result.duration
+          })
         } catch (error) {
           logger.error('Node execution failed', { error, nodeType: request.nodeType })
-          ipcRenderer.invoke(`workflow:node-result:${request.requestId}`, {
+          ipcRenderer.send(`workflow:node-result:${request.requestId}`, {
             success: false,
             error: error instanceof Error ? error.message : String(error)
           })

@@ -1,12 +1,14 @@
-import { CheckOutlined, RobotOutlined } from '@ant-design/icons'
+import { CheckOutlined, ClockCircleOutlined, RobotOutlined } from '@ant-design/icons'
 import type { NotesSortType } from '@renderer/types/note'
 import type { MenuProps } from 'antd'
 import { Dropdown, Input, Tooltip } from 'antd'
-import { ArrowLeft, ArrowUpNarrowWide, FilePlus2, FolderPlus, Search, Star } from 'lucide-react'
+import { ArrowLeft, ArrowUpNarrowWide, FilePlus2, FolderPlus, LayoutGrid, List, Search, Star, Zap } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
+
+export type ViewMode = 'tree' | 'card' | 'stream'
 
 interface NotesSidebarHeaderProps {
   isShowStarred: boolean
@@ -16,6 +18,7 @@ interface NotesSidebarHeaderProps {
   sortType: NotesSortType
   diaryFilter: string | null
   availableCharacters: string[]
+  viewMode: ViewMode
   onCreateFolder: () => void
   onCreateNote: () => void
   onToggleStarredView: () => void
@@ -24,6 +27,8 @@ interface NotesSidebarHeaderProps {
   onSetSearchKeyword: (keyword: string) => void
   onSelectSortType: (sortType: NotesSortType) => void
   onSetDiaryFilter: (characterName: string | null) => void
+  onTimeSearch?: (expression: string) => void
+  onViewModeChange?: (mode: ViewMode) => void
 }
 
 const NotesSidebarHeader: FC<NotesSidebarHeaderProps> = ({
@@ -34,6 +39,7 @@ const NotesSidebarHeader: FC<NotesSidebarHeaderProps> = ({
   sortType,
   diaryFilter,
   availableCharacters,
+  viewMode,
   onCreateFolder,
   onCreateNote,
   onToggleStarredView,
@@ -41,9 +47,12 @@ const NotesSidebarHeader: FC<NotesSidebarHeaderProps> = ({
   onToggleDiaryView,
   onSetSearchKeyword,
   onSelectSortType,
-  onSetDiaryFilter
+  onSetDiaryFilter,
+  onTimeSearch,
+  onViewModeChange
 }) => {
   const { t } = useTranslation()
+  const [timeExpression, setTimeExpression] = useState('')
 
   const handleSortMenuClick: MenuProps['onClick'] = useCallback(
     (e) => {
@@ -186,6 +195,59 @@ const NotesSidebarHeader: FC<NotesSidebarHeaderProps> = ({
                 {diaryFilter || t('notes.diary_all', '全部')}
               </DiaryFilterButton>
             </Dropdown>
+
+            <ViewModeToggle>
+              <Tooltip title={t('notes.view_tree', '树形视图')} mouseEnterDelay={0.8}>
+                <ViewModeButton
+                  $active={viewMode === 'tree'}
+                  onClick={() => onViewModeChange?.('tree')}
+                >
+                  <List size={14} />
+                </ViewModeButton>
+              </Tooltip>
+              <Tooltip title={t('notes.view_card', '卡片视图')} mouseEnterDelay={0.8}>
+                <ViewModeButton
+                  $active={viewMode === 'card'}
+                  onClick={() => onViewModeChange?.('card')}
+                >
+                  <LayoutGrid size={14} />
+                </ViewModeButton>
+              </Tooltip>
+              <Tooltip title={t('notes.view_stream', '日记流')} mouseEnterDelay={0.8}>
+                <ViewModeButton
+                  $active={viewMode === 'stream'}
+                  onClick={() => onViewModeChange?.('stream')}
+                >
+                  <Zap size={14} />
+                </ViewModeButton>
+              </Tooltip>
+            </ViewModeToggle>
+
+            <Tooltip
+              title={
+                <div style={{ fontSize: 12 }}>
+                  <div>{t('notes.time_search_hint', '支持时间表达式:')}</div>
+                  <div>今天、昨天、前天</div>
+                  <div>本周、上周、本月、上个月</div>
+                  <div>过去7天、最近30天</div>
+                  <div>2025-01-01 至 2025-01-06</div>
+                </div>
+              }
+              placement="bottom">
+              <TimeSearchInput
+                prefix={<ClockCircleOutlined style={{ color: 'var(--color-text-3)' }} />}
+                placeholder={t('notes.time_search_placeholder', '时间搜索...')}
+                value={timeExpression}
+                onChange={(e) => setTimeExpression(e.target.value)}
+                onPressEnter={() => {
+                  if (timeExpression.trim() && onTimeSearch) {
+                    onTimeSearch(timeExpression.trim())
+                  }
+                }}
+                size="small"
+                allowClear
+              />
+            </Tooltip>
           </>
         )}
         {isShowSearch && (
@@ -271,6 +333,44 @@ const DiaryFilterButton = styled.div`
 
   &:hover {
     background: var(--color-primary-bg-hover);
+  }
+`
+
+const TimeSearchInput = styled(Input)`
+  width: 100px;
+  margin-left: 4px;
+
+  .ant-input {
+    font-size: 12px;
+    border-radius: 4px;
+  }
+`
+
+const ViewModeToggle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+  padding: 2px;
+  background: var(--color-background-mute);
+  border-radius: 4px;
+`
+
+const ViewModeButton = styled.div<{ $active?: boolean }>`
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: ${({ $active }) => ($active ? 'var(--color-primary)' : 'var(--color-text-3)')};
+  background: ${({ $active }) => ($active ? 'var(--color-background)' : 'transparent')};
+
+  &:hover {
+    color: var(--color-primary);
+    background: var(--color-background);
   }
 `
 

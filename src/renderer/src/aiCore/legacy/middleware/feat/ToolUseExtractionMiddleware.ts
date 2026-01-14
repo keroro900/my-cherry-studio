@@ -1,3 +1,13 @@
+/**
+ * @deprecated VCP 统一协议后，此中间件已废弃
+ *
+ * 工具调用现在统一通过以下方式处理：
+ * 1. VCPToolExecutorMiddleware - 处理 VCP 格式的工具请求
+ * 2. AiSdkToChunkAdapter.executeVCPTool - 处理 SDK tool-call 事件
+ *
+ * 此文件保留作为参考，已从 register.ts 中移除
+ */
+
 import { loggerService } from '@logger'
 import type { MCPTool } from '@renderer/types'
 import type { MCPToolCreatedChunk, TextDeltaChunk } from '@renderer/types/chunk'
@@ -22,6 +32,8 @@ const TOOL_USE_TAG_CONFIG: TagConfig = {
 
 /**
  * 工具使用提取中间件
+ *
+ * @deprecated 已废弃，使用 VCPToolExecutorMiddleware 替代
  *
  * 职责：
  * 1. 从文本流中检测并提取 <tool_use></tool_use> 标签

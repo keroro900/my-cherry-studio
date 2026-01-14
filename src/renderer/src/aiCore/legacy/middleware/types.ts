@@ -78,6 +78,7 @@ export interface ProcessingState<
     output?: SdkRawOutput | string
     isRecursiveCall?: boolean
     recursionDepth?: number
+    vcpHandlerActive?: boolean // 防止 VCP 中间件重复处理
   }
   webSearchState?: {
     results?: WebSearchResponse

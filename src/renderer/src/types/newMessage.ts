@@ -7,7 +7,6 @@
  * - ToolMessageBlock 是统一的工具消息块类型
  *
  * @see src/renderer/src/aiCore/legacy/middleware/VCPToolExecutorMiddleware.ts
- * @see src/main/knowledge/vcp/MCPOBridge.ts
  */
 import type { CompletionUsage } from '@cherrystudio/openai/resources'
 import type { ProviderMetadata } from 'ai'
@@ -233,6 +232,18 @@ export type Message = {
 
   // Agent session identifier used to resume Claude Code runs
   agentSessionId?: string
+
+  // 群聊相关字段
+  /** 群聊 Agent ID */
+  groupChatAgentId?: string
+  /** 群聊 Agent 名称 */
+  groupChatAgentName?: string
+  /** 群聊 Agent 角色 */
+  groupChatAgentRole?: 'host' | 'participant' | 'observer' | 'expert' | 'moderator'
+  /** 群聊 Agent 头像 */
+  groupChatAgentAvatar?: string
+  /** 群聊会话 ID */
+  groupChatSessionId?: string
 
   // raw data
   // TODO: add this providerMetadata to MessageBlock to save raw provider data for each block

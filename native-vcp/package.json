@@ -1,0 +1,42 @@
+{
+  "name": "native-vcp",
+  "version": "1.0.0",
+  "description": "Native VCP Runtime for Cherry Studio - High-performance Rust modules",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "napi": {
+    "name": "native-vcp",
+    "triples": {
+      "defaults": true,
+      "additional": [
+        "x86_64-unknown-linux-musl",
+        "aarch64-unknown-linux-gnu",
+        "aarch64-apple-darwin",
+        "aarch64-pc-windows-msvc"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "prepublishOnly": "napi prepublish -t npm",
+    "artifacts": "napi artifacts",
+    "universal": "napi universal",
+    "version": "napi version"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.0"
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kangfenmao/cherry-studio"
+  },
+  "license": "Apache-2.0"
+}

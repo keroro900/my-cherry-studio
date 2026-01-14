@@ -33,19 +33,26 @@ import { SelectionService } from './services/SelectionService'
 import storeSyncService from './services/StoreSyncService'
 import { initializeTavernModule, registerTavernIpcHandlers } from './services/tavern'
 import { registerAllVCPIpcHandlers } from './services/vcp'
-import { getVCPCallbackServer } from './services/VCPCallbackServer'
+import { getVCPCallbackServer } from './services/vcp/VCPCallbackServer'
+import { getVCPNotificationService } from './services/vcp/VCPNotificationService'
 import { registerWebSocketIpcHandlers } from './services/WebSocketIpcHandler'
 import { windowService } from './services/WindowService'
 import { registerUnifiedKnowledgeIpcHandlers } from './knowledge/unified'
 import { registerQualityIpcHandlers } from './services/quality/QualityIpcHandler'
 import { registerTimeParserIpcHandlers } from './ipc/timeParserIpc'
 import { registerSemanticGroupIpcHandlers } from './ipc/semanticGroupIpc'
-import { registerVCPForumIpcHandlers } from './services/VCPForumIpcHandler'
+import { registerVCPForumIpcHandlers } from './services/vcp/VCPForumIpcHandler'
+import { registerVCPClusterIpcHandlers } from './services/vcp/VCPClusterIpcHandler'
 import { registerNativeVCPIpcHandlers } from './services/NativeVCPIpcHandler'
+import { registerVCPInjectorIpcHandlers } from './services/vcp/VCPInjectorIpcHandler'
+import { registerVCPDiaryIpcHandlers } from './services/vcp/VCPDiaryIpcHandler'
+import { registerVCPReindexIpcHandlers } from './services/vcp/VCPReindexIpcHandler'
+import { registerUnifiedRerankIpcHandlers } from './services/rerank'
+import { initializeUnifiedModelConfigService } from './services/config'
 
 const logger = loggerService.withContext('IPC')
 
-export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
+export async function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   const appUpdater = new AppUpdater()
 
   // ============================================================
@@ -134,6 +141,17 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   }
 
   // ============================================================
+  // 5.1.1 Register VCP Cluster direct IPC handlers (思维簇)
+  // ============================================================
+  try {
+    logger.info('Starting VCP Cluster IPC handler registration...')
+    registerVCPClusterIpcHandlers()
+    logger.info('VCP Cluster IPC handlers registered successfully')
+  } catch (error) {
+    logger.error('Failed to register VCP Cluster IPC handlers', error as Error)
+  }
+
+  // ============================================================
   // 5.2 Register Native VCP IPC handlers (Rust 原生模块)
   // ============================================================
   try {
@@ -145,21 +163,50 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   }
 
   // ============================================================
+  // 5.3 Register VCP Injector IPC handlers (上下文注入器)
+  // ============================================================
+  try {
+    logger.info('Starting VCP Injector IPC handler registration...')
+    registerVCPInjectorIpcHandlers()
+    logger.info('VCP Injector IPC handlers registered successfully')
+  } catch (error) {
+    logger.error('Failed to register VCP Injector IPC handlers', error as Error)
+  }
+
+  // ============================================================
+  // 5.4 Register VCP Diary IPC handlers (日记管理)
+  // ============================================================
+  try {
+    logger.info('Starting VCP Diary IPC handler registration...')
+    registerVCPDiaryIpcHandlers()
+    logger.info('VCP Diary IPC handlers registered successfully')
+  } catch (error) {
+    logger.error('Failed to register VCP Diary IPC handlers', error as Error)
+  }
+
+  // ============================================================
+  // 5.5 Register VCP Reindex IPC handlers (向量索引重建)
+  // ============================================================
+  try {
+    logger.info('Starting VCP Reindex IPC handler registration...')
+    registerVCPReindexIpcHandlers()
+    logger.info('VCP Reindex IPC handlers registered successfully')
+  } catch (error) {
+    logger.error('Failed to register VCP Reindex IPC handlers', error as Error)
+  }
+
+  // ============================================================
   // 6. Register Tavern IPC handlers (VCPTavern Native)
   // ============================================================
   try {
     logger.info('Starting Tavern IPC handler registration...')
     registerTavernIpcHandlers()
     logger.info('Tavern IPC handlers registered successfully')
-    initializeTavernModule()
-      .then(() => {
-        logger.info('Tavern module services initialized successfully')
-      })
-      .catch((error) => {
-        logger.error('Failed to initialize Tavern module services', error as Error)
-      })
+    // 等待 Tavern 模块初始化完成，避免竞态条件
+    await initializeTavernModule()
+    logger.info('Tavern module services initialized successfully')
   } catch (error) {
-    logger.error('Failed to register Tavern IPC handlers', error as Error)
+    logger.error('Failed to register/initialize Tavern module', error as Error)
   }
 
   // ============================================================
@@ -182,6 +229,28 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   }
 
   // ============================================================
+  // 7.1 Register Unified Rerank IPC handlers (统一重排序服务)
+  // ============================================================
+  try {
+    logger.info('Starting Unified Rerank IPC handler registration...')
+    registerUnifiedRerankIpcHandlers()
+    logger.info('Unified Rerank IPC handlers registered successfully')
+  } catch (error) {
+    logger.error('Failed to register Unified Rerank IPC handlers', error as Error)
+  }
+
+  // ============================================================
+  // 7.2 Initialize Unified Model Config Service (统一模型配置服务)
+  // ============================================================
+  initializeUnifiedModelConfigService()
+    .then(() => {
+      logger.info('Unified Model Config Service initialized successfully')
+    })
+    .catch((error) => {
+      logger.error('Failed to initialize Unified Model Config Service', error as Error)
+    })
+
+  // ============================================================
   // 8. Register other async-loaded IPC handlers (改为同步以避免竞态)
   // ============================================================
 
@@ -194,17 +263,6 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
     })
     .catch((error) => {
       logger.error('Failed to register DailyNoteWrite IPC handlers', error as Error)
-    })
-
-  // Knowledge File Watcher IPC handlers
-  import('./services/KnowledgeWatcherIpcHandler')
-    .then(({ registerKnowledgeWatcherIpcHandlers }) => {
-      logger.info('Starting Knowledge Watcher IPC handler registration...')
-      registerKnowledgeWatcherIpcHandlers()
-      logger.info('Knowledge Watcher IPC handlers registered successfully')
-    })
-    .catch((error) => {
-      logger.error('Failed to register Knowledge Watcher IPC handlers', error as Error)
     })
 
   // FsShell IPC handlers
@@ -329,6 +387,18 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
       })
   } catch (error) {
     logger.error('Failed to initialize VCP Callback Server', error as Error)
+  }
+
+  // ============================================================
+  // 10.1 Initialize VCP Notification Service
+  // ============================================================
+  try {
+    logger.info('Initializing VCP Notification Service...')
+    const notificationService = getVCPNotificationService()
+    notificationService.registerIpcHandlers()
+    logger.info('VCP Notification Service initialized successfully')
+  } catch (error) {
+    logger.error('Failed to initialize VCP Notification Service', error as Error)
   }
 
   // ============================================================

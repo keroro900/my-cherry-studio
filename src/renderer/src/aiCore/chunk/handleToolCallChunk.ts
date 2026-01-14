@@ -1,7 +1,16 @@
 /**
  * 工具调用 Chunk 处理模块
- * TODO: Tool包含了providerTool和普通的Tool还有MCPTool,后面需要重构
- * 提供工具调用相关的处理API，每个交互使用一个新的实例
+ *
+ * @deprecated VCP 统一协议后，此模块已废弃
+ * 工具调用现在统一通过 AiSdkToChunkAdapter.executeVCPTool 处理
+ * 此模块保留作为备用，后续可能会完全移除
+ *
+ * 新的工具调用流程：
+ * 1. SDK tool-call 事件 → VCPToolRequest 格式转换
+ * 2. executeVCPTool → 用户确认 → vcpUnified.executeTool
+ * 3. 发出 MCP_TOOL_PENDING/COMPLETE chunks
+ *
+ * @see AiSdkToChunkAdapter.executeVCPTool
  */
 
 import { loggerService } from '@logger'

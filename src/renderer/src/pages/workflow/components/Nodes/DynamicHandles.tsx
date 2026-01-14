@@ -1,14 +1,13 @@
 /**
- * 动态 Handle 渲染组件 v4.0
+ * 动态 Handle 渲染组件 v5.0
  * 根据节点的 inputs/outputs 配置自动渲染对应的 Handle
  * 支持 Any-to-Any 连接验证
  *
- * v4.0 重构：
- * - 全新内嵌式设计 - 端口嵌入节点边缘
- * - 更小更精致的端口样式（8px 菱形/圆形）
+ * v5.0 重构：
+ * - 圆形端口设计 - 更现代简洁
+ * - 输入端口：空心圆，输出端口：实心圆
  * - 优雅的悬停动画和发光效果
- * - 性能优化：使用 CSS 变量和 will-change
- * - 参考 ComfyUI 和 Figma 的端口设计
+ * - 参考 YouArt / chaiNNer 的端口设计
  */
 
 import { Handle, Position } from '@xyflow/react'
@@ -23,17 +22,17 @@ interface DynamicHandlesProps {
   showLabels?: boolean
 }
 
-// 数据类型颜色映射 - 更柔和的配色
+// 数据类型颜色映射 - 与 ReactFlowStyles.css 保持一致
 const DATA_TYPE_COLORS: Record<string, string> = {
-  text: '#60a5fa', // 蓝色
-  image: '#4ade80', // 绿色
-  images: '#2dd4bf', // 青色
-  video: '#f472b6', // 粉色
-  json: '#a78bfa', // 紫色
-  any: '#fbbf24', // 琥珀色
-  prompt: '#c084fc', // 紫罗兰
-  boolean: '#fb923c', // 橙色
-  number: '#38bdf8' // 天蓝色
+  text: '#58a6ff', // 蓝色 - 与 pro-dark 主题一致
+  image: '#a371f7', // 紫色
+  images: '#f778ba', // 粉色
+  video: '#f85149', // 红色
+  json: '#3fb950', // 绿色
+  any: '#8b949e', // 灰色
+  prompt: '#a371f7', // 紫色
+  boolean: '#d29922', // 橙黄色
+  number: '#79c0ff' // 天蓝色
 }
 
 // 数据类型图标映射
@@ -97,7 +96,7 @@ const HandleWrapper = styled.div<{ $side: 'left' | 'right'; $top: string }>`
   will-change: transform;
 `
 
-// 共享的 Handle 样式
+// 共享的 Handle 样式 - 圆形设计
 const handleBaseStyles = css<{ $color: string }>`
   --handle-color: ${(props) => props.$color};
   --handle-glow-color: ${(props) => props.$color}60;
@@ -107,37 +106,46 @@ const handleBaseStyles = css<{ $color: string }>`
   align-items: center;
   justify-content: center;
 
-  /* 内嵌式端口样式 - 小巧精致 */
+  /* 圆形端口样式 - 现代简洁 */
   .react-flow__handle {
     position: relative;
-    width: 8px;
-    height: 8px;
-    min-width: 8px;
-    min-height: 8px;
-    border: 1.5px solid var(--handle-color);
-    border-radius: 2px;
-    background: var(--color-background, #1a1a2e);
-    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    min-height: 10px;
+    border: 2px solid var(--handle-color);
+    border-radius: 50%;
+    background: var(--color-background, #161b22);
+    transform: none;
     cursor: crosshair;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    /* 内嵌效果 - 轻微内阴影 */
-    box-shadow:
-      inset 0 0 2px var(--handle-color),
-      0 0 0 2px var(--color-background, #1a1a2e);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 0 2px var(--color-background, #161b22);
 
     &:hover {
-      width: 10px;
-      height: 10px;
+      width: 14px;
+      height: 14px;
       background: var(--handle-color);
       border-color: var(--handle-color);
       box-shadow:
-        0 0 8px var(--handle-glow-color),
-        0 0 0 2px var(--color-background, #1a1a2e);
+        0 0 12px var(--handle-glow-color),
+        0 0 20px var(--handle-glow-color),
+        0 0 0 2px var(--color-background, #161b22);
       animation: ${pulseGlow} 1.5s ease-in-out infinite;
     }
 
     &:active {
-      transform: rotate(45deg) scale(0.9);
+      transform: scale(0.85);
+    }
+
+    /* 连接中状态 */
+    &.connecting,
+    &.connectingfrom,
+    &.connectingto {
+      width: 14px;
+      height: 14px;
+      box-shadow:
+        0 0 12px var(--handle-glow-color),
+        0 0 20px var(--handle-glow-color);
     }
   }
 `
@@ -146,9 +154,9 @@ const handleBaseStyles = css<{ $color: string }>`
 const InputHandleInner = styled.div<{ $color: string }>`
   ${handleBaseStyles}
 
-  /* 输入端口特殊样式 - 空心菱形 */
+  /* 输入端口特殊样式 - 空心圆 */
   .react-flow__handle {
-    background: var(--color-background, #1a1a2e);
+    background: var(--color-background, #161b22);
 
     &:hover {
       background: var(--handle-color);
@@ -160,12 +168,19 @@ const InputHandleInner = styled.div<{ $color: string }>`
 const OutputHandleInner = styled.div<{ $color: string }>`
   ${handleBaseStyles}
 
-  /* 输出端口特殊样式 - 实心菱形 */
+  /* 输出端口特殊样式 - 实心圆 */
   .react-flow__handle {
     background: var(--handle-color);
+    box-shadow:
+      0 0 4px var(--handle-glow-color),
+      0 0 0 2px var(--color-background, #161b22);
 
     &:hover {
-      transform: rotate(45deg) scale(1.2);
+      transform: scale(1.2);
+      box-shadow:
+        0 0 12px var(--handle-glow-color),
+        0 0 20px var(--handle-glow-color),
+        0 0 0 2px var(--color-background, #161b22);
     }
   }
 `
@@ -221,13 +236,12 @@ const TooltipContent = styled.div`
   gap: 4px;
 `
 
-// 数据类型指示点
+// 数据类型指示点 - 圆形
 const TypeDot = styled.span<{ $color: string }>`
   width: 6px;
   height: 6px;
-  border-radius: 1px;
+  border-radius: 50%;
   background: ${(props) => props.$color};
-  transform: rotate(45deg);
   flex-shrink: 0;
 `
 
@@ -260,7 +274,7 @@ const TypeBadge = styled.span<{ $color: string }>`
 // ==================== Handle 组件 ====================
 
 /**
- * 输入 Handle 组件 - 内嵌空心菱形设计
+ * 输入 Handle 组件 - 空心圆设计
  */
 const InputHandle = memo(
   ({ handle, index, total, showLabels }: { handle: NodeHandle; index: number; total: number; showLabels: boolean }) => {
@@ -290,7 +304,7 @@ const InputHandle = memo(
 InputHandle.displayName = 'InputHandle'
 
 /**
- * 输出 Handle 组件 - 内嵌实心菱形设计
+ * 输出 Handle 组件 - 实心圆设计
  */
 const OutputHandle = memo(
   ({ handle, index, total, showLabels }: { handle: NodeHandle; index: number; total: number; showLabels: boolean }) => {

@@ -1,9 +1,13 @@
 /**
  * 节点右键菜单组件
+ * 提供复制、剪切、复制节点、删除等操作
+ * 参考 YouArt / Agentok 的菜单设计
  */
 
 import type { Node } from '@xyflow/react'
+import { Copy, CopyPlus, Scissors, Trash2 } from 'lucide-react'
 import { memo } from 'react'
+import styled, { keyframes } from 'styled-components'
 
 interface NodeContextMenuProps {
   x: number
@@ -20,108 +24,184 @@ function NodeContextMenu({ x, y, node, onClose, onDelete, onDuplicate, onCopy, o
   if (!node) return null
 
   const menuItems = [
-    { label: '复制', icon: '📋', action: () => onCopy(node.id), shortcut: 'Ctrl+C' },
-    { label: '剪切', icon: '✂️', action: () => onCut(node.id), shortcut: 'Ctrl+X' },
-    { label: '复制节点', icon: '📑', action: () => onDuplicate(node.id), shortcut: 'Ctrl+D' },
+    { label: '复制', icon: <Copy size={14} />, action: () => onCopy(node.id), shortcut: 'Ctrl+C' },
+    { label: '剪切', icon: <Scissors size={14} />, action: () => onCut(node.id), shortcut: 'Ctrl+X' },
+    { label: '复制节点', icon: <CopyPlus size={14} />, action: () => onDuplicate(node.id), shortcut: 'Ctrl+D' },
     { type: 'divider' as const },
-    { label: '删除', icon: '🗑️', action: () => onDelete(node.id), shortcut: 'Delete', danger: true }
+    { label: '删除', icon: <Trash2 size={14} />, action: () => onDelete(node.id), shortcut: 'Delete', danger: true }
   ]
 
   return (
     <>
       {/* 背景遮罩 */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 999
-        }}
-        onClick={onClose}
-      />
+      <Backdrop onClick={onClose} />
 
       {/* 菜单 */}
-      <div
-        style={{
-          position: 'fixed',
-          top: y,
-          left: x,
-          backgroundColor: 'var(--ant-color-bg-elevated)',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          border: '1px solid var(--ant-color-border)',
-          padding: '4px 0',
-          minWidth: '180px',
-          zIndex: 1000,
-          animation: 'fadeIn 0.15s ease'
-        }}>
+      <MenuContainer $x={x} $y={y}>
         {/* 节点信息 */}
-        <div
-          style={{
-            padding: '8px 12px',
-            borderBottom: '1px solid var(--ant-color-border)',
-            marginBottom: '4px'
-          }}>
-          <div style={{ fontSize: '12px', color: 'var(--ant-color-text-secondary)' }}>
-            {String((node.data as any)?.label || node.id)}
-          </div>
-        </div>
+        <MenuHeader>
+          <NodeLabel>{String((node.data as any)?.label || node.id)}</NodeLabel>
+          <NodeType>{String((node.data as any)?.nodeType || 'node')}</NodeType>
+        </MenuHeader>
+
+        <MenuDivider />
 
         {menuItems.map((item, index) =>
           item.type === 'divider' ? (
-            <div
-              key={index}
-              style={{
-                height: '1px',
-                backgroundColor: 'var(--ant-color-border)',
-                margin: '4px 0'
-              }}
-            />
+            <MenuDivider key={index} />
           ) : (
-            <button
+            <MenuItem
               key={item.label}
               onClick={() => {
                 item.action()
                 onClose()
               }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                width: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                fontSize: '14px',
-                color: item.danger ? '#ff4d4f' : 'var(--ant-color-text)',
-                textAlign: 'left',
-                transition: 'background-color 0.15s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--ant-color-fill-secondary)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}>
-              <span>{item.icon}</span>
-              <span style={{ flex: 1 }}>{item.label}</span>
-              <span style={{ fontSize: '12px', color: 'var(--ant-color-text-tertiary)' }}>{item.shortcut}</span>
-            </button>
+              $danger={item.danger}>
+              <MenuItemIcon $danger={item.danger}>{item.icon}</MenuItemIcon>
+              <MenuItemLabel>{item.label}</MenuItemLabel>
+              <MenuItemShortcut>{item.shortcut}</MenuItemShortcut>
+            </MenuItem>
           )
         )}
-      </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      </MenuContainer>
     </>
   )
 }
+
+// ==================== 动画 ====================
+
+const fadeInScale = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+`
+
+// ==================== 样式组件 ====================
+
+const Backdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+`
+
+const MenuContainer = styled.div<{ $x: number; $y: number }>`
+  position: fixed;
+  top: ${(props) => props.$y}px;
+  left: ${(props) => props.$x}px;
+  min-width: 200px;
+  padding: 6px;
+  background: var(--ant-color-bg-elevated);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--ant-color-border);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: ${fadeInScale} 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+`
+
+const MenuHeader = styled.div`
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`
+
+const NodeLabel = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`
+
+const NodeType = styled.div`
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`
+
+const MenuDivider = styled.div`
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ant-color-border) 20%,
+    var(--ant-color-border) 80%,
+    transparent 100%
+  );
+  margin: 4px 8px;
+`
+
+const MenuItem = styled.button<{ $danger?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: ${(props) => (props.$danger ? 'var(--ant-color-error)' : 'var(--ant-color-text)')};
+  text-align: left;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: ${(props) =>
+      props.$danger ? 'var(--ant-color-error-bg)' : 'var(--ant-color-fill-secondary)'};
+    transform: translateX(2px);
+  }
+
+  &:active {
+    transform: translateX(2px) scale(0.98);
+  }
+`
+
+const MenuItemIcon = styled.span<{ $danger?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: ${(props) =>
+    props.$danger ? 'var(--ant-color-error-bg)' : 'var(--ant-color-fill-tertiary)'};
+  color: ${(props) => (props.$danger ? 'var(--ant-color-error)' : 'var(--ant-color-text-secondary)')};
+  transition: all 0.15s ease;
+
+  ${MenuItem}:hover & {
+    background: ${(props) =>
+      props.$danger ? 'var(--ant-color-error)' : 'var(--ant-color-primary)'};
+    color: white;
+  }
+`
+
+const MenuItemLabel = styled.span`
+  flex: 1;
+  font-weight: 500;
+`
+
+const MenuItemShortcut = styled.span`
+  font-size: 11px;
+  color: var(--ant-color-text-quaternary);
+  padding: 2px 6px;
+  background: var(--ant-color-fill-quaternary);
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+`
 
 export default memo(NodeContextMenu)

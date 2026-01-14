@@ -13,13 +13,14 @@ import { getMessageModelId } from '@renderer/services/MessagesService'
 import { getModelUniqId } from '@renderer/services/ModelService'
 import { estimateMessageUsage } from '@renderer/services/TokenService'
 import type { Assistant, Topic } from '@renderer/types'
+import { getBubbleThemeConfig } from '@renderer/types/assistant'
 import type { Message, MessageBlock } from '@renderer/types/newMessage'
 import { classNames, cn } from '@renderer/utils'
 import { scrollIntoView } from '@renderer/utils/dom'
 import { isMessageProcessing } from '@renderer/utils/messageUtils/is'
 import { Divider } from 'antd'
-import type { Dispatch, FC, SetStateAction } from 'react'
-import React, { memo, useCallback, useEffect, useRef } from 'react'
+import type { CSSProperties, Dispatch, FC, SetStateAction } from 'react'
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -77,6 +78,25 @@ const MessageItem: FC<Props> = ({
   const { editingMessageId, startEditing, stopEditing } = useMessageEditing()
   const { setTimeoutTimer } = useTimer()
   const isEditing = editingMessageId === message.id
+
+  // 气泡主题样式 - 仅应用于助手消息
+  const bubbleThemeStyles = useMemo((): CSSProperties | undefined => {
+    if (message.role !== 'assistant' || !assistant?.bubbleTheme) {
+      return undefined
+    }
+
+    const theme = getBubbleThemeConfig(assistant.bubbleTheme)
+    return {
+      background: theme.backgroundColor || undefined,
+      borderColor: theme.borderColor || undefined,
+      borderWidth: theme.borderColor ? '1px' : undefined,
+      borderStyle: theme.borderColor ? 'solid' : undefined,
+      borderRadius: theme.borderRadius ? `${theme.borderRadius}px` : undefined,
+      boxShadow: theme.glowColor ? `0 0 20px ${theme.glowColor}` : undefined,
+      backdropFilter: theme.enableGlassmorphism ? 'blur(10px)' : undefined,
+      WebkitBackdropFilter: theme.enableGlassmorphism ? 'blur(10px)' : undefined
+    } as CSSProperties
+  }, [message.role, assistant?.bubbleTheme])
 
   useEffect(() => {
     if (isEditing && messageContainerRef.current) {
@@ -192,8 +212,10 @@ const MessageItem: FC<Props> = ({
         className={classNames({
           message: true,
           'message-assistant': isAssistantMessage,
-          'message-user': !isAssistantMessage
+          'message-user': !isAssistantMessage,
+          'has-bubble-theme': !!bubbleThemeStyles
         })}
+        style={bubbleThemeStyles}
         ref={messageContainerRef}>
         <MessageHeader
           message={message}

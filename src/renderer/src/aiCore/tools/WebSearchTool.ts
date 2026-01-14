@@ -6,6 +6,21 @@ import { type InferToolInput, type InferToolOutput, tool } from 'ai'
 import * as z from 'zod'
 
 /**
+ * 配置开关：是否使用 VCP 统一执行路径
+ * 当为 true 时，搜索通过 VCPUnified (Main process) 路由到外部 VCP 插件
+ * 当为 false 时，搜索通过 WebSearchService (Renderer process) 直接执行
+ *
+ * 注意：Web 搜索不使用统一记忆层 (IntegratedMemoryCoordinator)，
+ * 因为搜索结果不存储在 UnifiedStorageCore 中。
+ * VCP 统一路径主要用于：
+ * 1. 统一的工具调用追踪和日志
+ * 2. 支持外部 VCP Web 搜索插件（如 VCPToolBox 的 WebSearch 插件）
+ *
+ * @see Phase 1 of VCP 统一重构计划
+ */
+const USE_VCP_UNIFIED_PATH = false // TODO: 当有可用的 VCP WebSearch 插件时设为 true
+
+/**
  * 使用预提取关键词的网络搜索工具
  * 这个工具直接使用插件阶段分析的搜索意图，避免重复分析
  */
@@ -59,6 +74,50 @@ You can use this tool as-is to search with the prepared queries, or provide addi
       if (finalQueries[0] === 'not_needed') {
         return searchResults
       }
+
+      // ========== VCP 统一路径 ==========
+      // 通过 VCPUnified (Main process) 路由到外部 VCP 插件
+      // 注意：需要有可用的 VCP WebSearch 插件
+      if (USE_VCP_UNIFIED_PATH) {
+        try {
+          // 尝试通过 VCP 统一执行路径调用外部搜索插件
+          const result = await window.api.vcpUnified.executeTool({
+            toolName: 'WebSearch', // VCPToolBox 风格的插件名
+            params: {
+              query: finalQueries[0],
+              additional_queries: finalQueries.slice(1),
+              urls: extractedKeywords.links || []
+            },
+            source: 'vcp'
+          })
+
+          if (result.success && result.output) {
+            // 尝试解析 VCP 插件返回的结果
+            const vcpOutput =
+              typeof result.output === 'string' ? JSON.parse(result.output) : (result.output as Record<string, unknown>)
+
+            if (vcpOutput.results && Array.isArray(vcpOutput.results)) {
+              return {
+                query: finalQueries[0],
+                results: vcpOutput.results.map((r: Record<string, unknown>) => ({
+                  title: String(r.title || ''),
+                  content: String(r.content || r.snippet || ''),
+                  url: String(r.url || r.link || '')
+                }))
+              }
+            }
+          }
+
+          console.warn('[WebSearchTool] VCP search returned no valid results, falling back to legacy path')
+          // 回退到旧路径
+        } catch (error) {
+          console.warn('[WebSearchTool] VCP unified path not available, falling back to legacy path:', error)
+          // 回退到旧路径
+        }
+      }
+
+      // ========== Legacy 路径 ==========
+      // 直接通过 WebSearchService (Renderer process) 执行搜索
 
       // 构建 ExtractResults 结构用于 processWebsearch
       const extractResults: ExtractResults = {

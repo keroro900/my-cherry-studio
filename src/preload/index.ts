@@ -396,163 +396,6 @@ const api = {
     testFeatures: () => ipcRenderer.invoke(IpcChannel.Memory_TestFeatures),
     getStats: () => ipcRenderer.invoke(IpcChannel.Memory_GetStats)
   },
-  advancedMemory: {
-    lightMemoSearch: (params: {
-      query: string
-      queryEmbedding?: number[]
-      config?: {
-        k1?: number
-        b?: number
-        bm25Weight?: number
-        semanticWeight?: number
-        topK?: number
-        threshold?: number
-        quickRerank?: boolean
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AdvancedMemory_LightMemoSearch, params),
-    deepMemoSearch: (params: {
-      query: string
-      queryEmbedding?: number[]
-      config?: {
-        keywordWeight?: number
-        semanticWeight?: number
-        initialTopK?: number
-        finalTopK?: number
-        threshold?: number
-        rerank?: boolean
-        rerankModelId?: string
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AdvancedMemory_DeepMemoSearch, params),
-    meshMemoSearch: (params: {
-      queryEmbedding: number[]
-      config: {
-        query: string
-        filters?: Array<{
-          field: string
-          operator: 'equals' | 'not_equals' | 'contains' | 'in' | 'range' | 'regex' | 'any_of' | 'all_of'
-          value: unknown
-          ignoreCase?: boolean
-        }>
-        initialTopK?: number
-        finalTopK?: number
-        threshold?: number
-        rerank?: boolean
-        diversitySampling?: boolean
-        diversityLambda?: number
-        timeDecay?: boolean
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AdvancedMemory_MeshMemoSearch, params),
-    addDocument: (params: {
-      backend: 'lightmemo' | 'deepmemo' | 'meshmemo'
-      document: {
-        id: string
-        content: string
-        embedding?: number[]
-        metadata?: Record<string, unknown>
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AdvancedMemory_AddDocument, params),
-    addDocuments: (params: {
-      backend: 'lightmemo' | 'deepmemo' | 'meshmemo'
-      documents: Array<{
-        id: string
-        content: string
-        embedding?: number[]
-        metadata?: Record<string, unknown>
-      }>
-    }) => ipcRenderer.invoke(IpcChannel.AdvancedMemory_AddDocuments, params),
-    clear: (params: { backend: 'lightmemo' | 'deepmemo' | 'meshmemo' }) =>
-      ipcRenderer.invoke(IpcChannel.AdvancedMemory_Clear, params),
-    getDocumentCount: (params: { backend: 'lightmemo' | 'deepmemo' | 'meshmemo' }) =>
-      ipcRenderer.invoke(IpcChannel.AdvancedMemory_GetDocumentCount, params)
-  },
-  // 统一记忆/知识管理 (Memory Master)
-  unifiedMemory: {
-    search: (params: {
-      query: string
-      options?: {
-        backends?: Array<'knowledge' | 'diary' | 'notes' | 'memory' | 'lightmemo' | 'deepmemo' | 'meshmemo' | 'unified'>
-        topK?: number
-        threshold?: number
-        userId?: string
-        agentId?: string
-        knowledgeBaseId?: string
-        diaryName?: string
-        useRRF?: boolean
-        rrfK?: number
-        tagBoost?: number
-      }
-    }) => ipcRenderer.invoke(IpcChannel.UnifiedMemory_Search, params),
-    getStats: () => ipcRenderer.invoke(IpcChannel.UnifiedMemory_GetStats),
-    clearBackend: (params: {
-      backend: 'knowledge' | 'diary' | 'notes' | 'memory' | 'lightmemo' | 'deepmemo' | 'meshmemo' | 'unified'
-    }) => ipcRenderer.invoke(IpcChannel.UnifiedMemory_ClearBackend, params),
-    getBackends: () => ipcRenderer.invoke(IpcChannel.UnifiedMemory_GetBackends)
-  },
-  // AIMemo - AI军团并发检索
-  aimemo: {
-    search: (params: {
-      query: string
-      sources: Array<{
-        type: 'knowledge' | 'diary' | 'memory' | 'external'
-        id: string
-        name: string
-        estimatedTokens?: number
-      }>
-      options?: {
-        concurrency?: number
-        topK?: number
-        threshold?: number
-        rerank?: boolean
-        timeout?: number
-        includeMetadata?: boolean
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AIMemo_Search, params),
-    quickSearch: (params: {
-      query: string
-      sources: Array<{
-        type: 'knowledge' | 'diary' | 'memory' | 'external'
-        id: string
-        name: string
-        estimatedTokens?: number
-      }>
-      options?: {
-        topK?: number
-        threshold?: number
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AIMemo_QuickSearch, params),
-    deepSearch: (params: {
-      query: string
-      sources: Array<{
-        type: 'knowledge' | 'diary' | 'memory' | 'external'
-        id: string
-        name: string
-        estimatedTokens?: number
-      }>
-      options?: {
-        concurrency?: number
-        topK?: number
-        threshold?: number
-        rerank?: boolean
-        timeout?: number
-        includeMetadata?: boolean
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AIMemo_DeepSearch, params),
-    getAgents: () => ipcRenderer.invoke(IpcChannel.AIMemo_GetAgents),
-    registerAgent: (params: {
-      agent: {
-        id: string
-        name: string
-        type: 'embedding' | 'rerank' | 'generate' | 'hybrid'
-        weight: number
-        config?: {
-          maxTokens?: number
-          batchSize?: number
-          timeout?: number
-          modelId?: string
-        }
-      }
-    }) => ipcRenderer.invoke(IpcChannel.AIMemo_RegisterAgent, params)
-  },
   // 统一知识库服务 (Unified Knowledge Service)
   unifiedKnowledge: {
     // 统一搜索 - 跨日记、知识库、笔记的融合搜索
@@ -677,6 +520,66 @@ const api = {
       return () => ipcRenderer.removeListener('groupchat:event', listener)
     }
   },
+  agentCollab: {
+    registerCapability: (capability: {
+      agentId: string
+      agentName: string
+      specialties: string[]
+      skills: string[]
+      availability?: 'available' | 'busy' | 'offline'
+      loadFactor?: number
+      successRate?: number
+    }) => ipcRenderer.invoke(IpcChannel.AgentCollab_RegisterCapability, capability),
+    getAvailableAgents: (specialty?: string) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_GetAvailableAgents, specialty),
+    findBestAgent: (requiredSkills: string[]) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_FindBestAgent, requiredSkills),
+    sendMessage: (message: {
+      type: 'request' | 'response' | 'broadcast' | 'knowledge_share'
+      fromAgentId: string
+      toAgentId?: string
+      content: string
+      metadata?: Record<string, unknown>
+      priority?: 'low' | 'normal' | 'high' | 'urgent'
+    }) => ipcRenderer.invoke(IpcChannel.AgentCollab_SendMessage, message),
+    getMessages: (args: { agentId: string; limit?: number }) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_GetMessages, args),
+    createTask: (task: {
+      title: string
+      description: string
+      creatorAgentId: string
+      priority?: 'low' | 'normal' | 'high' | 'urgent'
+      dependencies?: string[]
+    }) => ipcRenderer.invoke(IpcChannel.AgentCollab_CreateTask, task),
+    assignTask: (args: { taskId: string; agentId: string }) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_AssignTask, args),
+    updateTaskStatus: (args: {
+      taskId: string
+      status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'failed'
+      result?: any
+    }) => ipcRenderer.invoke(IpcChannel.AgentCollab_UpdateTaskStatus, args),
+    getTasks: (filter?: { status?: string; agentId?: string }) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_GetTasks, filter),
+    shareKnowledge: (entry: {
+      agentId: string
+      topic: string
+      content: string
+      tags?: string[]
+    }) => ipcRenderer.invoke(IpcChannel.AgentCollab_ShareKnowledge, entry),
+    searchKnowledge: (query: string, tags?: string[]) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_SearchKnowledge, query, tags),
+    createVoting: (voting: {
+      topic: string
+      options: string[]
+      initiatorAgentId: string
+      requiredVoters?: string[]
+      deadline?: string
+    }) => ipcRenderer.invoke(IpcChannel.AgentCollab_CreateVoting, voting),
+    submitVote: (args: { votingId: string; agentId: string; choice: string; reasoning?: string }) =>
+      ipcRenderer.invoke(IpcChannel.AgentCollab_SubmitVote, args),
+    closeVoting: (votingId: string) => ipcRenderer.invoke(IpcChannel.AgentCollab_CloseVoting, votingId),
+    getStats: () => ipcRenderer.invoke(IpcChannel.AgentCollab_GetStats)
+  },
   window: {
     setMinimumSize: (width: number, height: number) =>
       ipcRenderer.invoke(IpcChannel.Windows_SetMinimumSize, width, height),
@@ -711,7 +614,8 @@ const api = {
     isRunning: () => ipcRenderer.invoke(IpcChannel.Ovms_IsRunning),
     getStatus: () => ipcRenderer.invoke(IpcChannel.Ovms_GetStatus),
     runOvms: () => ipcRenderer.invoke(IpcChannel.Ovms_RunOVMS),
-    stopOvms: () => ipcRenderer.invoke(IpcChannel.Ovms_StopOVMS)
+    stopOvms: () => ipcRenderer.invoke(IpcChannel.Ovms_StopOVMS),
+    isSupported: () => ipcRenderer.invoke(IpcChannel.Ovms_IsSupported)
   },
   config: {
     set: (key: string, value: any, isNotify: boolean = false) =>
@@ -1042,6 +946,38 @@ const api = {
       }
     }
   },
+  flowInvite: {
+    // 监听心跳触发事件
+    onTrigger: (
+      callback: (data: {
+        id: string
+        name: string
+        prompt: string
+        context?: Record<string, unknown>
+        triggerCount: number
+        timestamp: number
+      }) => void
+    ): (() => void) => {
+      const listener = (
+        _: Electron.IpcRendererEvent,
+        data: {
+          id: string
+          name: string
+          prompt: string
+          context?: Record<string, unknown>
+          triggerCount: number
+          timestamp: number
+        }
+      ) => callback(data)
+      ipcRenderer.on('vcp:flowinvite:trigger', listener)
+      return () => {
+        ipcRenderer.removeListener('vcp:flowinvite:trigger', listener)
+      }
+    },
+    // 执行内置服务命令
+    execute: (command: string, params: Record<string, unknown>) =>
+      ipcRenderer.invoke('vcp:builtin:execute', { serviceName: 'FlowInvite', command, params })
+  },
   contextIntelligence: {
     // Context Purifier
     purify: (content: string, config?: unknown) => ipcRenderer.invoke(IpcChannel.Context_Purify, { content, config }),
@@ -1194,6 +1130,106 @@ const api = {
       const handler = (_event: unknown, data: unknown) => callback(data as Parameters<typeof callback>[0])
       ipcRenderer.on(IpcChannel.VCP_Async_Callback, handler)
       return () => ipcRenderer.removeListener(IpcChannel.VCP_Async_Callback, handler)
+    }
+  },
+
+  // VCP Notification Service (系统级通知)
+  vcpNotification: {
+    // 获取通知配置
+    getConfig: (): Promise<{
+      systemNotificationEnabled: boolean
+      soundEnabled: boolean
+      errorOnly: boolean
+      emailEnabled: boolean
+      emailAddress?: string
+      filters: {
+        includedTools?: string[]
+        excludedTools?: string[]
+        minDuration?: number
+      }
+      quietHours?: string
+    }> => ipcRenderer.invoke(IpcChannel.VCP_Notification_GetConfig),
+
+    // 更新通知配置
+    setConfig: (config: {
+      systemNotificationEnabled?: boolean
+      soundEnabled?: boolean
+      errorOnly?: boolean
+      emailEnabled?: boolean
+      emailAddress?: string
+      filters?: {
+        includedTools?: string[]
+        excludedTools?: string[]
+        minDuration?: number
+      }
+      quietHours?: string
+    }): Promise<{ success: boolean; config: unknown }> =>
+      ipcRenderer.invoke(IpcChannel.VCP_Notification_SetConfig, config),
+
+    // 获取通知列表
+    getList: (options?: { limit?: number; unreadOnly?: boolean }): Promise<
+      Array<{
+        id: string
+        type: string
+        level: string
+        title: string
+        message: string
+        timestamp: string
+        data?: Record<string, unknown>
+        read: boolean
+        systemNotified: boolean
+      }>
+    > => ipcRenderer.invoke(IpcChannel.VCP_Notification_GetList, options),
+
+    // 标记通知已读
+    markRead: (notificationIds: string[]): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IpcChannel.VCP_Notification_MarkRead, notificationIds),
+
+    // 清空通知
+    clear: (): Promise<{ success: boolean }> => ipcRenderer.invoke(IpcChannel.VCP_Notification_Clear),
+
+    // 发送测试通知
+    test: (): Promise<{ success: boolean }> => ipcRenderer.invoke(IpcChannel.VCP_Notification_Test),
+
+    // 监听新通知
+    onNew: (
+      callback: (notification: {
+        id: string
+        type: string
+        level: string
+        title: string
+        message: string
+        timestamp: string
+        data?: Record<string, unknown>
+        read: boolean
+        systemNotified: boolean
+      }) => void
+    ) => {
+      const handler = (_event: unknown, data: unknown) => callback(data as Parameters<typeof callback>[0])
+      ipcRenderer.on('vcpNotification:new', handler)
+      return () => ipcRenderer.removeListener('vcpNotification:new', handler)
+    },
+
+    // 监听配置变更
+    onConfigChanged: (callback: (config: Record<string, unknown>) => void) => {
+      const handler = (_event: unknown, data: unknown) => callback(data as Record<string, unknown>)
+      ipcRenderer.on('vcpNotification:configChanged', handler)
+      return () => ipcRenderer.removeListener('vcpNotification:configChanged', handler)
+    },
+
+    // 监听通知点击
+    onClick: (
+      callback: (notification: {
+        id: string
+        type: string
+        level: string
+        title: string
+        message: string
+      }) => void
+    ) => {
+      const handler = (_event: unknown, data: unknown) => callback(data as Parameters<typeof callback>[0])
+      ipcRenderer.on('vcpNotification:click', handler)
+      return () => ipcRenderer.removeListener('vcpNotification:click', handler)
     }
   },
 
@@ -1401,6 +1437,169 @@ const api = {
       }
       error?: string
     }> => ipcRenderer.invoke(IpcChannel.VCPPlugin_GetPluginsDir)
+  },
+
+  // ==================== External Plugin System ====================
+
+  /**
+   * 外部插件管理 API
+   * 用于管理 userData/vcp/plugins 目录下的外部插件
+   */
+  externalPlugin: {
+    // 初始化外部插件管理器
+    initialize: (): Promise<{ success: boolean; data?: { pluginCount: number; enabledCount: number }; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:initialize'),
+
+    // 获取所有已安装插件
+    listPlugins: (): Promise<{
+      success: boolean
+      data?: Array<{
+        name: string
+        displayName: string
+        version: string
+        description: string
+        author?: string
+        type: string
+        enabled: boolean
+        installedAt: string
+        path: string
+        configSchema?: Record<
+          string,
+          {
+            type: 'string' | 'number' | 'boolean' | 'array' | 'object'
+            required?: boolean
+            default?: unknown
+            description?: string
+            enum?: string[]
+            min?: number
+            max?: number
+          }
+        >
+        defaultConfig?: Record<string, unknown>
+      }>
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:listPlugins'),
+
+    // 获取单个插件详情
+    getPlugin: (
+      name: string
+    ): Promise<{
+      success: boolean
+      data?: {
+        name: string
+        displayName: string
+        version: string
+        description: string
+        type: string
+        enabled: boolean
+        installedAt: string
+        path: string
+        config?: Record<string, unknown>
+      }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:getPlugin', name),
+
+    // 启用/禁用插件
+    setEnabled: (name: string, enabled: boolean): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:setEnabled', name, enabled),
+
+    // 更新插件配置
+    updateConfig: (name: string, config: Record<string, unknown>): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:updateConfig', name, config),
+
+    // 获取插件合并配置
+    getConfig: (name: string): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:getConfig', name),
+
+    // 安装插件 (从目录路径)
+    install: (
+      sourcePath: string
+    ): Promise<{
+      success: boolean
+      plugin?: {
+        name: string
+        displayName: string
+        version: string
+        type: string
+      }
+      error?: string
+      isMultiple?: boolean
+      availablePlugins?: Array<{ path: string; name: string }>
+    }> => ipcRenderer.invoke('vcp:external:install', sourcePath),
+
+    // 扫描源目录，查找可用插件
+    scanSource: (
+      sourcePath: string
+    ): Promise<{
+      success: boolean
+      data?: {
+        isSinglePlugin: boolean
+        pluginPaths: Array<{ path: string; name: string; manifestPath: string }>
+      }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:scanSource', sourcePath),
+
+    // 批量安装插件
+    installBatch: (
+      sourcePaths: string[]
+    ): Promise<{
+      success: boolean
+      data?: {
+        installed: Array<{ name: string; displayName: string; version: string; type: string }>
+        failed: Array<{ path: string; error: string }>
+        skipped: Array<{ path: string; reason: string }>
+      }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:installBatch', sourcePaths),
+
+    // 卸载插件
+    uninstall: (name: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:uninstall', name),
+
+    // 重新扫描已安装插件
+    rescan: (): Promise<{
+      success: boolean
+      data?: Array<{
+        name: string
+        displayName: string
+        version: string
+        type: string
+        enabled: boolean
+      }>
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:rescan'),
+
+    // 验证 manifest
+    validateManifest: (
+      manifest: Partial<{
+        name: string
+        version: string
+        type: string
+      }>
+    ): Promise<{ success: boolean; data?: { valid: boolean; errors?: string[] }; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:validateManifest', manifest),
+
+    // 获取目录路径
+    getPaths: (): Promise<{
+      success: boolean
+      data?: { plugins: string; assets: string; config: string }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:getPaths'),
+
+    // 获取统计信息
+    getStats: (): Promise<{
+      success: boolean
+      data?: { pluginCount: number; enabledCount: number }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:external:getStats'),
+
+    // 检查插件是否已安装
+    isInstalled: (name: string): Promise<{ success: boolean; data?: boolean; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:isInstalled', name),
+
+    // 在文件管理器中打开插件目录
+    openPluginsFolder: (): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vcp:external:openPluginsFolder')
   },
 
   /**
@@ -1724,13 +1923,26 @@ const api = {
    */
   vcpPlaceholder: {
     // 解析占位符
+    // 支持两种调用格式:
+    // 1. 简单字符串: resolve(text)
+    // 2. 对象格式: resolve({ text, context })
     resolve: (
-      text: string
+      input:
+        | string
+        | {
+            text: string
+            context?: {
+              currentQuery?: string
+              currentModelId?: string
+              role?: 'system' | 'user' | 'assistant'
+              thresholdConfig?: { enabled: boolean; threshold: number }
+            }
+          }
     ): Promise<{
       success: boolean
       result?: string
       error?: string
-    }> => ipcRenderer.invoke('vcp:placeholder:resolve', text),
+    }> => ipcRenderer.invoke('vcp:placeholder:resolve', input),
 
     // 替换异步占位符
     replacePlaceholders: (text: string): Promise<string> =>
@@ -2004,7 +2216,156 @@ const api = {
     }): Promise<{
       injections?: string[]
       cleanedText?: string
-    }> => ipcRenderer.invoke(IpcChannel.VCP_Diary_Search, args)
+    }> => ipcRenderer.invoke(IpcChannel.VCP_Diary_Search, args),
+
+    // 批量同步现有日记到 SQLite (用于向量搜索)
+    syncToSQLite: (args?: {
+      category?: string
+    }): Promise<{
+      success: boolean
+      synced: number
+      skipped: number
+      errors: string[]
+    }> => ipcRenderer.invoke('vcp:diary:syncToSQLite', args)
+  },
+
+  /**
+   * VCP 存储管理 API
+   * 向量索引维度检测和重建
+   */
+  vcpStorage: {
+    // 检测维度不匹配
+    checkDimensionMismatch: (params?: {
+      embeddingConfig?: {
+        model: string
+        provider: string
+        apiKey: string
+        baseURL: string
+      }
+    }): Promise<{
+      hasMismatch: boolean
+      indexDimension: number
+      configDimension: number
+      modelId?: string
+      details?: string
+    }> => ipcRenderer.invoke('vcp:storage:check-dimension-mismatch', params),
+
+    // 重建向量索引
+    rebuildIndexes: (params: {
+      embeddingConfig: {
+        model: string
+        provider: string
+        apiKey: string
+        baseURL: string
+      }
+    }): Promise<{
+      success: boolean
+      rebuiltCount: number
+      errors: string[]
+      durationMs: number
+      newDimensions: number
+    }> => ipcRenderer.invoke('vcp:storage:rebuild-indexes', params),
+
+    // 获取索引统计
+    getIndexStats: (): Promise<{
+      totalVectors: number
+      dimensions: number
+      isNative: boolean
+    }> => ipcRenderer.invoke('vcp:storage:get-index-stats'),
+
+    // 验证索引健康状态
+    validateIndex: (): Promise<{
+      isHealthy: boolean
+      issues: string[]
+    }> => ipcRenderer.invoke('vcp:storage:validate-index'),
+
+    // 从数据库恢复索引
+    recoverFromDatabase: (params?: {
+      tableType?: 'chunks' | 'tags'
+      filterDiaryName?: string
+    }): Promise<{
+      success: boolean
+      recoveredCount: number
+      error?: string
+    }> => ipcRenderer.invoke('vcp:storage:recover-from-database', params),
+
+    // ==================== 日记本索引 API ====================
+
+    // 列出所有日记本
+    listDiaries: (): Promise<string[]> => ipcRenderer.invoke('vcp:storage:list-diaries'),
+
+    // 获取日记本索引统计
+    getDiaryStats: (params?: { dimensions?: number }): Promise<
+      Array<{
+        diaryName: string
+        totalVectors: number
+        dimensions: number
+        isNative: boolean
+      }>
+    > => ipcRenderer.invoke('vcp:storage:get-diary-stats', params),
+
+    // 重建单个日记本索引
+    rebuildDiaryIndex: (params: {
+      diaryName: string
+      embeddingConfig: {
+        model: string
+        provider: string
+        apiKey: string
+        baseURL: string
+      }
+    }): Promise<{
+      success: boolean
+      diaryName: string
+      rebuiltCount: number
+      error?: string
+      durationMs: number
+    }> => ipcRenderer.invoke('vcp:storage:rebuild-diary-index', params),
+
+    // 重建所有日记本索引
+    rebuildAllDiaryIndexes: (params: {
+      embeddingConfig: {
+        model: string
+        provider: string
+        apiKey: string
+        baseURL: string
+      }
+    }): Promise<{
+      success: boolean
+      results: Array<{
+        success: boolean
+        diaryName: string
+        rebuiltCount: number
+        error?: string
+        durationMs: number
+      }>
+      totalRebuilt: number
+      durationMs: number
+    }> => ipcRenderer.invoke('vcp:storage:rebuild-all-diary-indexes', params),
+
+    // 从 SQLite 恢复日记本索引 (Rust 原生)
+    recoverDiaryFromSqlite: (params?: { diaryName?: string }): Promise<{
+      success: boolean
+      recoveredCount: number
+      error?: string
+    }> => ipcRenderer.invoke('vcp:storage:recover-diary-from-sqlite', params),
+
+    // 搜索日记本索引
+    searchDiaryIndex: (params: {
+      diaryName: string
+      queryVector: number[]
+      topK: number
+      dimensions?: number
+    }): Promise<Array<{ id: string; score: number }>> =>
+      ipcRenderer.invoke('vcp:storage:search-diary-index', params),
+
+    // 跨日记本搜索
+    searchAcrossDiaries: (params: {
+      diaryNames: string[]
+      queryVector: number[]
+      topK: number
+      dimensions?: number
+    }): Promise<Array<{ id: string; score: number; diaryName: string }>> =>
+      ipcRenderer.invoke('vcp:storage:search-across-diaries', params)
   },
 
   /**
@@ -2319,6 +2680,330 @@ const api = {
     }> => ipcRenderer.invoke('vcp:knowledge:get-stats')
   },
 
+  // ==================== VCP Memory 统一记忆层接口 ====================
+  // 使用 VCPMemoryAdapter 作为统一入口，整合所有记忆后端
+  vcpMemory: {
+    /**
+     * 智能搜索 - 推荐的 VCP 层记忆搜索入口
+     * 自动选择最佳后端组合，应用学习权重，支持 RRF 融合
+     *
+     * @param params.embeddingConfig - Embedding 配置，用于 knowledge/lightmemo 后端的向量搜索
+     *                                 如果不提供，则降级为纯 BM25 搜索
+     * @param params.rerankConfig - Reranker 配置，用于搜索结果重排序（可选）
+     */
+    intelligentSearch: (params: {
+      query: string
+      k?: number
+      backends?: string[]
+      enableLearning?: boolean
+      minThreshold?: number
+      tags?: string[]
+      timeRangeDays?: number
+      /** Embedding 配置 (可选，用于 knowledge/lightmemo 后端的向量搜索) */
+      embeddingConfig?: {
+        /** Provider ID */
+        providerId: string
+        /** Model ID */
+        modelId: string
+        /** API Key (可选，使用 provider 默认) */
+        apiKey?: string
+        /** Base URL (可选，使用 provider 默认) */
+        baseUrl?: string
+      }
+      /** Reranker 配置 (可选，用于搜索结果重排序) */
+      rerankConfig?: {
+        /** Provider ID (如 jina, cohere) */
+        providerId: string
+        /** Model ID (如 jina-reranker-v3) */
+        modelId: string
+        /** API Key (可选，使用 provider 默认) */
+        apiKey?: string
+        /** Base URL (可选，使用 provider 默认) */
+        baseUrl?: string
+      }
+    }): Promise<{
+      success: boolean
+      data?: Array<{
+        id: string
+        content: string
+        score: number
+        backend: string
+        metadata?: Record<string, unknown>
+        createdAt?: string
+      }>
+      totalCount?: number
+      durationMs?: number
+      backends?: string[]
+      learningApplied?: boolean
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:intelligent-search', params),
+
+    /**
+     * 深度搜索 - 两阶段检索 (初筛 + 精排)
+     * 使用 DeepMemo 进行更精确的语义匹配
+     */
+    deepSearch: (params: {
+      query: string
+      initialK?: number
+      finalK?: number
+      backends?: string[]
+      useReranker?: boolean
+      rerankerModelId?: string
+      minThreshold?: number
+    }): Promise<{
+      success: boolean
+      data?: Array<{
+        id: string
+        content: string
+        score: number
+        backend: string
+        metadata?: Record<string, unknown>
+      }>
+      totalCount?: number
+      durationMs?: number
+      backends?: string[]
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:deep-search', params),
+
+    /**
+     * WaveRAG 三阶段检索 (Lens-Expansion-Focus)
+     */
+    waveRAGSearch: (params: {
+      query: string
+      k?: number
+      backends?: string[]
+      phases?: Array<'lens' | 'expansion' | 'focus'>
+      expansionDepth?: number
+      focusFactor?: number
+      minThreshold?: number
+    }): Promise<{
+      success: boolean
+      data?: Array<{
+        id: string
+        content: string
+        score: number
+        backend: string
+        metadata?: Record<string, unknown>
+      }>
+      totalCount?: number
+      durationMs?: number
+      backends?: string[]
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:waverag-search', params),
+
+    /**
+     * 创建记忆条目
+     */
+    create: (params: {
+      content: string
+      backend?: string
+      tags?: string[]
+      autoTag?: boolean
+      metadata?: Record<string, unknown>
+    }): Promise<{
+      success: boolean
+      data?: {
+        id: string
+        content: string
+        tags: string[]
+        backend: string
+        createdAt: string
+      }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:create', params),
+
+    /**
+     * 记录搜索反馈 (用于自学习)
+     */
+    feedback: (params: {
+      query: string
+      selectedId: string
+      resultIds: string[]
+      feedbackType?: 'select' | 'positive' | 'negative'
+    }): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:feedback', params),
+
+    /**
+     * 获取标签建议
+     */
+    tagSuggestions: (
+      partialQuery: string,
+      existingTags?: string[]
+    ): Promise<{
+      success: boolean
+      tags?: string[]
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:tag-suggestions', partialQuery, existingTags),
+
+    /**
+     * 获取综合统计信息
+     */
+    stats: (): Promise<{
+      success: boolean
+      data?: {
+        memoryStats: {
+          totalEntries: number
+          byBackend: Record<string, number>
+        }
+        learningStats: {
+          queryCount: number
+          feedbackCount: number
+        }
+        tagPoolStats: {
+          totalTags: number
+          topTags: Array<{ tag: string; count: number }>
+        }
+      }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:stats'),
+
+    /**
+     * 获取学习进度
+     */
+    learningProgress: (): Promise<{
+      success: boolean
+      data?: {
+        queryCount: number
+        feedbackCount: number
+        tagWeightRange: { min: number; max: number }
+        topLearningTags: Array<{ tag: string; weight: number }>
+      }
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:learning-progress'),
+
+    /**
+     * 获取配置
+     */
+    getConfig: (): Promise<{
+      success: boolean
+      data?: Record<string, unknown>
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:get-config'),
+
+    /**
+     * 更新配置
+     */
+    updateConfig: (config: Record<string, unknown>): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:update-config', config),
+
+    // ==================== 记忆管理操作 (UI 层支持) ====================
+
+    /**
+     * 列出记忆条目
+     */
+    list: (params?: {
+      source?: 'memory' | 'diary' | 'all'
+      userId?: string
+      agentId?: string
+      limit?: number
+      offset?: number
+    }): Promise<{
+      success: boolean
+      results?: Array<{
+        id: string
+        content: string
+        source: string
+        userId?: string
+        agentId?: string
+        characterName?: string
+        metadata?: Record<string, unknown>
+        createdAt?: string
+      }>
+      total?: number
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:list', params || {}),
+
+    /**
+     * 删除单个记忆条目
+     */
+    delete: (id: string): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:delete', id),
+
+    /**
+     * 更新记忆条目
+     */
+    update: (id: string, data: {
+      content?: string
+      metadata?: Record<string, unknown>
+    }): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:update', id, data),
+
+    /**
+     * 删除用户的所有记忆
+     */
+    deleteAllForUser: (userId: string): Promise<{
+      success: boolean
+      deletedCount?: number
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:delete-all-for-user', userId),
+
+    /**
+     * 获取用户列表及其记忆统计
+     */
+    getUsersList: (): Promise<{
+      success: boolean
+      users?: Array<{
+        userId: string
+        memoryCount: number
+        lastMemoryDate: string
+      }>
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:get-users-list'),
+
+    /**
+     * 验证嵌入配置 - 检测实际返回的向量维度是否与配置匹配
+     * 用于诊断 API 返回维度不匹配的问题
+     */
+    validateEmbeddingConfig: (params: {
+      /** Provider ID */
+      providerId: string
+      /** Model ID */
+      modelId: string
+      /** API Key (可选，使用 provider 默认) */
+      apiKey?: string
+      /** Base URL (可选，使用 provider 默认) */
+      baseUrl?: string
+    }): Promise<{
+      success: boolean
+      actualDimensions?: number
+      expectedDimensions?: number
+      message?: string
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:validate-embedding-config', params),
+
+    /**
+     * 重建向量索引 - 使用指定的嵌入配置重建索引
+     * 当嵌入模型或维度变更后需要重建
+     */
+    rebuildVectorIndex: (params: {
+      /** 新的向量维度 */
+      dimensions: number
+      /** Provider ID */
+      providerId: string
+      /** Model ID */
+      modelId: string
+      /** API Key (可选，使用 provider 默认) */
+      apiKey?: string
+      /** Base URL (可选，使用 provider 默认) */
+      baseUrl?: string
+    }): Promise<{
+      success: boolean
+      /** 重建的条目数量 */
+      rebuiltCount?: number
+      /** 耗时 (ms) */
+      durationMs?: number
+      error?: string
+    }> => ipcRenderer.invoke('vcp:memory:rebuild-vector-index', params)
+  },
+
   // ==================== VCP 论坛直接接口 (VCP Forum Direct API) ====================
   vcpForum: {
     // 列出所有帖子
@@ -2392,145 +3077,54 @@ const api = {
     }> => ipcRenderer.invoke('vcp:forum:stats')
   },
 
-  // ==================== 三大自学习系统 (Self-Learning System) ====================
-
-  /**
-   * 自学习服务 API
-   * 基于 VCPToolBox 概念设计的完整实现：
-   * 1. 查询频率自学习 (Query Frequency Learning)
-   * 2. 用户反馈学习 (User Feedback Learning)
-   * 3. 语义关联发现 (Semantic Association Discovery)
-   */
-  selfLearning: {
-    // 记录查询事件
-    recordQuery: (params: {
-      tags: string[]
-      type?: 'search' | 'rag' | 'tagmemo'
-    }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.SelfLearning_RecordQuery, params),
-
-    // 记录正向反馈 - 用户选择了某个搜索结果
-    recordPositiveFeedback: (params: {
-      query: string
-      selectedResultId: string
-      relatedTags: string[]
-    }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.SelfLearning_RecordPositiveFeedback, params),
-
-    // 记录负向反馈 - 用户明确标记某个结果不相关
-    recordNegativeFeedback: (params: {
-      query: string
-      ignoredResultId: string
-      relatedTags: string[]
-    }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.SelfLearning_RecordNegativeFeedback, params),
-
-    // 获取标签学习权重
-    getLearnedWeight: (params: { tag: string }): Promise<{ success: boolean; weight?: number; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.SelfLearning_GetLearnedWeight, params),
-
-    // 发现语义关联
-    discoverAssociations: (): Promise<{
+  // ==================== VCP 思维簇直接接口 (VCP Cluster Direct API) ====================
+  vcpCluster: {
+    // 列出所有思维簇
+    list: (): Promise<{
       success: boolean
-      suggestions?: Array<{
-        sourceTag: string
-        suggestedTag: string
-        confidence: number
-        discoveredAt: number
-        confirmed: boolean
+      clusters?: Array<{
+        name: string
+        path: string
+        fileCount: number
+        latestMtime?: number
+        files: Array<{
+          name: string
+          path: string
+          mtime: number
+          size: number
+        }>
       }>
       error?: string
-    }> => ipcRenderer.invoke(IpcChannel.SelfLearning_DiscoverAssociations),
+    }> => ipcRenderer.invoke('vcp:cluster:list'),
 
-    // 确认语义关联建议
-    confirmSuggestion: (params: {
-      sourceTag: string
-      suggestedTag: string
-    }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.SelfLearning_ConfirmSuggestion, params),
-
-    // 获取待确认建议
-    getPendingSuggestions: (): Promise<{
-      success: boolean
-      suggestions?: Array<{
-        sourceTag: string
-        suggestedTag: string
-        confidence: number
-        discoveredAt: number
-        confirmed: boolean
-      }>
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.SelfLearning_GetPendingSuggestions),
-
-    // 获取学习统计
-    getStats: (): Promise<{
+    // 获取思维簇统计
+    stats: (): Promise<{
       success: boolean
       stats?: {
-        totalTags: number
-        totalQueries: number
-        totalFeedback: number
-        pendingSuggestions: number
-        topTags: Array<{ tag: string; weight: number; queryCount: number }>
+        clusterCount: number
+        totalFiles: number
+        totalSize: number
       }
       error?: string
-    }> => ipcRenderer.invoke(IpcChannel.SelfLearning_GetStats),
+    }> => ipcRenderer.invoke('vcp:cluster:stats'),
 
-    // 获取标签详细统计
-    getTagStats: (params: {
-      tag: string
+    // 读取簇文件内容
+    read: (filePath: string): Promise<{
+      success: boolean
+      content?: string
+      error?: string
+    }> => ipcRenderer.invoke('vcp:cluster:read', filePath),
+
+    // 创建簇文件
+    create: (params: {
+      clusterName: string
+      content: string
     }): Promise<{
       success: boolean
-      stats?: {
-        queryCount: number
-        positiveCount: number
-        negativeCount: number
-        lastQueryTime: number
-        learnedWeight: number
-      } | null
+      output?: string
+      data?: { filePath: string; clusterName: string }
       error?: string
-    }> => ipcRenderer.invoke(IpcChannel.SelfLearning_GetTagStats, params),
-
-    // 重置学习数据
-    reset: (): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke(IpcChannel.SelfLearning_Reset)
-  },
-
-  // ==================== 知识库文件监控 (Knowledge File Watcher) ====================
-
-  /**
-   * 知识库文件监控 API
-   * 基于 VCPToolBox chokidar 实现的文件监控服务
-   */
-  knowledgeWatcher: {
-    // 添加监控路径
-    addPath: (params: { rootPath: string; knowledgeBaseName: string }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.KnowledgeWatcher_AddPath, params),
-
-    // 移除监控路径
-    removePath: (params: { rootPath: string }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.KnowledgeWatcher_RemovePath, params),
-
-    // 获取监控状态
-    getStatus: (): Promise<{
-      success: boolean
-      status?: Array<{
-        path: string
-        name: string
-        isActive: boolean
-        pendingCount: number
-      }>
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.KnowledgeWatcher_GetStatus),
-
-    // 获取所有监控路径
-    getWatchedPaths: (): Promise<{
-      success: boolean
-      paths?: string[]
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.KnowledgeWatcher_GetWatchedPaths),
-
-    // 停止所有监控
-    stopAll: (): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke(IpcChannel.KnowledgeWatcher_StopAll)
+    }> => ipcRenderer.invoke('vcp:cluster:create', params)
   },
 
   // Canvas Collaborative Editing (协同编辑)
@@ -2906,6 +3500,16 @@ const api = {
       error?: string
     }> => ipcRenderer.invoke('tavern:preset:createRoleplay', name, systemPrefix, systemSuffix),
 
+    // 应用预设到消息列表
+    applyPreset: (
+      messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+      presetId?: string
+    ): Promise<{
+      success: boolean
+      data?: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>
+      error?: string
+    }> => ipcRenderer.invoke('tavern:preset:apply', messages, presetId),
+
     // ==================== 解析操作 ====================
 
     // 解析 PNG 文件
@@ -2925,171 +3529,6 @@ const api = {
       data?: unknown
       error?: string
     }> => ipcRenderer.invoke('tavern:parse:json', jsonStr)
-  },
-
-  // ==================== 记忆大师 (Memory Master) ====================
-
-  /**
-   * 记忆大师 API
-   * 基于 VCPToolBox 概念设计的智能记忆管理服务：
-   * - 自动补标：AI 分析内容生成高质量标签
-   * - 批量整理：事件合并、结构优化、语法去冗余
-   * - 标签池管理：维护全局标签一致性
-   * - 模型可配置：用户可选择 AI 模型
-   */
-  memoryMaster: {
-    // ==================== 自动补标 ====================
-
-    // 自动生成标签
-    autoTag: (params: {
-      content: string
-      options?: {
-        existingTags?: string[]
-        authorStyle?: string
-        maxTags?: number
-        language?: 'zh' | 'en' | 'auto'
-        modelId?: string
-        providerId?: string
-      }
-    }): Promise<{
-      success: boolean
-      tags?: string[]
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_AutoTag, params),
-
-    // 验证标签格式
-    validateTags: (params: {
-      tags: string[]
-    }): Promise<{
-      success: boolean
-      valid?: boolean
-      invalidTags?: string[]
-      suggestedTags?: string[]
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_ValidateTags, params),
-
-    // 检测并建议标签
-    detectAndSuggest: (params: {
-      content: string
-      existingTags?: string[]
-    }): Promise<{
-      success: boolean
-      valid?: boolean
-      suggestedTags?: string[]
-      invalidTags?: string[]
-      needsTagging?: boolean
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_DetectAndSuggest, params),
-
-    // ==================== 批量整理 ====================
-
-    // 批量整理笔记
-    batchOrganize: (params: {
-      notePaths: string[]
-      options: {
-        startDate?: Date
-        endDate?: Date
-        tasks: Array<'merge' | 'summarize' | 'deduplicate' | 'tag'>
-        modelId?: string
-        providerId?: string
-      }
-    }): Promise<{
-      success: boolean
-      message?: string
-      processedCount?: number
-      mergedCount?: number
-      taggedCount?: number
-      errors?: string[]
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_BatchOrganize, params),
-
-    // 合并多个内容
-    mergeContents: (params: {
-      contents: string[]
-      options?: { modelId?: string; providerId?: string }
-    }): Promise<{
-      success: boolean
-      merged?: string
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_MergeContents, params),
-
-    // 去除冗余内容
-    deduplicate: (params: {
-      content: string
-      options?: { modelId?: string; providerId?: string }
-    }): Promise<{
-      success: boolean
-      deduplicated?: string
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_Deduplicate, params),
-
-    // ==================== 标签池管理 ====================
-
-    // 获取标签池
-    getTagPool: (): Promise<{
-      success: boolean
-      tags?: string[]
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_GetTagPool),
-
-    // 获取标签统计
-    getTagStats: (): Promise<{
-      success: boolean
-      stats?: Array<{
-        tag: string
-        count: number
-        lastUsed: Date
-      }>
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_GetTagStats),
-
-    // 获取 Top N 标签
-    getTopTags: (params?: {
-      n?: number
-    }): Promise<{
-      success: boolean
-      tags?: string[]
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_GetTopTags, params || {}),
-
-    // 添加标签到标签池
-    addTagsToPool: (params: {
-      tags: string[]
-    }): Promise<{
-      success: boolean
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_AddTagsToPool, params),
-
-    // ==================== 配置管理 ====================
-
-    // 获取配置
-    getConfig: (): Promise<{
-      success: boolean
-      config?: {
-        autoTagEnabled: boolean
-        defaultModelId?: string
-        defaultProviderId?: string
-        maxTags: number
-        tagFormat: 'lowercase' | 'kebab-case' | 'original'
-        suggestionsEnabled: boolean
-      }
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_GetConfig),
-
-    // 更新配置
-    updateConfig: (params: {
-      config: {
-        autoTagEnabled?: boolean
-        defaultModelId?: string
-        defaultProviderId?: string
-        maxTags?: number
-        tagFormat?: 'lowercase' | 'kebab-case' | 'original'
-        suggestionsEnabled?: boolean
-      }
-    }): Promise<{
-      success: boolean
-      error?: string
-    }> => ipcRenderer.invoke(IpcChannel.MemoryMaster_UpdateConfig, params)
   },
 
   // ==================== Agent 日记写入 (DailyNoteWrite) ====================
@@ -3218,7 +3657,28 @@ const api = {
         documentCount?: number
       }
       error?: string
-    }> => ipcRenderer.invoke(IpcChannel.Note_GetSearchStats)
+    }> => ipcRenderer.invoke(IpcChannel.Note_GetSearchStats),
+
+    // 列出所有笔记
+    listAll: (params?: {
+      limit?: number
+      includeContent?: boolean
+    }): Promise<{
+      success: boolean
+      notes?: Array<{
+        id: string
+        filePath: string
+        title: string
+        content: string
+        tags?: string[]
+        characterName?: string
+        isPublic?: boolean
+        updatedAt: string
+        createdAt: string
+      }>
+      total?: number
+      error?: string
+    }> => ipcRenderer.invoke('note:list-all', params)
   },
 
   // ==================== 统一记忆协调器 (Integrated Memory Coordinator) ====================
@@ -3480,7 +3940,64 @@ const api = {
       success: boolean
       config?: Record<string, unknown>
       error?: string
-    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_UpdateConfig, params)
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_UpdateConfig, params),
+
+    // ==================== 新增方法 (替代废弃API) ====================
+
+    // 获取单个标签的详细统计
+    getTagStats: (params: { tag: string }): Promise<{
+      success: boolean
+      stats?: {
+        queryCount: number
+        positiveCount: number
+        negativeCount: number
+        lastQueryTime: number
+        learnedWeight: number
+      } | null
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_GetTagStats, params),
+
+    // 确认语义关联建议
+    confirmSuggestion: (params: { sourceTag: string; suggestedTag: string }): Promise<{
+      success: boolean
+      confirmed?: boolean
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_ConfirmSuggestion, params),
+
+    // 获取待确认的语义关联建议
+    getPendingSuggestions: (): Promise<{
+      success: boolean
+      suggestions?: Array<{
+        sourceTag: string
+        suggestedTag: string
+        confidence: number
+        discoveredAt: number
+        confirmed: boolean
+      }>
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_GetPendingSuggestions),
+
+    // 清空指定后端的数据
+    clearBackend: (params: { backend: 'lightmemo' | 'deepmemo' | 'meshmemo' | 'diary' | 'notes' }): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_ClearBackend, params),
+
+    // 添加文档到指定后端
+    addDocument: (params: {
+      backend: 'lightmemo' | 'deepmemo' | 'meshmemo'
+      document: { id: string; content: string; embedding?: number[]; metadata?: Record<string, unknown> }
+    }): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_AddDocument, params),
+
+    // 获取指定后端的文档数量
+    getDocumentCount: (params: { backend: 'lightmemo' | 'deepmemo' | 'meshmemo' }): Promise<{
+      success: boolean
+      count?: number
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.IntegratedMemory_GetDocumentCount, params)
   },
 
   // ==================== MemoryBrain (统一记忆大脑) ====================
@@ -4477,6 +4994,253 @@ const api = {
       }> => ipcRenderer.invoke('vcp:native:tagmemo:stats')
     },
 
+    // ==================== WaveRAG 三阶段检索 ====================
+    waverag: {
+      // 创建 WaveRAG 引擎
+      create: (config?: {
+        lensMaxTags?: number
+        expansionDepth?: number
+        expansionThreshold?: number
+        expansionMaxTags?: number
+        focusTopK?: number
+        focusScoreThreshold?: number
+        tagMemoWeight?: number
+        bm25Weight?: number
+        vectorWeight?: number
+      }): Promise<{
+        success: boolean
+        engineId?: string
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:create', config),
+
+      // 执行三阶段检索
+      search: (
+        engineId: string,
+        queryTags: string[],
+        bm25Results: Array<{ id: string; content: string; metadata?: string; score: number }>,
+        vectorResults: Array<{ id: string; content: string; metadata?: string; score: number }>,
+        configOverride?: {
+          lensMaxTags?: number
+          expansionDepth?: number
+          expansionThreshold?: number
+          expansionMaxTags?: number
+          focusTopK?: number
+          focusScoreThreshold?: number
+          tagMemoWeight?: number
+          bm25Weight?: number
+          vectorWeight?: number
+        }
+      ): Promise<{
+        success: boolean
+        data?: {
+          results: Array<{
+            id: string
+            content: string
+            finalScore: number
+            originalScore: number
+            tagBoostScore: number
+            matchedTags: string[]
+            metadata?: string
+            source: string
+          }>
+          lensPhase: {
+            tags: string[]
+            expandedTags: string[]
+            durationMs: number
+          }
+          expansionPhase: {
+            allTags: string[]
+            depthReached: number
+            durationMs: number
+          }
+          focusPhase: {
+            resultCount: number
+            tagBoostApplied: boolean
+            durationMs: number
+          }
+          queryTags: string[]
+          expansionTags: string[]
+          totalDurationMs: number
+          traceId: string
+        }
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:search', engineId, queryTags, bm25Results, vectorResults, configOverride),
+
+      // 快速三阶段检索 (无状态)
+      quickSearch: (
+        queryTags: string[],
+        bm25Results: Array<{ id: string; content: string; metadata?: string; score: number }>,
+        vectorResults: Array<{ id: string; content: string; metadata?: string; score: number }>,
+        config?: {
+          lensMaxTags?: number
+          expansionDepth?: number
+          expansionThreshold?: number
+          expansionMaxTags?: number
+          focusTopK?: number
+          focusScoreThreshold?: number
+          tagMemoWeight?: number
+          bm25Weight?: number
+          vectorWeight?: number
+        }
+      ): Promise<{
+        success: boolean
+        data?: {
+          results: Array<{
+            id: string
+            content: string
+            finalScore: number
+            originalScore: number
+            tagBoostScore: number
+            matchedTags: string[]
+            metadata?: string
+            source: string
+          }>
+          lensPhase: {
+            tags: string[]
+            expandedTags: string[]
+            durationMs: number
+          }
+          expansionPhase: {
+            allTags: string[]
+            depthReached: number
+            durationMs: number
+          }
+          focusPhase: {
+            resultCount: number
+            tagBoostApplied: boolean
+            durationMs: number
+          }
+          queryTags: string[]
+          expansionTags: string[]
+          totalDurationMs: number
+          traceId: string
+        }
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:quickSearch', queryTags, bm25Results, vectorResults, config),
+
+      // 更新 TagMemo 矩阵
+      updateTagMatrix: (
+        engineId: string,
+        tag1: string,
+        tag2: string,
+        weight?: number
+      ): Promise<{
+        success: boolean
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:updateTagMatrix', engineId, tag1, tag2, weight),
+
+      // 批量更新 TagMemo 矩阵
+      batchUpdateTagMatrix: (
+        engineId: string,
+        updates: Array<{ tag1: string; tag2: string; weight?: number }>
+      ): Promise<{
+        success: boolean
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:batchUpdateTagMatrix', engineId, updates),
+
+      // 获取统计信息
+      getStats: (engineId: string): Promise<{
+        success: boolean
+        data?: {
+          tagCount: number
+          pairCount: number
+          totalUpdates: number
+          cooccurrenceTags: number
+        }
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:stats', engineId),
+
+      // 获取配置
+      getConfig: (engineId: string): Promise<{
+        success: boolean
+        data?: {
+          lensMaxTags?: number
+          expansionDepth?: number
+          expansionThreshold?: number
+          expansionMaxTags?: number
+          focusTopK?: number
+          focusScoreThreshold?: number
+          tagMemoWeight?: number
+          bm25Weight?: number
+          vectorWeight?: number
+        }
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:config', engineId),
+
+      // 更新配置
+      updateConfig: (
+        engineId: string,
+        config: {
+          lensMaxTags?: number
+          expansionDepth?: number
+          expansionThreshold?: number
+          expansionMaxTags?: number
+          focusTopK?: number
+          focusScoreThreshold?: number
+          tagMemoWeight?: number
+          bm25Weight?: number
+          vectorWeight?: number
+        }
+      ): Promise<{
+        success: boolean
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:updateConfig', engineId, config),
+
+      // 计算 TagBoost
+      computeTagBoost: (
+        engineId: string,
+        params: {
+          queryTags: string[]
+          contentTags: string[]
+          originalScore?: number
+          alphaMin?: number
+          alphaMax?: number
+          betaBase?: number
+        }
+      ): Promise<{
+        success: boolean
+        data?: {
+          originalScore: number
+          boostedScore: number
+          matchedTags: string[]
+          expansionTags: string[]
+          boostFactor: number
+          tagMatchScore: number
+          spikeDetails: Array<{
+            tag: string
+            weight: number
+            globalFreq: number
+            score: number
+          }>
+          dynamicAlpha: number
+          dynamicBeta: number
+        }
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:computeTagBoost', engineId, params),
+
+      // 导出 TagMemo 矩阵
+      exportTagMatrix: (engineId: string): Promise<{
+        success: boolean
+        data?: string
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:exportTagMatrix', engineId),
+
+      // 加载 TagMemo 矩阵
+      loadTagMatrix: (
+        engineId: string,
+        json: string
+      ): Promise<{
+        success: boolean
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:loadTagMatrix', engineId, json),
+
+      // 销毁引擎
+      destroy: (engineId: string): Promise<{
+        success: boolean
+        error?: string
+      }> => ipcRenderer.invoke('vcp:native:waverag:destroy', engineId)
+    },
+
     // ==================== 记忆调用追踪 ====================
 
     // 获取记忆调用记录
@@ -4607,6 +5371,192 @@ const api = {
       success: boolean
       error?: string
     }> => ipcRenderer.invoke('vcp:native:storage:openInExplorer', dirPath)
+  },
+
+  // ==================== 统一模型配置 (UnifiedModelConfig) ====================
+
+  /**
+   * 统一模型配置 API
+   * 统一管理 Embedding 和 Rerank 模型配置
+   * 支持全局配置和场景覆盖配置
+   */
+  modelConfig: {
+    // 设置全局 Embedding 配置
+    setEmbedding: (config: {
+      model: { id: string; provider: string; name?: string; dimensions?: number }
+      provider: { id: string; apiKey?: string; baseUrl?: string }
+      targetDimension?: number
+      enableCache?: boolean
+    }): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('model-config:setEmbedding', config),
+
+    // 设置全局 Rerank 配置
+    setRerank: (config: {
+      model: { id: string; provider: string; name?: string }
+      provider: { id: string; apiKey?: string; baseUrl?: string }
+      topN?: number
+    }): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('model-config:setRerank', config),
+
+    // 设置场景配置
+    setSceneConfig: (
+      scene: 'knowledge' | 'memory' | 'deepmemo' | 'lightmemo' | 'default',
+      embedding?: {
+        model: { id: string; provider: string; name?: string; dimensions?: number }
+        provider: { id: string; apiKey?: string; baseUrl?: string }
+        targetDimension?: number
+        enableCache?: boolean
+      },
+      rerank?: {
+        model: { id: string; provider: string; name?: string }
+        provider: { id: string; apiKey?: string; baseUrl?: string }
+        topN?: number
+      }
+    ): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('model-config:setSceneConfig', scene, embedding, rerank),
+
+    // 更新完整配置
+    update: (config: {
+      embedding?: {
+        model: { id: string; provider: string; name?: string; dimensions?: number }
+        provider: { id: string; apiKey?: string; baseUrl?: string }
+        targetDimension?: number
+        enableCache?: boolean
+      }
+      rerank?: {
+        model: { id: string; provider: string; name?: string }
+        provider: { id: string; apiKey?: string; baseUrl?: string }
+        topN?: number
+      }
+      sceneOverrides?: Record<
+        string,
+        {
+          embedding?: {
+            model: { id: string; provider: string; name?: string; dimensions?: number }
+            provider: { id: string; apiKey?: string; baseUrl?: string }
+            targetDimension?: number
+            enableCache?: boolean
+          }
+          rerank?: {
+            model: { id: string; provider: string; name?: string }
+            provider: { id: string; apiKey?: string; baseUrl?: string }
+            topN?: number
+          }
+        }
+      >
+    }): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('model-config:update', config),
+
+    // 获取完整配置
+    get: (): Promise<{
+      embedding?: {
+        model: { id: string; provider: string; name?: string; dimensions?: number }
+        provider: { id: string; apiKey?: string; baseUrl?: string }
+        targetDimension?: number
+        enableCache?: boolean
+      }
+      rerank?: {
+        model: { id: string; provider: string; name?: string }
+        provider: { id: string; apiKey?: string; baseUrl?: string }
+        topN?: number
+      }
+      sceneOverrides?: Record<
+        string,
+        {
+          embedding?: {
+            model: { id: string; provider: string; name?: string; dimensions?: number }
+            provider: { id: string; apiKey?: string; baseUrl?: string }
+            targetDimension?: number
+            enableCache?: boolean
+          }
+          rerank?: {
+            model: { id: string; provider: string; name?: string }
+            provider: { id: string; apiKey?: string; baseUrl?: string }
+            topN?: number
+          }
+        }
+      >
+    }> => ipcRenderer.invoke('model-config:get'),
+
+    // 获取有效 Embedding 配置
+    getEffectiveEmbedding: (
+      scene?: 'knowledge' | 'memory' | 'deepmemo' | 'lightmemo' | 'default'
+    ): Promise<
+      | {
+          model: { id: string; provider: string; name?: string; dimensions?: number }
+          provider: { id: string; apiKey?: string; baseUrl?: string }
+          targetDimension?: number
+          enableCache?: boolean
+        }
+      | undefined
+    > => ipcRenderer.invoke('model-config:getEffectiveEmbedding', scene),
+
+    // 获取有效 Rerank 配置
+    getEffectiveRerank: (
+      scene?: 'knowledge' | 'memory' | 'deepmemo' | 'lightmemo' | 'default'
+    ): Promise<
+      | {
+          model: { id: string; provider: string; name?: string }
+          provider: { id: string; apiKey?: string; baseUrl?: string }
+          topN?: number
+        }
+      | undefined
+    > => ipcRenderer.invoke('model-config:getEffectiveRerank', scene),
+
+    // 检查配置状态
+    status: (
+      scene?: 'knowledge' | 'memory' | 'deepmemo' | 'lightmemo' | 'default'
+    ): Promise<{
+      hasEmbedding: boolean
+      hasRerank: boolean
+    }> => ipcRenderer.invoke('model-config:status', scene)
+  },
+
+  // ==================== Sticker System ====================
+  sticker: {
+    // Get all stickers from all packs
+    getAll: (): Promise<
+      Array<{
+        id: string
+        url: string
+        filename: string
+        packName: string
+      }>
+    > => ipcRenderer.invoke(IpcChannel.Sticker_GetAll),
+
+    // Get all sticker packs
+    getPacks: (): Promise<
+      Array<{
+        name: string
+        path: string
+        count: number
+      }>
+    > => ipcRenderer.invoke(IpcChannel.Sticker_GetPacks),
+
+    // Import a sticker pack from a folder
+    importPack: (
+      sourcePath: string,
+      packName?: string
+    ): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.Sticker_ImportPack, sourcePath, packName),
+
+    // Delete a sticker pack
+    deletePack: (
+      packName: string
+    ): Promise<{
+      success: boolean
+      error?: string
+    }> => ipcRenderer.invoke(IpcChannel.Sticker_DeletePack, packName),
+
+    // Get sticker list formatted for AI prompt injection
+    // Returns: "包名1: file1.gif|file2.png\n包名2: file3.jpg"
+    getListForPrompt: (): Promise<string> => ipcRenderer.invoke(IpcChannel.Sticker_GetListForPrompt),
+
+    // Get stickers directory path (for constructing file:// URLs)
+    getDirPath: (): Promise<string> => ipcRenderer.invoke(IpcChannel.Sticker_GetDirPath),
+
+    // Get files for a specific sticker pack
+    // Returns: ["file1.gif", "file2.png", ...]
+    getPackFiles: (packName: string): Promise<string[]> => ipcRenderer.invoke(IpcChannel.Sticker_GetPackFiles, packName)
   }
 }
 

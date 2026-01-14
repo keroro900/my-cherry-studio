@@ -1,6 +1,6 @@
 import { DynamicVirtualList } from '@renderer/components/VirtualList'
 import { useActiveNode } from '@renderer/hooks/useNotesQuery'
-import NotesSidebarHeader from '@renderer/pages/notes/NotesSidebarHeader'
+import NotesSidebarHeader, { type ViewMode } from '@renderer/pages/notes/NotesSidebarHeader'
 import { useAppSelector } from '@renderer/store'
 import { selectSortType } from '@renderer/store/note'
 import type { NotesSortType, NotesTreeNode } from '@renderer/types/note'
@@ -12,6 +12,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
+import DiaryCardView from './components/DiaryCardView'
 import TreeNode from './components/TreeNode'
 import {
   NotesActionsContext,
@@ -21,6 +22,7 @@ import {
   NotesSelectionContext,
   NotesUIContext
 } from './context/NotesContexts'
+import { useDiaryFeatures, parseTimeExpression } from './hooks/useDiaryFeatures'
 import { useFullTextSearch } from './hooks/useFullTextSearch'
 import { useNotesDragAndDrop } from './hooks/useNotesDragAndDrop'
 import { useNotesEditing } from './hooks/useNotesEditing'
@@ -60,11 +62,20 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
   const { activeNode } = useActiveNode(notesTree)
   const sortType = useAppSelector(selectSortType)
 
+  // 日记功能 hook
+  const { diaryBooks } = useDiaryFeatures()
+  const availableCharacters = useMemo(() => diaryBooks.map((b) => b.name), [diaryBooks])
+
   const [isShowStarred, setIsShowStarred] = useState(false)
   const [isShowSearch, setIsShowSearch] = useState(false)
+  const [isShowDiary, setIsShowDiary] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
+  const [diaryFilter, setDiaryFilter] = useState<string | null>(null)
+  const [diarySearchResults, setDiarySearchResults] = useState<NotesTreeNode[]>([])
   const [isDragOverSidebar, setIsDragOverSidebar] = useState(false)
   const [openDropdownKey, setOpenDropdownKey] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('tree')
+  const [selectedFolderForCards, setSelectedFolderForCards] = useState<string | null>(null)
 
   const notesTreeRef = useRef<NotesTreeNode[]>(notesTree)
   const virtualListRef = useRef<any>(null)
@@ -155,6 +166,27 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
     setIsShowStarred(!isShowStarred)
   }, [isShowStarred])
 
+  const handleToggleDiaryView = useCallback(() => {
+    const newIsShowDiary = !isShowDiary
+    setIsShowDiary(newIsShowDiary)
+
+    if (newIsShowDiary) {
+      // 进入日记模式时切换到卡片视图（文件夹卡片模式）
+      setViewMode('card')
+      setSelectedFolderForCards(null) // 重置文件夹选择
+    } else {
+      // 退出日记模式时恢复树形视图
+      setViewMode('tree')
+      setSelectedFolderForCards(null)
+    }
+  }, [isShowDiary])
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode)
+    // 切换视图模式时重置文件夹选择
+    setSelectedFolderForCards(null)
+  }, [])
+
   const handleToggleSearchView = useCallback(() => {
     setIsShowSearch(!isShowSearch)
   }, [isShowSearch])
@@ -164,6 +196,48 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
       onSortNodes(selectedSortType)
     },
     [onSortNodes]
+  )
+
+  // 时间表达式搜索处理
+  const handleTimeSearch = useCallback(
+    async (expression: string) => {
+      const timeResult = parseTimeExpression(expression)
+      if (!timeResult) {
+        // 不是有效的时间表达式，当作普通搜索
+        setSearchKeyword(expression)
+        setIsShowSearch(true)
+        setIsShowDiary(false)
+        return
+      }
+
+      // 使用时间范围搜索日记
+      try {
+        const result = await window.api.vcpDiary.search({
+          query: '',
+          characterName: diaryFilter || undefined,
+          dateFrom: timeResult.dateFrom,
+          dateTo: timeResult.dateTo,
+          limit: 100
+        })
+
+        if (result.success && result.entries) {
+          // 将搜索结果转换为 NotesTreeNode 格式
+          const nodes: NotesTreeNode[] = result.entries.map((entry) => ({
+            id: entry.id,
+            name: entry.title || entry.date,
+            type: 'file' as const,
+            treePath: `/${diaryFilter || 'diary'}/${entry.date}.md`,
+            externalPath: '',
+            createdAt: entry.date,
+            updatedAt: entry.date
+          }))
+          setDiarySearchResults(nodes)
+        }
+      } catch (error) {
+        console.error('Time search failed:', error)
+      }
+    },
+    [diaryFilter]
   )
 
   const getEmptyAreaMenuItems = useCallback((): MenuProps['items'] => {
@@ -231,6 +305,38 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
       return result
     }
 
+    // 日记模式筛选：按角色文件夹过滤
+    const flattenForDiary = (nodes: NotesTreeNode[]): Array<{ node: NotesTreeNode; depth: number }> => {
+      let result: Array<{ node: NotesTreeNode; depth: number }> = []
+
+      for (const node of nodes) {
+        // 如果有筛选条件，只显示匹配的文件夹及其内容
+        if (diaryFilter) {
+          if (node.type === 'folder' && node.name === diaryFilter) {
+            // 匹配的文件夹 - 展开显示所有内容
+            result.push({ node, depth: 0 })
+            if (node.children) {
+              for (const child of node.children) {
+                if (child.type === 'file') {
+                  result.push({ node: child, depth: 1 })
+                }
+              }
+            }
+          } else if (node.children) {
+            // 递归搜索子文件夹
+            const childResults = flattenForDiary(node.children)
+            result = [...result, ...childResults]
+          }
+        } else {
+          // 无筛选条件 - 显示所有日记本（顶层文件夹）
+          if (node.type === 'folder') {
+            result.push({ node, depth: 0 })
+          }
+        }
+      }
+      return result
+    }
+
     if (isShowSearch) {
       if (hasSearchKeyword) {
         return searchResults.map((result) => ({ node: result, depth: 0 }))
@@ -243,8 +349,37 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
       return filteredNodes.map((node) => ({ node, depth: 0 }))
     }
 
+    // 日记模式
+    if (isShowDiary) {
+      // 如果有时间搜索结果，显示搜索结果
+      if (diarySearchResults.length > 0) {
+        return diarySearchResults.map((node) => ({ node, depth: 0 }))
+      }
+      return flattenForDiary(notesTree)
+    }
+
     return flattenForVirtualization(notesTree)
-  }, [notesTree, isShowStarred, isShowSearch, hasSearchKeyword, searchResults])
+  }, [notesTree, isShowStarred, isShowSearch, isShowDiary, diaryFilter, diarySearchResults, hasSearchKeyword, searchResults])
+
+  // All diary notes for stream mode (all files from all folders)
+  const allDiaryNotes = useMemo(() => {
+    if (!isShowDiary || viewMode !== 'stream') return []
+
+    const collectAllFiles = (nodes: NotesTreeNode[]): NotesTreeNode[] => {
+      let result: NotesTreeNode[] = []
+      for (const node of nodes) {
+        if (node.type === 'file') {
+          result.push(node)
+        }
+        if (node.children && node.children.length > 0) {
+          result = [...result, ...collectAllFiles(node.children)]
+        }
+      }
+      return result
+    }
+
+    return collectAllFiles(notesTree)
+  }, [notesTree, isShowDiary, viewMode])
 
   // Scroll to active node
   useEffect(() => {
@@ -364,14 +499,22 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
                   <NotesSidebarHeader
                     isShowStarred={isShowStarred}
                     isShowSearch={isShowSearch}
+                    isShowDiary={isShowDiary}
                     searchKeyword={searchKeyword}
                     sortType={sortType}
+                    diaryFilter={diaryFilter}
+                    availableCharacters={availableCharacters}
+                    viewMode={viewMode}
                     onCreateFolder={handleCreateFolder}
                     onCreateNote={handleCreateNote}
                     onToggleStarredView={handleToggleStarredView}
                     onToggleSearchView={handleToggleSearchView}
+                    onToggleDiaryView={handleToggleDiaryView}
                     onSetSearchKeyword={setSearchKeyword}
                     onSelectSortType={handleSelectSortType}
+                    onSetDiaryFilter={setDiaryFilter}
+                    onTimeSearch={handleTimeSearch}
+                    onViewModeChange={handleViewModeChange}
                   />
 
                   <NotesTreeContainer>
@@ -395,39 +538,63 @@ const NotesSidebar: FC<NotesSidebarProps> = ({
                         </span>
                       </SearchStatusBar>
                     )}
-                    <Dropdown
-                      menu={{ items: getEmptyAreaMenuItems() }}
-                      trigger={['contextMenu']}
-                      open={openDropdownKey === 'empty-area'}
-                      onOpenChange={(open) => setOpenDropdownKey(open ? 'empty-area' : null)}>
-                      <DynamicVirtualList
-                        ref={virtualListRef}
-                        list={flattenedNodes}
-                        estimateSize={() => 28}
-                        itemContainerStyle={{ padding: '8px 8px 0 8px' }}
-                        overscan={10}
-                        isSticky={isSticky}
-                        getItemDepth={getItemDepth}>
-                        {({ node, depth }) => <TreeNode node={node} depth={depth} renderChildren={false} />}
-                      </DynamicVirtualList>
-                    </Dropdown>
-                    {!isShowStarred && !isShowSearch && (
-                      <div style={{ padding: '0 8px', marginTop: '6px', marginBottom: '12px' }}>
-                        <TreeNode
-                          node={{
-                            id: 'hint-node',
-                            name: '',
-                            type: 'hint',
-                            treePath: '',
-                            externalPath: '',
-                            createdAt: '',
-                            updatedAt: ''
-                          }}
-                          depth={0}
-                          renderChildren={false}
-                          onHintClick={handleSelectFolder}
-                        />
-                      </div>
+
+                    {/* Card View for Diary Mode */}
+                    {isShowDiary && (viewMode === 'card' || viewMode === 'stream') && (
+                      <DiaryCardView
+                        notes={
+                          viewMode === 'stream'
+                            ? allDiaryNotes
+                            : flattenedNodes.filter(({ node }) => node.type === 'file').map(({ node }) => node)
+                        }
+                        activeNodeId={activeNode?.id}
+                        onSelectNote={onSelectNode}
+                        onToggleStar={onToggleStar}
+                        isStreamMode={viewMode === 'stream'}
+                        showFolderCards={viewMode === 'card'}
+                        selectedFolder={selectedFolderForCards}
+                        onFolderSelect={setSelectedFolderForCards}
+                      />
+                    )}
+
+                    {/* Tree View (default and search) */}
+                    {(!isShowDiary || viewMode === 'tree') && (
+                      <>
+                        <Dropdown
+                          menu={{ items: getEmptyAreaMenuItems() }}
+                          trigger={['contextMenu']}
+                          open={openDropdownKey === 'empty-area'}
+                          onOpenChange={(open) => setOpenDropdownKey(open ? 'empty-area' : null)}>
+                          <DynamicVirtualList
+                            ref={virtualListRef}
+                            list={flattenedNodes}
+                            estimateSize={() => 28}
+                            itemContainerStyle={{ padding: '8px 8px 0 8px' }}
+                            overscan={10}
+                            isSticky={isSticky}
+                            getItemDepth={getItemDepth}>
+                            {({ node, depth }) => <TreeNode node={node} depth={depth} renderChildren={false} />}
+                          </DynamicVirtualList>
+                        </Dropdown>
+                        {!isShowStarred && !isShowSearch && !isShowDiary && (
+                          <div style={{ padding: '0 8px', marginTop: '6px', marginBottom: '12px' }}>
+                            <TreeNode
+                              node={{
+                                id: 'hint-node',
+                                name: '',
+                                type: 'hint',
+                                treePath: '',
+                                externalPath: '',
+                                createdAt: '',
+                                updatedAt: ''
+                              }}
+                              depth={0}
+                              renderChildren={false}
+                              onHintClick={handleSelectFolder}
+                            />
+                          </div>
+                        )}
+                      </>
                     )}
                   </NotesTreeContainer>
 

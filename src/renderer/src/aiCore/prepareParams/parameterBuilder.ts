@@ -256,77 +256,108 @@ export async function buildStreamTextParams(
     systemPrompt = await replacePromptVariables(assistant.prompt, model.name)
   }
 
-  // VCP 统一协议：工具注入遵循原始设计
-  // 1. MCP 工具：显式配置的 MCP 工具会自动注入
-  // 2. VCP 内置工具：只有当 prompt 明确包含 {{VCPAllTools}} 占位符时才注入
-  //    不再默认注入所有工具，让用户通过占位符显式控制
+  // VCP 统一协议：工具注入遵循 VCPToolBox 原始设计
+  // 重要：只有当 prompt 明确包含占位符时才注入工具描述，避免 token 爆炸
+  //
+  // 支持的占位符：
+  // - {{VCPToolCatalog}} - 精简工具目录（推荐，~500 tokens）
+  // - {{VCPAllTools}} / {{VCPTools}} - 自动降级为精简版
+  // - {{VCPServiceName}} - 单个服务的完整描述（VCPToolBox 核心特性）
+  //   例如: {{VCPDailyNoteWrite}}, {{VCPLightMemo}}, {{VCPAIMemo}}
+  // - {{MCPTools}} - 仅注入 MCP 工具（新增）
+  //
+  // 如果没有占位符但启用了 VCP，只注入协议指南（不注入工具列表）
   const hasMcpTools = mcpTools && mcpTools.length > 0
+  const isVcpEnabled = assistant.vcpConfig?.enabled ?? false
 
   // 检查原始 prompt 是否包含 VCP 占位符（在变量替换之前）
   const originalPrompt = assistant.prompt || ''
-  const hasVcpPlaceholder = originalPrompt.includes('{{VCPAllTools}}') || originalPrompt.includes('{{VCPTools}}')
+  const hasVcpPlaceholder =
+    originalPrompt.includes('{{VCPAllTools}}') ||
+    originalPrompt.includes('{{VCPTools}}') ||
+    originalPrompt.includes('{{VCPToolCatalog}}')
+  const hasMcpPlaceholder = originalPrompt.includes('{{MCPTools}}')
 
-  // 只在有 MCP 工具或明确使用 VCP 占位符时才处理工具注入
-  if (hasMcpTools || hasVcpPlaceholder) {
-    const vcpGuide = generateVCPProtocolGuide()
-    let toolsDescription = ''
+  // 检查是否有单个服务占位符 {{VCPServiceName}} (VCPToolBox 核心特性)
+  // 格式: {{VCPDailyNoteWrite}}, {{VCPLightMemo}}, {{VCPAIMemo}} 等
+  const vcpSingleServicePattern = /\{\{VCP([A-Za-z0-9_]+)\}\}/g
+  const reservedPlaceholders = ['AllTools', 'Tools', 'ToolCatalog', 'ToolName', 'Guide']
+  const singleServiceMatches = [...originalPrompt.matchAll(vcpSingleServicePattern)]
+    .filter(match => !reservedPlaceholders.includes(match[1]))
+  const hasSingleServicePlaceholder = singleServiceMatches.length > 0
 
-    // 1. 添加 MCP 工具描述
-    if (hasMcpTools) {
-      toolsDescription += convertMcpToolsToVCPDescription(mcpTools)
+  // 只有在有占位符或 VCP 启用时才处理
+  if (hasVcpPlaceholder || hasMcpPlaceholder || hasSingleServicePlaceholder || isVcpEnabled) {
+    // 检查是否使用分层模式（{{VCPToolCatalog}}）
+    const isLayeredMode = originalPrompt.includes('{{VCPToolCatalog}}')
+    const vcpGuide = generateVCPProtocolGuide(isLayeredMode)
+
+    // 1. 处理 {{MCPTools}} 占位符 - 仅注入 MCP 工具
+    if (hasMcpPlaceholder && hasMcpTools) {
+      const mcpToolsDescription = convertMcpToolsToVCPDescription(mcpTools)
+      const mcpSection = `${vcpGuide}\n\n---\n\n${mcpToolsDescription}`
+      systemPrompt = systemPrompt.replace(/\{\{MCPTools\}\}/g, mcpSection)
+      logger.debug('MCP tools placeholder replaced', { mcpToolCount: mcpTools.length })
     }
 
     // 2. 如果 prompt 包含 VCP 占位符，解析并获取工具描述
     if (hasVcpPlaceholder) {
       try {
-        // 解析 {{VCPAllTools}} 占位符
-        const vcpToolsResult = await window.api.vcpPlaceholder?.resolve('{{VCPAllTools}}')
-        if (vcpToolsResult?.success && vcpToolsResult.result && vcpToolsResult.result !== '{{VCPAllTools}}') {
-          // 构建完整的工具描述（包含协议指南）
-          const fullToolDescription = `${vcpGuide}
-
----
-
-${vcpToolsResult.result}`
-          // 将占位符替换为完整的工具描述（包含协议指南）
-          systemPrompt = systemPrompt.replace(/\{\{VCPAllTools\}\}/g, fullToolDescription)
-          systemPrompt = systemPrompt.replace(/\{\{VCPTools\}\}/g, fullToolDescription)
-          // 如果还没有 MCP 工具描述，记录 VCP 工具被使用
-          if (!hasMcpTools) {
-            toolsDescription = vcpToolsResult.result
+        // 处理 {{VCPToolCatalog}} - 精简工具目录（推荐）
+        if (originalPrompt.includes('{{VCPToolCatalog}}')) {
+          const vcpCatalogResult = await window.api.vcpPlaceholder?.resolve('{{VCPToolCatalog}}')
+          if (vcpCatalogResult?.success && vcpCatalogResult.result && vcpCatalogResult.result !== '{{VCPToolCatalog}}') {
+            const fullCatalog = `${vcpGuide}\n\n---\n\n${vcpCatalogResult.result}`
+            systemPrompt = systemPrompt.replace(/\{\{VCPToolCatalog\}\}/g, fullCatalog)
+            logger.debug('VCP catalog placeholder replaced', { catalogLength: vcpCatalogResult.result.length })
           }
-          logger.debug('VCP placeholder replaced with tools and protocol guide', {
-            toolsLength: vcpToolsResult.result.length
-          })
+        }
+
+        // 处理 {{VCPAllTools}} 或 {{VCPTools}} - 自动降级为精简版工具目录
+        if (originalPrompt.includes('{{VCPAllTools}}') || originalPrompt.includes('{{VCPTools}}')) {
+          const vcpCatalogResult = await window.api.vcpPlaceholder?.resolve('{{VCPToolCatalog}}')
+          if (vcpCatalogResult?.success && vcpCatalogResult.result && vcpCatalogResult.result !== '{{VCPToolCatalog}}') {
+            const catalogWithGuide = `${vcpGuide}\n\n---\n\n${vcpCatalogResult.result}\n\n---\n\n**提示**: 使用 \`vcp_get_tool_info\` 查询任意工具的详细用法。`
+            systemPrompt = systemPrompt.replace(/\{\{VCPAllTools\}\}/g, catalogWithGuide)
+            systemPrompt = systemPrompt.replace(/\{\{VCPTools\}\}/g, catalogWithGuide)
+            logger.debug('VCP AllTools placeholder replaced with catalog', { catalogLength: vcpCatalogResult.result.length })
+          }
         }
       } catch (err) {
-        logger.debug('Failed to resolve VCP placeholder', { error: err })
+        logger.warn('Failed to resolve VCP placeholder', { error: err })
       }
     }
 
-    // 只有当有 MCP 工具时才额外注入 VCP 协议指南到末尾
-    // VCP 占位符已经在上面处理（包含协议指南）
-    if (hasMcpTools && toolsDescription.trim()) {
-      const vcpSection = `
+    // 3. 处理 {{VCPServiceName}} 单个服务占位符 (VCPToolBox 核心特性)
+    // 这是避免 token 爆炸的关键：按需注入单个工具的完整描述
+    // 例如: {{VCPDailyNoteWrite}} 只注入日记写入服务的描述和调用示例
+    if (hasSingleServicePlaceholder) {
+      try {
+        for (const match of singleServiceMatches) {
+          const placeholder = match[0]  // 完整占位符，如 {{VCPDailyNoteWrite}}
 
----
-
-# 可用工具
-
-${vcpGuide}
-
----
-
-${toolsDescription}
-
----
-`
-      systemPrompt = systemPrompt + vcpSection
-      logger.debug('VCP unified protocol: Injected MCP tools into system prompt', {
-        mcpToolCount: mcpTools.length,
-        systemPromptLength: systemPrompt.length
-      })
+          // 调用 PlaceholderEngine 解析单个服务描述
+          const serviceResult = await window.api.vcpPlaceholder?.resolve(placeholder)
+          if (serviceResult?.success && serviceResult.result && serviceResult.result !== placeholder) {
+            // 为单个服务添加协议指南（简化版，只包含调用格式）
+            const serviceWithGuide = `${serviceResult.result}\n\n---\n\n${vcpGuide}`
+            systemPrompt = systemPrompt.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), serviceWithGuide)
+            logger.debug('VCP single service placeholder replaced', {
+              placeholder,
+              descLength: serviceResult.result.length
+            })
+          } else {
+            logger.warn('Failed to resolve VCP service placeholder', { placeholder })
+          }
+        }
+      } catch (err) {
+        logger.warn('Failed to resolve VCP single service placeholders', { error: err })
+      }
     }
+
+    // 注意：VCPToolBox 原版不会自动注入任何内容
+    // 所有工具描述和协议指南都需要用户手动在 prompt 中添加占位符
+    // 如需协议指南，用户应添加 {{VarVCPGuide}} 或在 prompt 中直接写明调用格式
   }
 
   if (systemPrompt) {

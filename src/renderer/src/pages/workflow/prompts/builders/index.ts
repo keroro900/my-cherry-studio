@@ -85,19 +85,5 @@ export {
   type ElectronicsPhotoPromptJson
 } from './ElectronicsPhotoPromptBuilder'
 
-// Fashion 服装分析构建器
-export {
-  type GarmentAnalysisConfig,
-  GarmentAnalysisPromptBuilder,
-  type GarmentAnalysisPromptJson
-} from './GarmentAnalysisPromptBuilder'
-
-// Fashion 趋势分析构建器
-export {
-  type TrendAnalysisConfig,
-  TrendAnalysisPromptBuilder,
-  type TrendAnalysisPromptJson
-} from './TrendAnalysisPromptBuilder'
-
 // 导出类型
 export type { BuildResult, GarmentAnalysis, PromptModule } from './PromptBuilder'

@@ -1,0 +1,471 @@
+/**
+ * GroupChatPanel 样式
+ *
+ * 重构版 - 增强视觉效果，更现代的 UI 设计
+ */
+
+/* ==================== 容器 ==================== */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-background);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border);
+}
+
+/* ==================== 头部 ==================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(
+    180deg,
+    var(--color-background-soft) 0%,
+    var(--color-background) 100%
+  );
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.headerTitle :global(.anticon) {
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+/* 心流锁激活时的标题效果 */
+.headerTitleFlowlock {
+  position: relative;
+  animation: flowlockGlow 2s ease-in-out infinite, flowlockWave 3s ease-in-out infinite;
+}
+
+@keyframes flowlockGlow {
+  0%, 100% {
+    text-shadow:
+      0 0 5px var(--color-primary),
+      0 0 10px var(--color-primary),
+      0 0 15px var(--color-primary);
+    filter: brightness(1.1);
+  }
+  50% {
+    text-shadow:
+      0 0 10px var(--color-primary),
+      0 0 20px var(--color-primary),
+      0 0 30px var(--color-primary);
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes flowlockWave {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* ==================== 设置面板 ==================== */
+.settingsPanel {
+  padding: 16px 20px;
+  background: var(--color-background-mute);
+  border-bottom: 1px solid var(--color-border);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.settingsPanel label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--color-text-2);
+  font-weight: 500;
+}
+
+.settingsPanel :global(.ant-select) {
+  margin-top: 4px;
+}
+
+.settingsPanel :global(.ant-checkbox-wrapper) {
+  font-size: 14px;
+}
+
+.settingsPanel :global(.ant-input-textarea) {
+  margin-top: 4px;
+}
+
+/* 设置分组标题 */
+.settingsGroup {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.settingsGroup:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* ==================== Agent 列表区域 ==================== */
+.agentsSection {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sectionTitle :global(.anticon) {
+  color: var(--color-primary);
+}
+
+.agentsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+/* Agent 卡片 */
+.agentCard {
+  width: calc(50% - 6px);
+  min-width: 220px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-soft);
+}
+
+.agentCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb, 24, 144, 255), 0.15);
+  transform: translateY(-2px);
+}
+
+.agentCard :global(.ant-card-body) {
+  padding: 12px 14px;
+}
+
+.agentCard :global(.ant-card-head) {
+  min-height: auto;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.removeBtn {
+  cursor: pointer;
+  color: var(--color-text-3);
+  transition: all 0.2s;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.removeBtn:hover {
+  color: var(--color-error);
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.agentExpertise {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.agentExpertise :global(.ant-tag) {
+  margin: 0;
+  font-size: 11px;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+/* 思考中的 Agent 卡片 */
+.agentCard.thinking {
+  border-color: var(--color-warning);
+  animation: agentThinking 1.5s ease-in-out infinite;
+}
+
+@keyframes agentThinking {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(250, 173, 20, 0.2);
+  }
+}
+
+/* ==================== 消息列表区域 ==================== */
+.messagesSection {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--color-background);
+  scroll-behavior: smooth;
+}
+
+.emptyMessages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-3);
+  gap: 12px;
+}
+
+.emptyMessages :global(.anticon) {
+  font-size: 56px;
+  color: var(--color-text-4);
+  opacity: 0.5;
+}
+
+.emptyMessages p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ==================== 消息项 - 已移至 GroupChatMessageItem ==================== */
+
+/* ==================== 底部控制区 ==================== */
+.footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  background: linear-gradient(
+    0deg,
+    var(--color-background-soft) 0%,
+    var(--color-background) 100%
+  );
+}
+
+.footer :global(.ant-space-compact) {
+  display: flex;
+  align-items: stretch;
+}
+
+.footer :global(.ant-input) {
+  border-radius: 8px 0 0 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.footer :global(.ant-btn) {
+  height: auto;
+  padding: 10px 16px;
+}
+
+.footer :global(.ant-btn-primary) {
+  border-radius: 0 8px 8px 0;
+}
+
+/* 文件预览区域 */
+.filePreview {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filePreview :global(.ant-tag) {
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ==================== 邀请按钮 ==================== */
+.inviteButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--color-background-mute);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inviteButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: var(--color-text-2);
+}
+
+.inviteButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.inviteButton :global(.ant-avatar) {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 768px) {
+  .agentCard {
+    width: 100%;
+  }
+
+  .header {
+    padding: 12px 16px;
+  }
+
+  .settingsPanel,
+  .agentsSection,
+  .footer {
+    padding: 12px 16px;
+  }
+
+  .messagesSection {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerTitle {
+    font-size: 15px;
+  }
+
+  .agentCard {
+    min-width: 100%;
+  }
+}
+
+/* ==================== 滚动条样式 ==================== */
+.messagesSection::-webkit-scrollbar,
+.agentsList::-webkit-scrollbar,
+.settingsPanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesSection::-webkit-scrollbar-track,
+.agentsList::-webkit-scrollbar-track,
+.settingsPanel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesSection::-webkit-scrollbar-thumb,
+.agentsList::-webkit-scrollbar-thumb,
+.settingsPanel::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.messagesSection::-webkit-scrollbar-thumb:hover,
+.agentsList::-webkit-scrollbar-thumb:hover,
+.settingsPanel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-3);
+}
+
+/* ==================== 暗色主题适配 ==================== */
+:global(.dark) .container {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+:global(.dark) .header {
+  background: linear-gradient(
+    180deg,
+    var(--color-background-mute) 0%,
+    var(--color-background) 100%
+  );
+}
+
+:global(.dark) .agentCard {
+  background: var(--color-background-mute);
+}
+
+:global(.dark) .agentCard:hover {
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb, 24, 144, 255), 0.2);
+}
+
+/* ==================== 状态徽章动画 ==================== */
+.statusBadgeProcessing {
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ==================== 心流锁标签动画 ==================== */
+.flowlockTag {
+  position: relative;
+  overflow: hidden;
+}
+
+.flowlockTag::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: flowlockShimmer 3s ease-in-out infinite;
+}
+
+@keyframes flowlockShimmer {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 200%;
+  }
+}
+
+/* ==================== 减少动画支持 ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .headerTitleFlowlock,
+  .agentCard.thinking,
+  .statusBadgeProcessing,
+  .flowlockTag::after {
+    animation: none;
+  }
+
+  .agentCard:hover {
+    transform: none;
+  }
+}

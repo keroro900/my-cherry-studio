@@ -1,0 +1,10 @@
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\debug\deps\fs4-2137b2e8b55a3b3c.d: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\windows.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\windows\sync_impl.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\file_ext.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\fs_stats.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\file_ext\sync_impl.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\debug\deps\libfs4-2137b2e8b55a3b3c.rmeta: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\windows.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\windows\sync_impl.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\file_ext.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\fs_stats.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\file_ext\sync_impl.rs
+
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\lib.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\windows.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\windows\sync_impl.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\file_ext.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\fs_stats.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fs4-0.8.4\src\file_ext\sync_impl.rs:

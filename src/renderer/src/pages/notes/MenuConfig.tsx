@@ -1,5 +1,5 @@
 import type { NotesSettings } from '@renderer/store/note'
-import { Copy, MonitorSpeaker, Settings, Type } from 'lucide-react'
+import { BookOpen, Copy, MonitorSpeaker, Settings, Type } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export interface MenuItem {
@@ -13,6 +13,7 @@ export interface MenuItem {
   component?: (settings: NotesSettings, updateSettings: (newSettings: Partial<NotesSettings>) => void) => ReactNode
   copyAction?: boolean
   showSettingsPopup?: boolean
+  showRagSyntaxPopup?: boolean
 }
 
 export const menuItems: MenuItem[] = [
@@ -21,6 +22,12 @@ export const menuItems: MenuItem[] = [
     labelKey: 'notes.copyContent',
     icon: Copy,
     copyAction: true
+  },
+  {
+    key: 'rag-syntax',
+    labelKey: 'notes.rag_syntax_reference',
+    icon: BookOpen,
+    showRagSyntaxPopup: true
   },
   {
     key: 'divider0',

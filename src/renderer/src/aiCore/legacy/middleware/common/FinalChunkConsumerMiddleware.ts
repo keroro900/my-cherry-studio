@@ -54,7 +54,14 @@ const FinalChunkConsumerMiddleware: CompletionsMiddleware =
     // 调用下游中间件
     const result = await next(ctx, params)
 
-    // 响应后处理：处理GenericChunk流式响应
+    // 🔧 关键修复：递归调用时不消费流，直接返回给调用者（VCPToolExecutorMiddleware.executeToolsIfNeeded）
+    // 这样 depth 0 可以正确读取 depth 1 的流数据并入队到 TransformStream
+    if (isRecursiveCall) {
+      logger.debug('Recursive call detected, passing stream through without consuming')
+      return result
+    }
+
+    // 响应后处理：处理GenericChunk流式响应（仅在顶层调用时）
     if (result.stream) {
       const resultFromUpstream = result.stream
 
@@ -75,12 +82,7 @@ const FinalChunkConsumerMiddleware: CompletionsMiddleware =
               // 提取并累加usage/metrics数据
               extractAndAccumulateUsageMetrics(ctx, genericChunk)
 
-              const shouldSkipChunk =
-                isRecursiveCall &&
-                (genericChunk.type === ChunkType.BLOCK_COMPLETE ||
-                  genericChunk.type === ChunkType.LLM_RESPONSE_COMPLETE)
-
-              if (!shouldSkipChunk) params.onChunk?.(genericChunk)
+              params.onChunk?.(genericChunk)
             } else {
               logger.warn(`Received undefined chunk before stream was done.`)
             }
@@ -95,7 +97,7 @@ const FinalChunkConsumerMiddleware: CompletionsMiddleware =
             throw error
           }
         } finally {
-          if (params.onChunk && !isRecursiveCall) {
+          if (params.onChunk) {
             params.onChunk({
               type: ChunkType.BLOCK_COMPLETE,
               response: {

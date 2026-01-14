@@ -2,7 +2,8 @@ import * as AbortHandlerModule from './common/AbortHandlerMiddleware'
 import * as ErrorHandlerModule from './common/ErrorHandlerMiddleware'
 import * as FinalChunkConsumerModule from './common/FinalChunkConsumerMiddleware'
 import * as LoggingModule from './common/LoggingMiddleware'
-import * as McpToolChunkModule from './core/McpToolChunkMiddleware'
+// McpToolChunkModule 已废弃：工具执行由 VCPToolExecutorMiddleware 统一处理
+// import * as McpToolChunkModule from './core/McpToolChunkMiddleware'
 import * as RawStreamListenerModule from './core/RawStreamListenerMiddleware'
 import * as ResponseTransformModule from './core/ResponseTransformMiddleware'
 // import * as SdkCallModule from './core/SdkCallMiddleware'
@@ -13,7 +14,8 @@ import * as TransformCoreToSdkParamsModule from './core/TransformCoreToSdkParams
 import * as WebSearchModule from './core/WebSearchMiddleware'
 import * as ImageGenerationModule from './feat/ImageGenerationMiddleware'
 import * as ThinkingTagExtractionModule from './feat/ThinkingTagExtractionMiddleware'
-import * as ToolUseExtractionMiddleware from './feat/ToolUseExtractionMiddleware'
+// ToolUseExtractionMiddleware 已废弃：VCP 统一协议，所有工具调用通过 VCP 格式处理
+// import * as ToolUseExtractionMiddleware from './feat/ToolUseExtractionMiddleware'
 import * as VCPToolExecutorModule from './VCPToolExecutorMiddleware'
 
 /**
@@ -62,18 +64,20 @@ export const MiddlewareRegistry = {
     name: ThinkingTagExtractionModule.MIDDLEWARE_NAME,
     middleware: ThinkingTagExtractionModule.ThinkingTagExtractionMiddleware
   },
-  [ToolUseExtractionMiddleware.MIDDLEWARE_NAME]: {
-    name: ToolUseExtractionMiddleware.MIDDLEWARE_NAME,
-    middleware: ToolUseExtractionMiddleware.ToolUseExtractionMiddleware
-  },
+  // ToolUseExtractionMiddleware 已废弃：VCP 统一协议，所有工具调用通过 VCP 格式处理
+  // [ToolUseExtractionMiddleware.MIDDLEWARE_NAME]: {
+  //   name: ToolUseExtractionMiddleware.MIDDLEWARE_NAME,
+  //   middleware: ToolUseExtractionMiddleware.ToolUseExtractionMiddleware
+  // },
   [ThinkChunkModule.MIDDLEWARE_NAME]: {
     name: ThinkChunkModule.MIDDLEWARE_NAME,
     middleware: ThinkChunkModule.ThinkChunkMiddleware
   },
-  [McpToolChunkModule.MIDDLEWARE_NAME]: {
-    name: McpToolChunkModule.MIDDLEWARE_NAME,
-    middleware: McpToolChunkModule.McpToolChunkMiddleware
-  },
+  // McpToolChunkModule 已废弃：工具执行由 VCPToolExecutorMiddleware 统一处理
+  // [McpToolChunkModule.MIDDLEWARE_NAME]: {
+  //   name: McpToolChunkModule.MIDDLEWARE_NAME,
+  //   middleware: McpToolChunkModule.McpToolChunkMiddleware
+  // },
   [WebSearchModule.MIDDLEWARE_NAME]: {
     name: WebSearchModule.MIDDLEWARE_NAME,
     middleware: WebSearchModule.WebSearchMiddleware
@@ -118,11 +122,12 @@ export const DefaultCompletionsNamedMiddlewares = [
   MiddlewareRegistry[ErrorHandlerModule.MIDDLEWARE_NAME], // 错误处理
   MiddlewareRegistry[TransformCoreToSdkParamsModule.MIDDLEWARE_NAME], // 参数转换
   MiddlewareRegistry[AbortHandlerModule.MIDDLEWARE_NAME], // 中止处理
-  MiddlewareRegistry[VCPToolExecutorModule.MIDDLEWARE_NAME], // VCP 工具执行（统一协议）
-  MiddlewareRegistry[McpToolChunkModule.MIDDLEWARE_NAME], // 工具处理（备用，用于内置工具）
+  MiddlewareRegistry[VCPToolExecutorModule.MIDDLEWARE_NAME], // VCP 工具执行（统一协议，处理 VCP 标记和 tool_use 格式）
+  // MiddlewareRegistry[McpToolChunkModule.MIDDLEWARE_NAME], // 已移除：工具执行由 VCPToolExecutorMiddleware 统一处理
   MiddlewareRegistry[TextChunkModule.MIDDLEWARE_NAME], // 文本处理
   MiddlewareRegistry[WebSearchModule.MIDDLEWARE_NAME], // Web搜索处理
-  MiddlewareRegistry[ToolUseExtractionMiddleware.MIDDLEWARE_NAME], // 工具使用提取处理
+  // ToolUseExtractionMiddleware 已废弃：VCP 统一协议，所有工具调用通过 VCP 格式处理
+  // MiddlewareRegistry[ToolUseExtractionMiddleware.MIDDLEWARE_NAME], // 工具使用提取处理（提取 <tool_use> 发出 MCP_TOOL_CREATED chunk）
   MiddlewareRegistry[ThinkingTagExtractionModule.MIDDLEWARE_NAME], // 思考标签提取处理（特定provider）
   MiddlewareRegistry[ThinkChunkModule.MIDDLEWARE_NAME], // 思考处理（通用SDK）
   MiddlewareRegistry[ResponseTransformModule.MIDDLEWARE_NAME], // 响应转换
@@ -145,7 +150,7 @@ export {
   AbortHandlerModule,
   FinalChunkConsumerModule,
   LoggingModule,
-  McpToolChunkModule,
+  // McpToolChunkModule, // 已废弃：工具执行由 VCPToolExecutorMiddleware 统一处理
   ResponseTransformModule,
   StreamAdapterModule,
   TextChunkModule,

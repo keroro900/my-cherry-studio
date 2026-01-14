@@ -79,8 +79,27 @@ ${exampleParams || 'command:「始」execute「末」'}
 
 /**
  * 生成 VCP 协议使用说明
+ *
+ * @param isLayeredMode 是否为分层模式（使用 {{VCPToolCatalog}}）
  */
-export function generateVCPProtocolGuide(): string {
+export function generateVCPProtocolGuide(isLayeredMode: boolean = false): string {
+  const layeredGuide = isLayeredMode
+    ? `
+## 分层工具发现
+
+你已获得精简的工具目录。要使用某个工具，请先查询其详细用法：
+
+\`\`\`
+<<<[TOOL_REQUEST]>>>
+tool_name:「始」vcp_get_tool_info「末」,
+name:「始」工具名称「末」
+<<<[END_TOOL_REQUEST]>>>
+\`\`\`
+
+然后根据返回的详细用法调用具体工具。
+`
+    : ''
+
   return `## VCP 工具调用协议
 
 当需要调用工具时，请使用以下格式：
@@ -95,7 +114,7 @@ tool_name:「始」工具名称「末」,
 1. 所有参数值必须用「始」和「末」包裹
 2. tool_name 是必需参数，指定要调用的工具
 3. 调用完成后，您将收到工具执行结果
-4. 请等待工具结果后再继续回复用户`
+4. 请等待工具结果后再继续回复用户${layeredGuide}`
 }
 
 /**

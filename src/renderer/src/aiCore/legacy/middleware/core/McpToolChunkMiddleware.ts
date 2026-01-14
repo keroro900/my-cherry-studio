@@ -1,3 +1,13 @@
+/**
+ * @deprecated VCP 统一协议后，此中间件已废弃
+ *
+ * 工具执行现在统一通过 VCPToolExecutorMiddleware 处理
+ * 此文件保留作为参考，已从 register.ts 的 DefaultCompletionsNamedMiddlewares 中移除
+ *
+ * @see VCPToolExecutorMiddleware
+ * @see AiSdkToChunkAdapter.executeVCPTool
+ */
+
 import { loggerService } from '@logger'
 import type { MCPCallToolResponse, MCPTool, MCPToolResponse, Model } from '@renderer/types'
 import type { MCPToolCreatedChunk } from '@renderer/types/chunk'
@@ -23,6 +33,8 @@ const logger = loggerService.withContext('McpToolChunkMiddleware')
 
 /**
  * MCP工具处理中间件
+ *
+ * @deprecated 已废弃，使用 VCPToolExecutorMiddleware 替代
  *
  * 职责：
  * 1. 检测并拦截MCP工具进展chunk（Function Call方式和Tool Use方式）

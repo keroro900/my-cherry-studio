@@ -4,11 +4,22 @@ import { CacheBatchSpanProcessor, FunctionSpanExporter } from '@mcp-trace/trace-
 import { NodeTracer as MCPNodeTracer } from '@mcp-trace/trace-node/nodeTracer'
 import type { SpanContext } from '@opentelemetry/api'
 import { context, trace } from '@opentelemetry/api'
-import { BrowserWindow, ipcMain } from 'electron'
 import * as path from 'path'
 
 import { ConfigKeys, configManager } from './ConfigManager'
 import { spanCacheService } from './SpanCacheService'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronIpcMain: typeof import('electron').ipcMain | undefined
+let ElectronBrowserWindow: typeof import('electron').BrowserWindow | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const electron = require('electron')
+  electronIpcMain = electron.ipcMain
+  ElectronBrowserWindow = electron.BrowserWindow
+} catch {
+  // electron 未就绪
+}
 
 export const TRACER_NAME = 'CherryStudio'
 
@@ -27,27 +38,30 @@ export class NodeTraceService {
       },
       new CacheBatchSpanProcessor(exporter, spanCacheService)
     )
-  }
-}
 
-const originalHandle = ipcMain.handle
-ipcMain.handle = (channel: string, handler: (...args: any[]) => Promise<any>) => {
-  return originalHandle.call(ipcMain, channel, async (event, ...args) => {
-    const carray = args && args.length > 0 ? args[args.length - 1] : {}
-    let ctx = context.active()
-    let newArgs = args
-    if (carray && typeof carray === 'object' && 'type' in carray && carray.type === 'trace') {
-      const span = trace.wrapSpanContext(carray.context as SpanContext)
-      ctx = trace.setSpan(context.active(), span)
-      newArgs = args.slice(0, args.length - 1)
+    // Wrap ipcMain.handle with trace context support
+    if (electronIpcMain) {
+      const originalHandle = electronIpcMain.handle
+      electronIpcMain.handle = (channel: string, handler: (...args: any[]) => Promise<any>) => {
+        return originalHandle.call(electronIpcMain, channel, async (event, ...args) => {
+          const carray = args && args.length > 0 ? args[args.length - 1] : {}
+          let ctx = context.active()
+          let newArgs = args
+          if (carray && typeof carray === 'object' && 'type' in carray && carray.type === 'trace') {
+            const span = trace.wrapSpanContext(carray.context as SpanContext)
+            ctx = trace.setSpan(context.active(), span)
+            newArgs = args.slice(0, args.length - 1)
+          }
+          return context.with(ctx, () => handler(event, ...newArgs))
+        })
+      }
     }
-    return context.with(ctx, () => handler(event, ...newArgs))
-  })
+  }
 }
 
 export const nodeTraceService = new NodeTraceService()
 
-let traceWin: BrowserWindow | null = null
+let traceWin: import('electron').BrowserWindow | null = null
 
 export function openTraceWindow(topicId: string, traceId: string, autoOpen = true, modelName?: string) {
   if (traceWin && !traceWin.isDestroyed()) {
@@ -60,7 +74,12 @@ export function openTraceWindow(topicId: string, traceId: string, autoOpen = tru
     return
   }
 
-  traceWin = new BrowserWindow({
+  if (!ElectronBrowserWindow) {
+    logger.warn('ElectronBrowserWindow not available')
+    return
+  }
+
+  traceWin = new ElectronBrowserWindow({
     width: 600,
     minWidth: 500,
     minHeight: 600,

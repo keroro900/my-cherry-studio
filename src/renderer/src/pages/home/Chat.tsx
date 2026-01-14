@@ -5,19 +5,22 @@ import { HStack } from '@renderer/components/Layout'
 import MultiSelectActionPopup from '@renderer/components/Popups/MultiSelectionPopup'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import { QuickPanelProvider } from '@renderer/components/QuickPanel'
+import VCPLogViewer from '@renderer/components/VCP/VCPLogViewer'
 import { useCreateDefaultSession } from '@renderer/hooks/agents/useCreateDefaultSession'
-import { useAssistant } from '@renderer/hooks/useAssistant'
+import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { useChatContext } from '@renderer/hooks/useChatContext'
 import { useRuntime } from '@renderer/hooks/useRuntime'
 import { useNavbarPosition, useSettings } from '@renderer/hooks/useSettings'
 import { useShortcut } from '@renderer/hooks/useShortcuts'
 import { useShowAssistants, useShowTopics } from '@renderer/hooks/useStore'
 import { useTimer } from '@renderer/hooks/useTimer'
+import TracingPanel from '@renderer/pages/vcp/panels/TracingPanel'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import type { Assistant, Topic } from '@renderer/types'
 import { classNames } from '@renderer/utils'
-import { Alert, Flex } from 'antd'
+import { Alert, Drawer, Flex, Tabs as AntTabs, Tooltip } from 'antd'
 import { debounce } from 'lodash'
+import { Activity, ScrollText } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import type { FC } from 'react'
 import React, { useCallback, useState } from 'react'
@@ -26,12 +29,11 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import ChatNavbar from './ChatNavbar'
+import { GroupChatPanelNew } from './components/GroupChat'
 import AgentSessionInputbar from './Inputbar/AgentSessionInputbar'
-import GroupChatInputbar from './Inputbar/GroupChatInputbar'
 import Inputbar from './Inputbar/Inputbar'
 import AgentSessionMessages from './Messages/AgentSessionMessages'
 import ChatNavigation from './Messages/ChatNavigation'
-import GroupChatMessages from './Messages/GroupChatMessages'
 import Messages from './Messages/Messages'
 import Tabs from './Tabs'
 
@@ -46,6 +48,7 @@ interface Props {
 
 const Chat: FC<Props> = (props) => {
   const { assistant, updateTopic } = useAssistant(props.assistant.id)
+  const { assistants } = useAssistants()
   const { t } = useTranslation()
   const { topicPosition, messageStyle, messageNavigation } = useSettings()
   const { showTopics } = useShowTopics()
@@ -53,7 +56,7 @@ const Chat: FC<Props> = (props) => {
   const { isTopNavbar } = useNavbarPosition()
   const chatMaxWidth = useChatMaxWidth()
   const { chat } = useRuntime()
-  const { activeTopicOrSession, activeAgentId, activeSessionIdMap, activeGroupChatSessionId, groupChatAssistantIds } =
+  const { activeTopicOrSession, activeAgentId, activeSessionIdMap, activeGroupChatSessionId } =
     chat
   const activeSessionId = activeAgentId ? activeSessionIdMap[activeAgentId] : null
   const { apiServer } = useSettings()
@@ -63,6 +66,8 @@ const Chat: FC<Props> = (props) => {
   const mainRef = React.useRef<HTMLDivElement>(null)
   const contentSearchRef = React.useRef<ContentSearchRef>(null)
   const [filterIncludeUser, setFilterIncludeUser] = useState(false)
+  const [showVCPLogPanel, setShowVCPLogPanel] = useState(false)
+  const [vcpPanelTab, setVcpPanelTab] = useState<'log' | 'tracing'>('log')
 
   const { setTimeoutTimer } = useTimer()
 
@@ -250,12 +255,19 @@ const Chat: FC<Props> = (props) => {
                   </div>
                 )}
                 {activeTopicOrSession === 'groupchat' && activeGroupChatSessionId && (
-                  <>
-                    <GroupChatMessages sessionId={activeGroupChatSessionId} />
-                    <GroupChatInputbar sessionId={activeGroupChatSessionId} assistantIds={groupChatAssistantIds} />
-                  </>
+                  <GroupChatPanelNew
+                    initialConfig={{ speakingMode: 'mention' }}
+                    availableAssistants={assistants}
+                  />
                 )}
                 {isMultiSelectMode && <MultiSelectActionPopup topic={props.activeTopic} />}
+
+                {/* VCP Log Panel Toggle Button */}
+                <VCPLogToggleButton onClick={() => setShowVCPLogPanel(true)}>
+                  <Tooltip title={t('vcp.log_viewer.title', 'VCP 日志')} placement="left">
+                    <ScrollText size={18} />
+                  </Tooltip>
+                </VCPLogToggleButton>
               </div>
             </QuickPanelProvider>
           </Main>
@@ -287,6 +299,53 @@ const Chat: FC<Props> = (props) => {
           )}
         </AnimatePresence>
       </HStack>
+
+      {/* VCP Log Viewer Drawer */}
+      <Drawer
+        title={
+          <AntTabs
+            activeKey={vcpPanelTab}
+            onChange={(key) => setVcpPanelTab(key as 'log' | 'tracing')}
+            size="small"
+            items={[
+              {
+                key: 'log',
+                label: (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <ScrollText size={14} />
+                    {t('vcp.log_viewer.title', 'VCP 日志')}
+                  </span>
+                )
+              },
+              {
+                key: 'tracing',
+                label: (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Activity size={14} />
+                    {t('vcp.tracing.title', 'VCP 追踪')}
+                  </span>
+                )
+              }
+            ]}
+            style={{ marginBottom: -16 }}
+          />
+        }
+        placement="right"
+        width={vcpPanelTab === 'tracing' ? 720 : 560}
+        open={showVCPLogPanel}
+        onClose={() => setShowVCPLogPanel(false)}
+        styles={{
+          body: { padding: 0, overflow: 'auto' },
+          header: { borderBottom: '1px solid var(--color-border)', paddingBottom: 0 }
+        }}>
+        {vcpPanelTab === 'log' ? (
+          <VCPLogViewer maxHeight={window.innerHeight - 120} />
+        ) : (
+          <TracingPanelWrapper>
+            <TracingPanel />
+          </TracingPanelWrapper>
+        )}
+      </Drawer>
     </Container>
   )
 }
@@ -323,6 +382,50 @@ const Main = styled(Flex)`
   }
   transform: translateZ(0);
   position: relative;
+`
+
+const VCPLogToggleButton = styled.button`
+  position: absolute;
+  bottom: 100px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-soft);
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    opacity: 1;
+    background: var(--color-background);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`
+
+const TracingPanelWrapper = styled.div`
+  height: calc(100vh - 120px);
+  overflow: auto;
+  padding: 0;
+
+  /* Override TracingPanel's internal padding for better fit in drawer */
+  > div {
+    padding: 0;
+  }
 `
 
 export default Chat

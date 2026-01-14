@@ -1,0 +1,10 @@
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\siphasher-d0b49784a1fe49c8.d: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip128.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\../README.md
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\libsiphasher-d0b49784a1fe49c8.rlib: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip128.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\../README.md
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\libsiphasher-d0b49784a1fe49c8.rmeta: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip128.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\../README.md
+
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\lib.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\sip128.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\siphasher-1.0.1\src\../README.md:

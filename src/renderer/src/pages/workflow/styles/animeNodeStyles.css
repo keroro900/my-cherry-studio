@@ -878,3 +878,181 @@
 .workflow-root[data-workflow-theme='ecom-professional'] .react-flow__resize-control.handle {
   border-color: #6366f1;
 }
+
+/* ==================== 专业深色主题 (Pro Dark) ==================== */
+/* 参考 YouArt/Dafthunk 的现代深色设计风格 */
+
+.workflow-root[data-workflow-theme='pro-dark'] {
+  /* 背景色系 - GitHub Dark 风格 */
+  --wf-bg-primary: #0d1117;
+  --wf-bg-secondary: #161b22;
+  --wf-bg-elevated: #21262d;
+  --wf-bg-hover: #30363d;
+
+  /* 边框色 */
+  --wf-border-color: rgba(48, 54, 61, 0.8);
+  --wf-border-hover: rgba(110, 118, 129, 0.6);
+
+  /* 文字色 */
+  --wf-text-primary: #e6edf3;
+  --wf-text-secondary: #8b949e;
+  --wf-text-tertiary: #6e7681;
+
+  /* 强调色 */
+  --wf-accent-primary: #58a6ff;
+  --wf-accent-success: #3fb950;
+  --wf-accent-warning: #d29922;
+  --wf-accent-error: #f85149;
+  --wf-accent-purple: #a371f7;
+
+  /* 节点变量 */
+  --wf-node-border-radius: 12px;
+  --wf-node-border-width: 1px;
+  --wf-node-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(48, 54, 61, 0.5);
+  --wf-node-backdrop-blur: 8px;
+  --wf-handle-size: 12px;
+  --wf-handle-border-width: 2px;
+  --wf-handle-glow: 0 0 8px rgba(88, 166, 255, 0.4);
+  --wf-transition-duration: 200ms;
+  --wf-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --wf-hover-scale: 1.01;
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node {
+  border-radius: var(--wf-node-border-radius);
+  border: var(--wf-node-border-width) solid var(--wf-border-color);
+  background: var(--wf-bg-secondary);
+  backdrop-filter: blur(var(--wf-node-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--wf-node-backdrop-blur));
+  box-shadow: var(--wf-node-shadow);
+  transition: all var(--wf-transition-duration) var(--wf-transition-easing);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node:hover {
+  transform: scale(var(--wf-hover-scale));
+  border-color: var(--wf-border-hover);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--wf-border-hover);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node.selected {
+  border-color: var(--wf-accent-primary);
+  box-shadow:
+    0 0 0 2px rgba(88, 166, 255, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__handle {
+  width: var(--wf-handle-size);
+  height: var(--wf-handle-size);
+  border: var(--wf-handle-border-width) solid var(--wf-bg-primary);
+  border-radius: 50%;
+  background: currentColor;
+  transition: all 0.15s ease;
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__handle:hover {
+  transform: scale(1.2);
+  box-shadow: var(--wf-handle-glow);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__edge-path {
+  stroke: var(--wf-accent-primary);
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__edge.animated path {
+  stroke-dasharray: 6 3;
+  animation: pro-dark-flow 1s linear infinite;
+}
+
+@keyframes pro-dark-flow {
+  to {
+    stroke-dashoffset: -9;
+  }
+}
+
+/* 专业深色主题 - 节点内文字颜色 */
+.workflow-root[data-workflow-theme='pro-dark'] {
+  --color-text: var(--wf-text-primary);
+  --color-text-2: var(--wf-text-secondary);
+  --color-text-3: var(--wf-text-tertiary);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node * {
+  color: var(--wf-text-primary);
+}
+
+/* 专业深色主题 - 分类色带 */
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node [class*='CategoryStripe'] {
+  filter: brightness(0.9) saturate(0.95);
+  opacity: 0.9;
+}
+
+/* 专业深色主题 - NodeResizer */
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__resize-control.handle {
+  border-color: var(--wf-accent-primary);
+  background: var(--wf-bg-elevated);
+}
+
+/* 专业深色主题 - 运行状态 */
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node[data-status='running'] {
+  border-color: var(--wf-accent-primary);
+  box-shadow:
+    0 0 0 2px rgba(88, 166, 255, 0.2),
+    0 0 20px rgba(88, 166, 255, 0.15);
+  animation: pro-dark-pulse 2s ease-in-out infinite;
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node[data-status='success'] {
+  border-color: var(--wf-accent-success);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__node[data-status='error'] {
+  border-color: var(--wf-accent-error);
+}
+
+@keyframes pro-dark-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(88, 166, 255, 0.2),
+      0 0 20px rgba(88, 166, 255, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(88, 166, 255, 0.3),
+      0 0 30px rgba(88, 166, 255, 0.25);
+  }
+}
+
+/* 专业深色主题 - MiniMap */
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__minimap {
+  background: var(--wf-bg-secondary);
+  border: 1px solid var(--wf-border-color);
+  border-radius: 8px;
+}
+
+/* 专业深色主题 - Controls */
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__controls {
+  background: var(--wf-bg-secondary);
+  border: 1px solid var(--wf-border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__controls-button {
+  background: var(--wf-bg-elevated);
+  border-color: var(--wf-border-color);
+  color: var(--wf-text-secondary);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__controls-button:hover {
+  background: var(--wf-bg-hover);
+  color: var(--wf-text-primary);
+}
+
+.workflow-root[data-workflow-theme='pro-dark'] .react-flow__controls-button svg {
+  fill: currentColor;
+}

@@ -40,6 +40,24 @@ export function hasAPIVersion(host?: string): boolean {
 }
 
 /**
+ * Removes the trailing API version segment from a URL string (e.g., /v1, /v2beta).
+ *
+ * @template T - The string type to preserve type safety
+ * @param {T} url - The URL string to process
+ * @returns {T} The URL string without the trailing API version
+ *
+ * @example
+ * ```ts
+ * withoutTrailingApiVersion('https://example.com/v1') // 'https://example.com'
+ * withoutTrailingApiVersion('https://example.com/api/v2beta') // 'https://example.com/api'
+ * ```
+ */
+export function withoutTrailingApiVersion<T extends string>(url: T): T {
+  const regex = new RegExp(VERSION_REGEX_PATTERN + '$', 'i')
+  return url.replace(regex, '') as T
+}
+
+/**
  * Removes the trailing slash from a URL string if it exists.
  *
  * @template T - The string type to preserve type safety

@@ -2,11 +2,10 @@
  * VCP 统一协议 - MCP 服务器工具选择按钮
  *
  * 该组件允许用户选择 MCP 服务器提供的工具、提示和资源：
- * - 选中的 MCP 工具会通过 MCPOBridge 转换为 VCP 格式
+ * - 选中的 MCP 工具会转换为 VCP 格式
  * - 工具调用统一使用 VCP 协议: <<<[TOOL_REQUEST]>>>
  * - 用户界面保持 "MCP 服务器" 术语（因为实际配置的是 MCP 服务器）
  *
- * @see src/main/knowledge/vcp/MCPOBridge.ts
  * @see src/renderer/src/aiCore/utils/mcp.ts - convertMcpToolsToVCPDescription
  */
 import { ActionIconButton } from '@renderer/components/Buttons'

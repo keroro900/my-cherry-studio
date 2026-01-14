@@ -1,3 +1,4 @@
+import { AutoContinueIndicator } from '@renderer/components/AutoContinue'
 import EmojiIcon from '@renderer/components/EmojiIcon'
 import { FlowLockIndicator } from '@renderer/components/FlowLock'
 import HorizontalScrollContainer from '@renderer/components/HorizontalScrollContainer'
@@ -72,6 +73,14 @@ const ChatNavbarContent: FC<Props> = ({ assistant }) => {
               <>
                 <ChevronRight className="h-4 w-4 text-gray-400" />
                 <FlowLockIndicator sessionId={topicId} />
+              </>
+            )}
+
+            {/* AutoContinue Indicator */}
+            {topicId && assistant?.id && (
+              <>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <AutoContinueIndicator agentId={assistant.id} topicId={topicId} />
               </>
             )}
           </div>

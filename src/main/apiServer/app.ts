@@ -12,6 +12,7 @@ import { chatRoutes } from './routes/chat'
 import { mcpRoutes } from './routes/mcp'
 import { messagesProviderRoutes, messagesRoutes } from './routes/messages'
 import { modelsRoutes } from './routes/models'
+import { vcpRoutes } from './routes/vcp'
 
 const logger = loggerService.withContext('ApiServer')
 
@@ -140,6 +141,7 @@ apiRouter.use('/mcps', mcpRoutes)
 apiRouter.use('/messages', extendMessagesTimeout, messagesRoutes)
 apiRouter.use('/models', modelsRoutes)
 apiRouter.use('/agents', agentsRoutes)
+apiRouter.use('/vcp', vcpRoutes)
 app.use('/v1', apiRouter)
 
 // Error handling (must be last)

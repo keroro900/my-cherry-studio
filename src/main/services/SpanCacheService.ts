@@ -245,10 +245,16 @@ class SpanCacheService implements TraceCache {
         if (key === 'attributes') {
           const savedAttrs = savedEntity.attributes || {}
           Object.keys(value).forEach((attrKey) => {
-            const jsonData =
-              typeof value[attrKey] === 'string' && value[attrKey].startsWith('{')
-                ? JSON.parse(value[attrKey])
-                : value[attrKey]
+            let jsonData = value[attrKey]
+            // 尝试解析以 '{' 开头的字符串为 JSON，但要处理解析失败的情况
+            if (typeof value[attrKey] === 'string' && value[attrKey].startsWith('{')) {
+              try {
+                jsonData = JSON.parse(value[attrKey])
+              } catch {
+                // 解析失败则保持原值（可能是 VCP 协议内容等非 JSON 文本）
+                jsonData = value[attrKey]
+              }
+            }
             if (
               savedAttrs[attrKey] !== undefined &&
               typeof jsonData === 'object' &&

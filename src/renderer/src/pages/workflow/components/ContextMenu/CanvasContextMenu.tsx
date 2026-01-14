@@ -1,8 +1,12 @@
 /**
  * 画布右键菜单组件
+ * 提供粘贴、全选、适应视图和快速添加节点功能
+ * 参考 YouArt / Agentok 的菜单设计
  */
 
+import { Clipboard, Maximize2, Plus, SquareDashedMousePointer } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
+import styled, { keyframes } from 'styled-components'
 
 import { NodeRegistryAdapter } from '../../nodes/base/NodeRegistryAdapter'
 import type { NodeCategory, NodeDefinition } from '../../nodes/base/types'
@@ -19,6 +23,20 @@ interface CanvasContextMenuProps {
 }
 
 const QUICK_ADD_CATEGORIES: NodeCategory[] = ['input', 'ai', 'image', 'output']
+
+// 类别颜色映射
+const CATEGORY_COLORS: Record<NodeCategory, string> = {
+  input: 'var(--workflow-theme-success, #52c41a)',
+  ai: 'var(--workflow-theme-primary, #1890ff)',
+  image: 'var(--workflow-theme-secondary, #722ed1)',
+  video: 'var(--ant-color-magenta, #eb2f96)',
+  flow: 'var(--workflow-theme-warning, #faad14)',
+  output: 'var(--workflow-theme-info, #13c2c2)',
+  external: 'var(--ant-color-orange, #fa8c16)',
+  custom: 'var(--workflow-theme-geekblue, #2f54eb)',
+  text: 'var(--ant-color-cyan, #13c2c2)',
+  quality: 'var(--ant-color-lime, #a0d911)'
+}
 
 function isModernNodeDefinition(value: unknown): value is NodeDefinition {
   return !!value && typeof value === 'object' && 'metadata' in value
@@ -66,155 +84,284 @@ function CanvasContextMenu({
   return (
     <>
       {/* 背景遮罩 */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 999
-        }}
-        onClick={onClose}
-      />
+      <Backdrop onClick={onClose} />
 
       {/* 菜单 */}
-      <div
-        style={{
-          position: 'fixed',
-          top: y,
-          left: x,
-          backgroundColor: 'var(--ant-color-bg-elevated)',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          border: '1px solid var(--ant-color-border)',
-          padding: '4px 0',
-          minWidth: '200px',
-          maxHeight: '400px',
-          overflowY: 'auto',
-          zIndex: 1000,
-          animation: 'fadeIn 0.15s ease'
-        }}>
+      <MenuContainer $x={x} $y={y}>
         {/* 快捷操作 */}
-        <div style={{ padding: '4px 0' }}>
+        <MenuSection>
           <MenuItem
-            icon="📋"
-            label="粘贴"
-            shortcut="Ctrl+V"
             onClick={() => {
               onPaste()
               onClose()
             }}
-            disabled={!canPaste}
-          />
+            disabled={!canPaste}>
+            <MenuItemIcon>
+              <Clipboard size={14} />
+            </MenuItemIcon>
+            <MenuItemLabel>粘贴</MenuItemLabel>
+            <MenuItemShortcut>Ctrl+V</MenuItemShortcut>
+          </MenuItem>
+
           <MenuItem
-            icon="⬚"
-            label="全选"
-            shortcut="Ctrl+A"
             onClick={() => {
               onSelectAll()
               onClose()
-            }}
-          />
+            }}>
+            <MenuItemIcon>
+              <SquareDashedMousePointer size={14} />
+            </MenuItemIcon>
+            <MenuItemLabel>全选</MenuItemLabel>
+            <MenuItemShortcut>Ctrl+A</MenuItemShortcut>
+          </MenuItem>
+
           <MenuItem
-            icon="⤢"
-            label="适应视图"
             onClick={() => {
               onFitView()
               onClose()
-            }}
-          />
-        </div>
+            }}>
+            <MenuItemIcon>
+              <Maximize2 size={14} />
+            </MenuItemIcon>
+            <MenuItemLabel>适应视图</MenuItemLabel>
+          </MenuItem>
+        </MenuSection>
 
-        <div
-          style={{
-            height: '1px',
-            backgroundColor: 'var(--ant-color-border)',
-            margin: '4px 0'
-          }}
-        />
+        <MenuDivider />
 
         {/* 快速添加节点 */}
-        <div style={{ padding: '4px 8px' }}>
-          <div
-            style={{
-              fontSize: '11px',
-              color: 'var(--ant-color-text-tertiary)',
-              marginBottom: '4px',
-              fontWeight: '600'
-            }}>
-            快速添加节点
-          </div>
-        </div>
+        <MenuSection>
+          <SectionHeader>
+            <Plus size={12} />
+            <span>快速添加节点</span>
+          </SectionHeader>
 
-        {quickAddNodes.map((nodeDef) => (
-          <MenuItem
-            key={nodeDef.metadata.type}
-            icon={nodeDef.metadata.icon}
-            label={nodeDef.metadata.label}
-            onClick={() => {
-              onAddNode(nodeDef.metadata.type, { x: x - 100, y: y - 50 })
-              onClose()
-            }}
-          />
-        ))}
-      </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+          {quickAddNodes.map((nodeDef) => {
+            const categoryColor = CATEGORY_COLORS[nodeDef.metadata.category] || 'var(--ant-color-text-tertiary)'
+            return (
+              <NodeMenuItem
+                key={nodeDef.metadata.type}
+                onClick={() => {
+                  onAddNode(nodeDef.metadata.type, { x: x - 100, y: y - 50 })
+                  onClose()
+                }}
+                $categoryColor={categoryColor}>
+                <NodeItemIcon $color={categoryColor}>{nodeDef.metadata.icon}</NodeItemIcon>
+                <MenuItemLabel>{nodeDef.metadata.label}</MenuItemLabel>
+                <CategoryDot $color={categoryColor} />
+              </NodeMenuItem>
+            )
+          })}
+        </MenuSection>
+      </MenuContainer>
     </>
   )
 }
 
-function MenuItem({
-  icon,
-  label,
-  shortcut,
-  onClick,
-  disabled = false
-}: {
-  icon: string
-  label: string
-  shortcut?: string
-  onClick: () => void
-  disabled?: boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        width: '100%',
-        padding: '8px 12px',
-        border: 'none',
-        backgroundColor: 'transparent',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontSize: '14px',
-        color: disabled ? 'var(--ant-color-text-disabled)' : 'var(--ant-color-text)',
-        textAlign: 'left',
-        transition: 'background-color 0.15s',
-        opacity: disabled ? 0.5 : 1
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = 'var(--ant-color-fill-secondary)'
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent'
-      }}>
-      <span>{icon}</span>
-      <span style={{ flex: 1 }}>{label}</span>
-      {shortcut && <span style={{ fontSize: '12px', color: 'var(--ant-color-text-tertiary)' }}>{shortcut}</span>}
-    </button>
-  )
-}
+// ==================== 动画 ====================
+
+const fadeInScale = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+`
+
+// ==================== 样式组件 ====================
+
+const Backdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+`
+
+const MenuContainer = styled.div<{ $x: number; $y: number }>`
+  position: fixed;
+  top: ${(props) => props.$y}px;
+  left: ${(props) => props.$x}px;
+  min-width: 220px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--ant-color-bg-elevated);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--ant-color-border);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: ${fadeInScale} 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 自定义滚动条 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--ant-color-border);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--ant-color-text-quaternary);
+  }
+`
+
+const MenuSection = styled.div`
+  padding: 4px 0;
+`
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ant-color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`
+
+const MenuDivider = styled.div`
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ant-color-border) 20%,
+    var(--ant-color-border) 80%,
+    transparent 100%
+  );
+  margin: 4px 8px;
+`
+
+const MenuItem = styled.button<{ disabled?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  font-size: 13px;
+  color: ${(props) => (props.disabled ? 'var(--ant-color-text-disabled)' : 'var(--ant-color-text)')};
+  text-align: left;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+
+  &:hover:not(:disabled) {
+    background: var(--ant-color-fill-secondary);
+    transform: translateX(2px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateX(2px) scale(0.98);
+  }
+`
+
+const MenuItemIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--ant-color-fill-tertiary);
+  color: var(--ant-color-text-secondary);
+  transition: all 0.15s ease;
+
+  ${MenuItem}:hover:not(:disabled) & {
+    background: var(--ant-color-primary);
+    color: white;
+  }
+`
+
+const MenuItemLabel = styled.span`
+  flex: 1;
+  font-weight: 500;
+`
+
+const MenuItemShortcut = styled.span`
+  font-size: 11px;
+  color: var(--ant-color-text-quaternary);
+  padding: 2px 6px;
+  background: var(--ant-color-fill-quaternary);
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+`
+
+const NodeMenuItem = styled.button<{ $categoryColor: string }>`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ant-color-text);
+  text-align: left;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: ${(props) => `${props.$categoryColor}15`};
+    transform: translateX(2px);
+    border-left: 2px solid ${(props) => props.$categoryColor};
+    padding-left: 10px;
+  }
+
+  &:active {
+    transform: translateX(2px) scale(0.98);
+  }
+`
+
+const NodeItemIcon = styled.span<{ $color: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: ${(props) => `${props.$color}15`};
+  font-size: 14px;
+  transition: all 0.15s ease;
+
+  ${NodeMenuItem}:hover & {
+    background: ${(props) => props.$color};
+    color: white;
+    transform: scale(1.05);
+  }
+`
+
+const CategoryDot = styled.span<{ $color: string }>`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: ${(props) => props.$color};
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+
+  ${NodeMenuItem}:hover & {
+    opacity: 1;
+    box-shadow: 0 0 6px ${(props) => props.$color};
+  }
+`
 
 export default memo(CanvasContextMenu)

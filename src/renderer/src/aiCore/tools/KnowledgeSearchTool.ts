@@ -1,10 +1,20 @@
 import { REFERENCE_PROMPT } from '@renderer/config/prompts'
 import { processKnowledgeSearch } from '@renderer/services/KnowledgeService'
+import { getProviderByModel } from '@renderer/services/AssistantService'
 import type { Assistant, KnowledgeReference } from '@renderer/types'
 import type { ExtractResults, KnowledgeExtractResults } from '@renderer/utils/extract'
 import { type InferToolInput, type InferToolOutput, tool } from 'ai'
 import { isEmpty } from 'lodash'
 import * as z from 'zod'
+
+/**
+ * 配置开关：是否使用 VCP 统一记忆层
+ * 当为 true 时，搜索通过 VCPMemoryAdapter (Main process) 执行
+ * 当为 false 时，搜索通过 KnowledgeService (Renderer process) 执行
+ *
+ * @see Phase 1 of VCP 统一重构计划
+ */
+const USE_VCP_UNIFIED_PATH = true // 启用 VCP 统一路径
 
 /**
  * 知识库搜索工具
@@ -79,6 +89,89 @@ You can use this tool as-is, or provide additionalContext to refine the search f
           rewrite: finalRewrite
         }
       }
+
+      // ========== VCP 统一路径 ==========
+      // 通过 VCPMemoryAdapter (Main process) 执行搜索
+      // 这是 Phase 1 VCP 统一重构的核心改动
+      if (USE_VCP_UNIFIED_PATH) {
+        try {
+          // 从知识库配置获取 embedding 和 reranker 模型
+          // 知识库在创建时就配置好了这些模型
+          const firstKnowledgeBase = assistant.knowledge_bases?.[0]
+          let embeddingConfig: {
+            providerId: string
+            modelId: string
+            apiKey?: string
+            baseUrl?: string
+          } | undefined
+
+          let rerankConfig: {
+            providerId: string
+            modelId: string
+            apiKey?: string
+            baseUrl?: string
+          } | undefined
+
+          // 使用知识库自己的 embedding 模型配置
+          if (firstKnowledgeBase?.model) {
+            const embeddingProvider = getProviderByModel(firstKnowledgeBase.model)
+            embeddingConfig = {
+              providerId: embeddingProvider.id,
+              modelId: firstKnowledgeBase.model.id,
+              apiKey: embeddingProvider.apiKey,
+              baseUrl: embeddingProvider.apiHost
+            }
+          }
+
+          // 使用知识库自己的 reranker 模型配置（如果有）
+          if (firstKnowledgeBase?.rerankModel) {
+            const rerankProvider = getProviderByModel(firstKnowledgeBase.rerankModel)
+            rerankConfig = {
+              providerId: rerankProvider.id,
+              modelId: firstKnowledgeBase.rerankModel.id,
+              apiKey: rerankProvider.apiKey,
+              baseUrl: rerankProvider.apiHost
+            }
+          }
+
+          // 使用 VCP 统一记忆层进行搜索
+          // IntegratedMemoryCoordinator 会自动应用:
+          // - SelfLearning 学习权重
+          // - TagBoost 标签增强
+          // - RRF 多源融合
+          const result = await window.api.vcpMemory.intelligentSearch({
+            query: searchCriteria.rewrite,
+            k: 10,
+            backends: ['knowledge'], // 限定为知识库后端
+            enableLearning: true,
+            // 使用知识库 ID 作为 tags 进行过滤
+            tags: knowledgeBaseIds,
+            embeddingConfig,
+            rerankConfig
+          })
+
+          if (!result.success || !result.data) {
+            console.warn('[KnowledgeSearchTool] VCP search failed, falling back to legacy path', result.error)
+            // 回退到旧路径
+          } else {
+            // 转换 VCP 结果格式为工具输出格式
+            return result.data.map((r) => ({
+              id: r.id,
+              content: r.content,
+              sourceUrl: r.metadata?.sourceUrl as string | undefined,
+              type: r.metadata?.type as string | undefined,
+              file: r.metadata?.file as { name: string; origin_name?: string } | undefined,
+              metadata: r.metadata
+            }))
+          }
+        } catch (error) {
+          console.error('[KnowledgeSearchTool] VCP unified path error:', error)
+          // 回退到旧路径
+        }
+      }
+
+      // ========== Legacy 路径 ==========
+      // 直接通过 KnowledgeService (Renderer process) 执行搜索
 
       // 构建 ExtractResults 对象
       const extractResults: ExtractResults = {

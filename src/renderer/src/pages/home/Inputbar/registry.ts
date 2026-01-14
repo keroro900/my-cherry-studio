@@ -31,6 +31,19 @@ const inputbarRegistry = new Map<InputbarScope, InputbarScopeConfig>([
     }
   ],
   [
+    TopicType.GroupChat,
+    {
+      placeholder: '输入消息，使用 @名称 提及特定助手...',
+      minRows: 2,
+      maxRows: 8,
+      showTokenCount: true,
+      showTools: true,
+      toolsCollapsible: false, // 群聊工具始终显示
+      enableQuickPanel: true, // 支持 @提及
+      enableDragDrop: true
+    }
+  ],
+  [
     'mini-window',
     {
       minRows: 1,

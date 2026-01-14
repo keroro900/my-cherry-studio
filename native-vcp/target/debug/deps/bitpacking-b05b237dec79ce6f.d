@@ -1,0 +1,9 @@
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\debug\deps\bitpacking-b05b237dec79ce6f.d: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\macros.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\macros_simple.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\bitpacker1x_simple.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\bitpacker4x_simple.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\debug\deps\libbitpacking-b05b237dec79ce6f.rmeta: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\macros.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\macros_simple.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\bitpacker1x_simple.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\bitpacker4x_simple.rs
+
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\lib.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\macros.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\macros_simple.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\bitpacker1x_simple.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bitpacking-0.9.2\src\bitpacker4x_simple.rs:

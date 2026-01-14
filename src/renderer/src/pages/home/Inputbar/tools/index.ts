@@ -14,6 +14,8 @@ import './generateImageTool'
 import './clearTopicTool'
 import './toggleExpandTool'
 import './newContextTool'
+import './emojiTool'
+import './stickerTool'
 // Agent Session tools
 import './createSessionTool'
 import './slashCommandsTool'

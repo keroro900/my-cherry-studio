@@ -4,8 +4,8 @@ import { DeleteIcon, EditIcon, LoadingIcon, RefreshIcon } from '@renderer/compon
 import { HStack } from '@renderer/components/Layout'
 import TextBadge from '@renderer/components/TextBadge'
 import { useTheme } from '@renderer/context/ThemeProvider'
+import { useAssistants } from '@renderer/hooks/useAssistant'
 import { useModel } from '@renderer/hooks/useModel'
-import MemoryService from '@renderer/services/MemoryService'
 import {
   selectCurrentUserId,
   selectGlobalMemoryEnabled,
@@ -14,10 +14,26 @@ import {
   setGlobalMemoryEnabled
 } from '@renderer/store/memory'
 import type { MemoryItem } from '@types'
-import { Badge, Button, Dropdown, Empty, Flex, Form, Input, Modal, Pagination, Space, Spin, Switch, Tag } from 'antd'
+import {
+  Badge,
+  Button,
+  Dropdown,
+  Empty,
+  Flex,
+  Form,
+  Input,
+  Modal,
+  Pagination,
+  Select,
+  Space,
+  Spin,
+  Switch,
+  Tag
+} from 'antd'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import {
+  Bot,
   Brain,
   Calendar,
   FlaskConical,
@@ -42,7 +58,6 @@ import {
   SettingRowTitle,
   SettingTitle
 } from '../index'
-import VectorSettings from '../VectorSettings/VectorSettings'
 import AdvancedMemorySettings from './AdvancedMemorySettings'
 import { DEFAULT_USER_ID } from './constants'
 import MemorySettingsModal from './MemorySettingsModal'
@@ -286,6 +301,7 @@ const MemorySettings = () => {
   const dispatch = useDispatch()
   const currentUser = useSelector(selectCurrentUserId)
   const globalMemoryEnabled = useSelector(selectGlobalMemoryEnabled)
+  const { assistants } = useAssistants()
 
   const [allMemories, setAllMemories] = useState<MemoryItem[]>([])
   const [loading, setLoading] = useState(false)
@@ -302,7 +318,7 @@ const MemorySettings = () => {
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
-  const memoryService = MemoryService.getInstance()
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined) // 分助手记忆过滤
 
   // Test memory features
   const handleTestFeatures = async () => {
@@ -327,31 +343,46 @@ const MemorySettings = () => {
   // Load unique users from database
   const loadUniqueUsers = useCallback(async () => {
     try {
-      const usersList = await memoryService.getUsersList()
-      const users = usersList.map((user) => user.userId)
-      setUniqueUsers(users)
+      const result = await window.api.vcpMemory.getUsersList()
+      if (result.success && result.users) {
+        const users = result.users.map((user) => user.userId)
+        setUniqueUsers(users)
+      }
     } catch (error) {
       logger.error('Failed to load users list:', error as Error)
     }
-  }, [memoryService])
+  }, [])
 
   // Load memories function
   const loadMemories = useCallback(
-    async (userId?: string) => {
+    async (userId?: string, agentId?: string) => {
       const targetUser = userId || currentUser
-      logger.debug(`Loading all memories for user: ${targetUser}`)
+      const targetAgent = agentId !== undefined ? agentId : selectedAgentId
+      logger.debug(`Loading memories for user: ${targetUser}, agent: ${targetAgent || 'all'}`)
       setLoading(true)
       try {
-        // First, ensure the memory service is using the correct user
-        memoryService.setCurrentUser(targetUser)
-
         // Load unique users efficiently from database
         await loadUniqueUsers()
 
         // Get all memories for current user context (load up to 10000)
-        const result = await memoryService.list({ limit: 10000, offset: 0 })
-        logger.verbose(`Loaded memories for user: ${targetUser}, count: ${result.results?.length || 0}`)
-        setAllMemories(result.results || [])
+        // Pass agentId for filtering if specified
+        const result = await window.api.vcpMemory.list({
+          userId: targetUser,
+          agentId: targetAgent,
+          limit: 10000,
+          offset: 0
+        })
+        logger.verbose(`Loaded memories for user: ${targetUser}, agent: ${targetAgent || 'all'}, count: ${result.results?.length || 0}`)
+        // Transform VCP result to MemoryItem format
+        const memories: MemoryItem[] = (result.results || []).map(item => ({
+          id: item.id,
+          memory: item.content,
+          userId: item.userId || targetUser,
+          agentId: item.agentId,
+          metadata: item.metadata as any,
+          createdAt: item.createdAt
+        }))
+        setAllMemories(memories)
       } catch (error) {
         logger.error('Failed to load memories:', error as Error)
         window.toast.error(t('memory.load_failed'))
@@ -359,16 +390,16 @@ const MemorySettings = () => {
         setLoading(false)
       }
     },
-    [currentUser, memoryService, t, loadUniqueUsers]
+    [currentUser, selectedAgentId, t, loadUniqueUsers]
   )
 
-  // Sync memoryService with Redux store on mount and when currentUser changes
+  // Load memories when currentUser/selectedAgentId changes
   useEffect(() => {
-    logger.verbose(`useEffect triggered for currentUser: ${currentUser}`)
+    logger.verbose(`useEffect triggered for currentUser: ${currentUser}, selectedAgentId: ${selectedAgentId}`)
     // Reset to first page when user changes
     setCurrentPage(1)
-    loadMemories(currentUser)
-  }, [currentUser, loadMemories])
+    loadMemories(currentUser, selectedAgentId)
+  }, [currentUser, selectedAgentId, loadMemories])
 
   // Debounce search text
   useEffect(() => {
@@ -412,12 +443,22 @@ const MemorySettings = () => {
 
   const handleAddMemory = async (memory: string) => {
     try {
-      // The memory service will automatically use the current user from its state
-      await memoryService.add(memory, {})
+      // Create memory via VCP API
+      // Pass userId and agentId for proper context
+      const result = await window.api.vcpMemory.create({
+        content: memory,
+        metadata: {
+          userId: currentUser,
+          agentId: selectedAgentId
+        }
+      })
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error')
+      }
       window.toast.success(t('memory.add_success'))
       // Go to first page to see the newly added memory
       setCurrentPage(1)
-      await loadMemories(currentUser)
+      await loadMemories(currentUser, selectedAgentId)
     } catch (error) {
       logger.error('Failed to add memory:', error as Error)
       window.toast.error(t('memory.add_failed'))
@@ -426,10 +467,13 @@ const MemorySettings = () => {
 
   const handleDeleteMemory = async (id: string) => {
     try {
-      await memoryService.delete(id)
+      const result = await window.api.vcpMemory.delete(id)
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error')
+      }
       window.toast.success(t('memory.delete_success'))
       // Reload all memories
-      await loadMemories(currentUser)
+      await loadMemories(currentUser, selectedAgentId)
     } catch (error) {
       logger.error('Failed to delete memory:', error as Error)
       window.toast.error(t('memory.delete_failed'))
@@ -442,11 +486,17 @@ const MemorySettings = () => {
 
   const handleUpdateMemory = async (id: string, memory: string, metadata?: Record<string, any>) => {
     try {
-      await memoryService.update(id, memory, metadata)
+      const result = await window.api.vcpMemory.update(id, {
+        content: memory,
+        metadata
+      })
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error')
+      }
       window.toast.success(t('memory.update_success'))
       setEditingMemory(null)
       // Reload all memories
-      await loadMemories(currentUser)
+      await loadMemories(currentUser, selectedAgentId)
     } catch (error) {
       logger.error('Failed to update memory:', error as Error)
       window.toast.error(t('memory.update_failed'))
@@ -466,8 +516,8 @@ const MemorySettings = () => {
     setCurrentPage(1)
 
     try {
-      // Explicitly load memories for the new user
-      await loadMemories(userId)
+      // Explicitly load memories for the new user (keep current agent filter)
+      await loadMemories(userId, selectedAgentId)
 
       window.toast.success(
         t('memory.user_switched', { user: userId === DEFAULT_USER_ID ? t('memory.default_user') : userId })
@@ -482,8 +532,13 @@ const MemorySettings = () => {
     try {
       // Create the user by adding an initial memory with the userId
       // This implicitly creates the user in the system
-      await memoryService.setCurrentUser(userId)
-      await memoryService.add(t('memory.initial_memory_content'), { userId })
+      const result = await window.api.vcpMemory.create({
+        content: t('memory.initial_memory_content'),
+        metadata: { userId }
+      })
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error')
+      }
 
       // Refresh the users list from the database to persist the new user
       await loadUniqueUsers()
@@ -500,7 +555,7 @@ const MemorySettings = () => {
 
   const handleSettingsSubmit = async () => {
     setSettingsModalVisible(false)
-    await memoryService.updateConfig()
+    // VCP memory config is managed through Redux store, no need to call updateConfig
     if (window.keyv.get('memory.wait.settings')) {
       window.keyv.remove('memory.wait.settings')
       dispatch(setGlobalMemoryEnabled(true))
@@ -524,11 +579,14 @@ const MemorySettings = () => {
       okType: 'danger',
       onOk: async () => {
         try {
-          await memoryService.deleteAllMemoriesForUser(userId)
+          const result = await window.api.vcpMemory.deleteAllForUser(userId)
+          if (!result.success) {
+            throw new Error(result.error || 'Unknown error')
+          }
           window.toast.success(t('memory.memories_reset_success', { user: getUserDisplayName(userId) }))
 
           // Reload memories to show the empty state
-          await loadMemories(currentUser)
+          await loadMemories(currentUser, selectedAgentId)
         } catch (error) {
           logger.error('Failed to reset memories:', error as Error)
           window.toast.error(t('memory.reset_memories_failed'))
@@ -551,7 +609,11 @@ const MemorySettings = () => {
       okType: 'danger',
       onOk: async () => {
         try {
-          await memoryService.deleteUser(userId)
+          // Delete user is same as deleting all memories for user
+          const result = await window.api.vcpMemory.deleteAllForUser(userId)
+          if (!result.success) {
+            throw new Error(result.error || 'Unknown error')
+          }
           window.toast.success(t('memory.user_deleted', { user: userId }))
 
           // Refresh the users list from database after deletion
@@ -561,7 +623,7 @@ const MemorySettings = () => {
           if (currentUser === userId) {
             await handleUserSwitch(DEFAULT_USER_ID)
           } else {
-            await loadMemories(currentUser)
+            await loadMemories(currentUser, selectedAgentId)
           }
         } catch (error) {
           logger.error('Failed to delete user:', error as Error)
@@ -661,14 +723,31 @@ const MemorySettings = () => {
       {/* Memory List */}
       <SettingGroup theme={theme}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <SettingTitle>{t('memory.title')}</SettingTitle>
+          <HStack style={{ alignItems: 'center', gap: 12 }}>
+            <SettingTitle style={{ margin: 0 }}>{t('memory.title')}</SettingTitle>
+            {/* 分助手记忆过滤器 */}
+            <Select
+              value={selectedAgentId || 'all'}
+              onChange={(value) => setSelectedAgentId(value === 'all' ? undefined : value)}
+              style={{ width: 180 }}
+              size="small"
+              suffixIcon={<Bot size={14} />}
+              options={[
+                { value: 'all', label: t('memory.all_assistants') || 'All Assistants' },
+                ...assistants.map((a) => ({
+                  value: a.id,
+                  label: a.name || a.id
+                }))
+              ]}
+            />
+          </HStack>
           <Space>
             <Input.Search
               placeholder={t('memory.search_placeholder')}
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
               allowClear
-              style={{ width: 240 }}
+              style={{ width: 200 }}
             />
             <Button type="primary" icon={<PlusIcon size={18} />} onClick={() => setAddMemoryModalVisible(true)}>
               {t('memory.add_memory')}
@@ -680,7 +759,7 @@ const MemorySettings = () => {
                     key: 'refresh',
                     label: t('common.refresh'),
                     icon: <RefreshIcon size={14} />,
-                    onClick: () => loadMemories(currentUser)
+                    onClick: () => loadMemories(currentUser, selectedAgentId)
                   },
                   {
                     key: 'test',
@@ -821,9 +900,6 @@ const MemorySettings = () => {
 
       {/* Advanced Memory (LightMemo / DeepMemo / MeshMemo) */}
       <AdvancedMemorySettings theme={theme} />
-
-      {/* Vector Database Settings */}
-      <VectorSettings />
 
       {/* Modals */}
       <AddMemoryModal

@@ -19,7 +19,16 @@ import { isWin } from '@main/constant'
 import { autoDiscoverGitBash } from '@main/utils/process'
 import getLoginShellEnvironment from '@main/utils/shell-env'
 import { withoutTrailingApiVersion } from '@shared/utils'
-import { app } from 'electron'
+import os from 'node:os'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electronApp = require('electron').app
+} catch {
+  // electron 未就绪
+}
 
 import type { GetAgentSessionResponse } from '../..'
 import type { AgentServiceInterface, AgentStream, AgentStreamEvent } from '../../interfaces/AgentStreamInterface'
@@ -56,7 +65,7 @@ class ClaudeCodeService implements AgentServiceInterface {
   constructor() {
     // Resolve Claude Code CLI robustly (works in dev and in asar)
     this.claudeExecutablePath = require_.resolve('@anthropic-ai/claude-agent-sdk/cli.js')
-    if (app.isPackaged) {
+    if (electronApp?.isPackaged) {
       this.claudeExecutablePath = this.claudeExecutablePath.replace(/\.asar([\\/])/, '.asar.unpacked$1')
     }
   }
@@ -139,7 +148,10 @@ class ClaudeCodeService implements AgentServiceInterface {
       // Set CLAUDE_CONFIG_DIR to app's userData directory to avoid path encoding issues
       // on Windows when the username contains non-ASCII characters (e.g., Chinese characters)
       // This prevents the SDK from using the user's home directory which may have encoding problems
-      CLAUDE_CONFIG_DIR: path.join(app.getPath('userData'), '.claude'),
+      CLAUDE_CONFIG_DIR: path.join(
+        electronApp ? electronApp.getPath('userData') : path.join(os.tmpdir(), 'cherry-studio-data'),
+        '.claude'
+      ),
       ...(customGitBashPath ? { CLAUDE_CODE_GIT_BASH_PATH: customGitBashPath } : {})
     }
 

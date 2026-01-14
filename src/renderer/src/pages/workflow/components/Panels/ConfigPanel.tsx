@@ -32,6 +32,10 @@ import OutputPreviewModalPopup, { type OutputItem } from './OutputPreviewModal'
 
 interface ConfigPanelProps {
   onCollapse?: () => void
+  /** 是否在弹窗中显示（隐藏头部） */
+  isModal?: boolean
+  /** 删除节点后的回调 */
+  onDelete?: () => void
 }
 
 // 类别颜色映射 - 使用工作流主题语义色
@@ -46,7 +50,6 @@ const CATEGORY_COLORS: Record<NodeDefinition['category'], string> = {
   external: 'var(--ant-color-orange, #fa8c16)',
   custom: 'var(--workflow-theme-geekblue, #2f54eb)',
   text: 'var(--ant-color-cyan, #13c2c2)',
-  fashion: 'var(--ant-color-pink, #eb2f96)',
   quality: 'var(--ant-color-lime, #a0d911)'
 }
 
@@ -166,7 +169,8 @@ const styles = {
     backgroundColor: 'var(--ant-color-bg-container)',
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.08)'
   } as React.CSSProperties,
   header: {
     height: '56px',
@@ -175,7 +179,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    backgroundColor: 'var(--ant-color-bg-elevated)',
+    background: 'linear-gradient(180deg, var(--ant-color-bg-elevated) 0%, var(--ant-color-bg-container) 100%)',
     flexShrink: 0
   } as React.CSSProperties,
   headerIcon: {
@@ -185,7 +189,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '10px',
-    fontSize: '18px'
+    fontSize: '18px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)'
   } as React.CSSProperties,
   headerInfo: {
     flex: 1,
@@ -213,10 +218,10 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '6px',
+    borderRadius: '8px',
     cursor: 'pointer',
     color: 'var(--ant-color-text-tertiary)',
-    transition: 'all 0.2s',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     border: 'none',
     background: 'none'
   } as React.CSSProperties,
@@ -236,19 +241,19 @@ const styles = {
   } as React.CSSProperties,
   input: {
     width: '100%',
-    padding: '8px 12px',
-    borderRadius: '6px',
+    padding: '10px 12px',
+    borderRadius: '8px',
     border: '1px solid var(--ant-color-border)',
     backgroundColor: 'var(--ant-color-bg-elevated)',
     color: 'var(--ant-color-text)',
     fontSize: '13px',
     outline: 'none',
-    transition: 'border-color 0.2s'
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
   } as React.CSSProperties,
   textarea: {
     width: '100%',
-    padding: '8px 12px',
-    borderRadius: '6px',
+    padding: '10px 12px',
+    borderRadius: '8px',
     border: '1px solid var(--ant-color-border)',
     backgroundColor: 'var(--ant-color-bg-elevated)',
     color: 'var(--ant-color-text)',
@@ -256,7 +261,8 @@ const styles = {
     outline: 'none',
     minHeight: '80px',
     resize: 'vertical',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
   } as React.CSSProperties,
   label: {
     display: 'block',
@@ -273,7 +279,8 @@ const styles = {
     borderTop: '1px solid var(--ant-color-border)',
     display: 'flex',
     gap: '8px',
-    flexShrink: 0
+    flexShrink: 0,
+    background: 'var(--ant-color-bg-elevated)'
   } as React.CSSProperties,
   deleteBtn: {
     flex: 1,
@@ -281,25 +288,26 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '6px',
-    padding: '8px 16px',
-    borderRadius: '6px',
+    padding: '10px 16px',
+    borderRadius: '8px',
     border: '1px solid var(--ant-color-error)',
     backgroundColor: 'transparent',
     color: 'var(--ant-color-error)',
     fontSize: '13px',
     fontWeight: 500,
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
   } as React.CSSProperties,
   outputPreview: {
     backgroundColor: 'var(--ant-color-bg-elevated)',
-    borderRadius: '8px',
+    borderRadius: '10px',
     padding: '12px',
-    border: '1px solid var(--ant-color-border)'
+    border: '1px solid var(--ant-color-border)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
   } as React.CSSProperties,
   outputImage: {
     width: '100%',
-    borderRadius: '6px',
+    borderRadius: '8px',
     maxHeight: '200px',
     objectFit: 'contain'
   } as React.CSSProperties,
@@ -317,7 +325,7 @@ const styles = {
 /**
  * 配置面板
  */
-function ConfigPanel({ onCollapse }: ConfigPanelProps) {
+function ConfigPanel({ onCollapse, isModal = false, onDelete }: ConfigPanelProps) {
   const dispatch = useAppDispatch()
 
   // 拆分选择器，减少不必要的重渲染
@@ -476,10 +484,23 @@ function ConfigPanel({ onCollapse }: ConfigPanelProps) {
   const handleDeleteNode = useCallback(() => {
     if (!selectedNodeId) return
     dispatch(removeNode(selectedNodeId))
-  }, [dispatch, selectedNodeId])
+    // 弹窗模式下，删除后调用回调关闭弹窗
+    onDelete?.()
+  }, [dispatch, selectedNodeId, onDelete])
 
   // 未选中节点时显示提示
   if (!selectedNode || !nodeDef) {
+    // 弹窗模式不显示空状态（Modal 会处理）
+    if (isModal) {
+      return (
+        <div style={{ ...styles.panel, padding: '32px', textAlign: 'center' }}>
+          <Target size={48} style={{ marginBottom: '16px', opacity: 0.3, color: 'var(--ant-color-text-tertiary)' }} />
+          <div style={{ color: 'var(--ant-color-text-tertiary)' }}>
+            <div style={{ marginBottom: '8px', fontWeight: 500 }}>未选中节点</div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div style={styles.panel}>
         <div style={styles.header}>
@@ -718,28 +739,30 @@ function ConfigPanel({ onCollapse }: ConfigPanelProps) {
 
   return (
     <div style={styles.panel}>
-      {/* 头部 */}
-      <div style={styles.header}>
-        <span
-          style={{
-            ...styles.headerIcon,
-            backgroundColor: `${categoryColor}20`
-          }}>
-          {nodeIcon}
-        </span>
-        <div style={styles.headerInfo}>
-          <div style={styles.headerTitle}>{selectedNode.data.label}</div>
-          <div style={styles.headerDesc}>{nodeDescription}</div>
-        </div>
-        <button style={styles.closeBtn} onClick={() => dispatch(updateNode({ id: '', data: {} }))} title="取消选中">
-          <X size={16} />
-        </button>
-        {onCollapse && (
-          <button style={styles.closeBtn} onClick={onCollapse} title="折叠面板">
-            <ChevronRight size={16} />
+      {/* 头部 - 弹窗模式隐藏（由 Modal 标题替代） */}
+      {!isModal && (
+        <div style={styles.header}>
+          <span
+            style={{
+              ...styles.headerIcon,
+              backgroundColor: `${categoryColor}20`
+            }}>
+            {nodeIcon}
+          </span>
+          <div style={styles.headerInfo}>
+            <div style={styles.headerTitle}>{selectedNode.data.label}</div>
+            <div style={styles.headerDesc}>{nodeDescription}</div>
+          </div>
+          <button style={styles.closeBtn} onClick={() => dispatch(updateNode({ id: '', data: {} }))} title="取消选中">
+            <X size={16} />
           </button>
-        )}
-      </div>
+          {onCollapse && (
+            <button style={styles.closeBtn} onClick={onCollapse} title="折叠面板">
+              <ChevronRight size={16} />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 内容区 */}
       <div style={styles.content}>

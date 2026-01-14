@@ -17,7 +17,7 @@ import { MIDDLEWARE_NAME as AbortHandlerMiddlewareName } from './middleware/comm
 import { MIDDLEWARE_NAME as ErrorHandlerMiddlewareName } from './middleware/common/ErrorHandlerMiddleware'
 import { MIDDLEWARE_NAME as FinalChunkConsumerMiddlewareName } from './middleware/common/FinalChunkConsumerMiddleware'
 import { applyCompletionsMiddlewares } from './middleware/composer'
-import { MIDDLEWARE_NAME as McpToolChunkMiddlewareName } from './middleware/core/McpToolChunkMiddleware'
+// McpToolChunkMiddleware 已移除：工具执行由 VCPToolExecutorMiddleware 统一处理
 import { MIDDLEWARE_NAME as RawStreamListenerMiddlewareName } from './middleware/core/RawStreamListenerMiddleware'
 import { MIDDLEWARE_NAME as ResponseTransformMiddlewareName } from './middleware/core/ResponseTransformMiddleware'
 import { MIDDLEWARE_NAME as StreamAdapterMiddlewareName } from './middleware/core/StreamAdapterMiddleware'
@@ -127,8 +127,7 @@ export default class AiProvider {
       if (!params.mcpTools?.length) {
         builder.remove(ToolUseExtractionMiddlewareName)
         logger.silly('ToolUseExtractionMiddleware is removed')
-        builder.remove(McpToolChunkMiddlewareName)
-        logger.silly('McpToolChunkMiddleware is removed')
+        // McpToolChunkMiddleware 已移除：工具执行由 VCPToolExecutorMiddleware 统一处理
       }
       if (isSupportedToolUse(params.assistant) && isFunctionCallingModel(model)) {
         builder.remove(ToolUseExtractionMiddlewareName)

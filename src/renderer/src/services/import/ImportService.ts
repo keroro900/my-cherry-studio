@@ -2,7 +2,7 @@ import { loggerService } from '@logger'
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { addAssistant } from '@renderer/store/assistants'
-import type { Assistant } from '@renderer/types'
+import { createDefaultCollaboration, type Assistant } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 
 import { DEFAULT_ASSISTANT_SETTINGS } from '../AssistantService'
@@ -123,7 +123,8 @@ class ImportServiceClass {
         topics: result.topics,
         messages: [],
         type: 'assistant',
-        settings: DEFAULT_ASSISTANT_SETTINGS
+        settings: DEFAULT_ASSISTANT_SETTINGS,
+        collaboration: createDefaultCollaboration() // 默认启用协作功能
       }
 
       // Add assistant to store

@@ -49,6 +49,10 @@ export const DEFAULT_TOOL_ORDER_BY_SCOPE: Record<InputbarScope, ToolOrder> = {
     visible: ['create_session', 'slash_commands', 'attachment'],
     hidden: []
   },
+  [TopicType.GroupChat]: {
+    visible: ['attachment', 'mention_models'],
+    hidden: []
+  },
   'mini-window': {
     visible: ['attachment', 'mention_models', 'quick_phrases'],
     hidden: []

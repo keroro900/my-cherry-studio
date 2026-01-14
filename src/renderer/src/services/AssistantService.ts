@@ -13,15 +13,16 @@ import { getStoreProviders } from '@renderer/hooks/useStore'
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { addAssistant } from '@renderer/store/assistants'
-import type {
-  Assistant,
-  AssistantPreset,
-  AssistantSettings,
-  Model,
-  Provider,
-  Topic,
-  TranslateAssistant,
-  TranslateLanguage
+import {
+  createDefaultCollaboration,
+  type Assistant,
+  type AssistantPreset,
+  type AssistantSettings,
+  type Model,
+  type Provider,
+  type Topic,
+  type TranslateAssistant,
+  type TranslateLanguage
 } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 
@@ -82,7 +83,8 @@ export function getDefaultAssistant(): Assistant {
     messages: [],
     type: 'assistant',
     regularPhrases: [], // Added regularPhrases
-    settings: DEFAULT_ASSISTANT_SETTINGS
+    settings: DEFAULT_ASSISTANT_SETTINGS,
+    collaboration: createDefaultCollaboration() // 默认启用协作功能
   }
 }
 
@@ -272,7 +274,8 @@ export async function createAssistantFromAgent(agent: AssistantPreset) {
     model: agent.defaultModel,
     type: 'assistant',
     regularPhrases: agent.regularPhrases || [], // Ensured regularPhrases
-    settings: agent.settings || DEFAULT_ASSISTANT_SETTINGS
+    settings: agent.settings || DEFAULT_ASSISTANT_SETTINGS,
+    collaboration: agent.collaboration || createDefaultCollaboration() // 默认启用协作功能
   }
 
   store.dispatch(addAssistant(assistant))

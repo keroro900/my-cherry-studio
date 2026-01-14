@@ -1,0 +1,10 @@
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\napi_build-cf5dbc26124238c5.d: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\android.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\wasi.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\windows.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\libnapi_build-cf5dbc26124238c5.rlib: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\android.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\wasi.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\windows.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\release\deps\libnapi_build-cf5dbc26124238c5.rmeta: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\android.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\wasi.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\windows.rs
+
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\lib.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\android.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\wasi.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\napi-build-2.3.1\src\windows.rs:

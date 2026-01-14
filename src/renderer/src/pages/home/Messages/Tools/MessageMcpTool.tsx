@@ -2,12 +2,16 @@
  * VCP 统一协议工具显示组件
  *
  * 虽然文件名包含 "Mcp"，但该组件是 VCP 统一协议的一部分：
- * - 所有工具（MCP/VCP/内置）都通过 VCP 协议格式调用
- * - MCP 服务器的工具会自动转换为 VCP 格式
- * - 执行使用 VCPToolExecutorMiddleware 统一处理
+ *
+ * VCP 工具类型：
+ * - builtin: VCP 内置服务（原生服务，如 CodeSearcher, Weather, DailyNoteWrite 等）
+ * - mcp: MCP 服务器工具（转换为 VCP 格式）
+ * - provider: Provider 内置工具（如 web_search）
+ *
+ * 所有工具统一由 VCPToolExecutorMiddleware 处理执行
  *
  * @see src/renderer/src/aiCore/legacy/middleware/VCPToolExecutorMiddleware.ts
- * @see src/main/knowledge/vcp/MCPOBridge.ts
+ * @see src/main/services/vcp/BuiltinServices/ - 内置服务实现
  */
 import { loggerService } from '@logger'
 import { CopyIcon, LoadingIcon } from '@renderer/components/Icons'
@@ -66,7 +70,11 @@ const MessageMcpTool: FC<Props> = ({ block }) => {
   const { t } = useTranslation()
   const { messageFont, fontSize } = useSettings()
   const { mcpServers, updateMCPServer } = useMCPServers()
-  const [expandedResponse, setExpandedResponse] = useState<{ content: string; title: string } | null>(null)
+  const [expandedResponse, setExpandedResponse] = useState<{
+    content: string
+    title: string
+    toolResponse?: MCPToolResponse
+  } | null>(null)
   const [progress, setProgress] = useState<number>(0)
   const { setTimeoutTimer } = useTimer()
 
@@ -302,7 +310,8 @@ const MessageMcpTool: FC<Props> = ({ block }) => {
                   e.stopPropagation()
                   setExpandedResponse({
                     content: JSON.stringify(response, null, 2),
-                    title: tool.name
+                    title: tool.name,
+                    toolResponse: toolResponse
                   })
                 }}
                 aria-label={t('common.expand')}>
@@ -509,6 +518,13 @@ const MessageMcpTool: FC<Props> = ({ block }) => {
               }
               items={[
                 {
+                  key: 'details',
+                  label: t('message.tools.details', '详情'),
+                  children: expandedResponse.toolResponse && (
+                    <ToolDetailsPanel toolResponse={expandedResponse.toolResponse} />
+                  )
+                },
+                {
                   key: 'preview',
                   label: t('message.tools.preview'),
                   children: renderPreview(expandedResponse.content)
@@ -562,6 +578,287 @@ const CollapsedContent: FC<{ isExpanded: boolean; resultString: string }> = ({ i
 
   return <MarkdownContainer className="markdown" dangerouslySetInnerHTML={{ __html: styledResult }} />
 }
+
+/**
+ * VCP 工具调用详情面板
+ *
+ * VCP 统一协议下的工具类型：
+ * - builtin: VCP 内置服务（原生服务，如 CodeSearcher, Weather 等）
+ * - mcp: MCP 服务器工具（转换为 VCP 格式）
+ * - provider: Provider 内置工具（如 web_search）
+ */
+const ToolDetailsPanel: FC<{ toolResponse: MCPToolResponse }> = ({ toolResponse }) => {
+  const { t } = useTranslation()
+  const { highlightCode } = useCodeStyle()
+  const [argsHighlighted, setArgsHighlighted] = useState<string>('')
+
+  const { id, tool, status, arguments: args, response } = toolResponse
+  const toolCallId = (toolResponse as any).toolCallId
+  const toolUseId = (toolResponse as any).toolUseId
+
+  // 高亮参数 JSON
+  useEffect(() => {
+    if (args) {
+      const argsStr = typeof args === 'string' ? args : JSON.stringify(args, null, 2)
+      highlightCode(argsStr, 'json').then(setArgsHighlighted)
+    }
+  }, [args, highlightCode])
+
+  // VCP 工具类型映射
+  const typeMap: Record<string, { label: string; description: string }> = {
+    builtin: {
+      label: t('message.tools.type.builtin', 'VCP 内置服务'),
+      description: t('message.tools.type.builtinDesc', '原生 VCP 服务')
+    },
+    mcp: {
+      label: t('message.tools.type.mcp', 'MCP 服务器'),
+      description: t('message.tools.type.mcpDesc', '通过 VCP 协议桥接')
+    },
+    provider: {
+      label: t('message.tools.type.provider', 'Provider 工具'),
+      description: t('message.tools.type.providerDesc', '模型提供商内置')
+    }
+  }
+
+  const typeInfo = typeMap[tool.type] || { label: tool.type.toUpperCase(), description: '' }
+
+  // 状态映射
+  const statusMap: Record<string, { label: string; color: string }> = {
+    pending: { label: t('message.tools.pending', '等待中'), color: 'var(--status-color-warning)' },
+    done: { label: t('message.tools.completed', '已完成'), color: 'var(--status-color-success)' },
+    error: { label: t('message.tools.error', '错误'), color: 'var(--status-color-error)' },
+    cancelled: { label: t('message.tools.cancelled', '已取消'), color: 'var(--color-text-3)' }
+  }
+
+  const statusInfo = statusMap[status] || { label: status, color: 'var(--color-text)' }
+
+  return (
+    <DetailsContainer>
+      {/* 基本信息 */}
+      <DetailSection>
+        <DetailSectionTitle>{t('message.tools.basicInfo', '基本信息')}</DetailSectionTitle>
+        <DetailRow>
+          <DetailLabel>{t('message.tools.toolName', '工具名称')}</DetailLabel>
+          <DetailValue>{tool.name}</DetailValue>
+        </DetailRow>
+        <DetailRow>
+          <DetailLabel>{t('message.tools.toolType', '工具类型')}</DetailLabel>
+          <DetailValue>
+            <TypeBadge $type={tool.type}>{typeInfo.label}</TypeBadge>
+            {typeInfo.description && <TypeDescription>{typeInfo.description}</TypeDescription>}
+          </DetailValue>
+        </DetailRow>
+        <DetailRow>
+          <DetailLabel>{t('message.tools.status', '状态')}</DetailLabel>
+          <DetailValue>
+            <StatusBadge $color={statusInfo.color}>{statusInfo.label}</StatusBadge>
+            {response?.isError && (
+              <StatusBadge $color="var(--status-color-error)" style={{ marginLeft: 8 }}>
+                {t('message.tools.hasError', '包含错误')}
+              </StatusBadge>
+            )}
+          </DetailValue>
+        </DetailRow>
+      </DetailSection>
+
+      {/* 调用标识 */}
+      <DetailSection>
+        <DetailSectionTitle>{t('message.tools.callIdentifiers', '调用标识')}</DetailSectionTitle>
+        <DetailRow>
+          <DetailLabel>ID</DetailLabel>
+          <DetailValue className="mono">{id}</DetailValue>
+        </DetailRow>
+        {toolCallId && (
+          <DetailRow>
+            <DetailLabel>Tool Call ID</DetailLabel>
+            <DetailValue className="mono">{toolCallId}</DetailValue>
+          </DetailRow>
+        )}
+        {toolUseId && (
+          <DetailRow>
+            <DetailLabel>Tool Use ID</DetailLabel>
+            <DetailValue className="mono">{toolUseId}</DetailValue>
+          </DetailRow>
+        )}
+      </DetailSection>
+
+      {/* VCP 内置服务信息 */}
+      {tool.type === 'builtin' && (
+        <DetailSection>
+          <DetailSectionTitle>{t('message.tools.builtinServiceInfo', '内置服务信息')}</DetailSectionTitle>
+          <DetailRow>
+            <DetailLabel>{t('message.tools.serviceName', '服务名称')}</DetailLabel>
+            <DetailValue>{tool.serverName || tool.name}</DetailValue>
+          </DetailRow>
+          {tool.description && (
+            <DetailRow>
+              <DetailLabel>{t('message.tools.description', '描述')}</DetailLabel>
+              <DetailValue>{tool.description}</DetailValue>
+            </DetailRow>
+          )}
+        </DetailSection>
+      )}
+
+      {/* MCP 服务器信息 */}
+      {tool.type === 'mcp' && (
+        <DetailSection>
+          <DetailSectionTitle>{t('message.tools.mcpServerInfo', 'MCP 服务器信息')}</DetailSectionTitle>
+          <DetailRow>
+            <DetailLabel>{t('message.tools.serverName', '服务器名称')}</DetailLabel>
+            <DetailValue>{tool.serverName || '-'}</DetailValue>
+          </DetailRow>
+          <DetailRow>
+            <DetailLabel>{t('message.tools.serverId', '服务器 ID')}</DetailLabel>
+            <DetailValue className="mono">{tool.serverId || '-'}</DetailValue>
+          </DetailRow>
+          {tool.description && (
+            <DetailRow>
+              <DetailLabel>{t('message.tools.description', '描述')}</DetailLabel>
+              <DetailValue>{tool.description}</DetailValue>
+            </DetailRow>
+          )}
+        </DetailSection>
+      )}
+
+      {/* Provider 工具信息 */}
+      {tool.type === 'provider' && (
+        <DetailSection>
+          <DetailSectionTitle>{t('message.tools.providerToolInfo', 'Provider 工具信息')}</DetailSectionTitle>
+          <DetailRow>
+            <DetailLabel>{t('message.tools.toolName', '工具名称')}</DetailLabel>
+            <DetailValue>{tool.name}</DetailValue>
+          </DetailRow>
+          {tool.description && (
+            <DetailRow>
+              <DetailLabel>{t('message.tools.description', '描述')}</DetailLabel>
+              <DetailValue>{tool.description}</DetailValue>
+            </DetailRow>
+          )}
+        </DetailSection>
+      )}
+
+      {/* 调用参数 */}
+      {args && (
+        <DetailSection>
+          <DetailSectionTitle>{t('message.tools.arguments', '调用参数')}</DetailSectionTitle>
+          <CodeBlockContainer>
+            <MarkdownContainer
+              className="markdown"
+              dangerouslySetInnerHTML={{ __html: argsHighlighted }}
+            />
+          </CodeBlockContainer>
+        </DetailSection>
+      )}
+    </DetailsContainer>
+  )
+}
+
+const DetailsContainer = styled.div`
+  padding: 8px 0;
+`
+
+const DetailSection = styled.div`
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`
+
+const DetailSectionTitle = styled.h4`
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+`
+
+const DetailRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  font-size: 13px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`
+
+const DetailLabel = styled.span`
+  color: var(--color-text-2);
+  min-width: 120px;
+  flex-shrink: 0;
+`
+
+const DetailValue = styled.span`
+  color: var(--color-text);
+  word-break: break-all;
+
+  &.mono {
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    background: var(--color-background-soft);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+`
+
+const TypeBadge = styled.span<{ $type: string }>`
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: ${({ $type }) =>
+    $type === 'mcp'
+      ? 'rgba(0, 210, 255, 0.15)'
+      : $type === 'builtin'
+        ? 'rgba(76, 175, 80, 0.15)'
+        : 'rgba(255, 152, 0, 0.15)'};
+  color: ${({ $type }) =>
+    $type === 'mcp'
+      ? 'var(--color-info)'
+      : $type === 'builtin'
+        ? 'var(--status-color-success)'
+        : 'var(--status-color-warning)'};
+`
+
+const TypeDescription = styled.span`
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--color-text-3);
+`
+
+const StatusBadge = styled.span<{ $color: string }>`
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: ${({ $color }) => $color}20;
+  color: ${({ $color }) => $color};
+`
+
+const CodeBlockContainer = styled.div`
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+
+  .markdown {
+    margin: 0;
+
+    pre {
+      margin: 0;
+      background: transparent;
+      border: none;
+    }
+  }
+`
 
 const ToolContentWrapper = styled.div`
   padding: 1px;

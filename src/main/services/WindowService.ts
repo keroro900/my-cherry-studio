@@ -1,7 +1,6 @@
 // just import the themeService to ensure the theme is initialized
 import './ThemeService'
 
-import { is } from '@electron-toolkit/utils'
 import { loggerService } from '@logger'
 import { isDev, isLinux, isMac, isWin } from '@main/constant'
 import { getFilesDir } from '@main/utils/file'
@@ -330,7 +329,7 @@ export class WindowService {
   }
 
   private loadMainWindowContent(mainWindow: BrowserWindow) {
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    if (isDev && process.env['ELECTRON_RENDERER_URL']) {
       mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
       // mainWindow.webContents.openDevTools()
     } else {
@@ -557,7 +556,7 @@ export class WindowService {
       this.miniWindow?.webContents.send(IpcChannel.ShowMiniWindow)
     })
 
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    if (isDev && process.env['ELECTRON_RENDERER_URL']) {
       this.miniWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/miniWindow.html')
     } else {
       this.miniWindow.loadFile(join(__dirname, '../renderer/miniWindow.html'))

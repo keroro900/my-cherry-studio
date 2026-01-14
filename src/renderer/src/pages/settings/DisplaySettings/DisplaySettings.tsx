@@ -5,11 +5,9 @@ import TextBadge from '@renderer/components/TextBadge'
 import { isMac, THEME_COLOR_PRESETS } from '@renderer/config/constant'
 import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import { useTheme } from '@renderer/context/ThemeProvider'
-import { useThemePreset } from '@renderer/hooks/useThemePreset'
-import { useWallpaper } from '@renderer/hooks/useWallpaper'
 import { useNavbarPosition, useSettings } from '@renderer/hooks/useSettings'
 import useUserTheme from '@renderer/hooks/useUserTheme'
-import { useAppDispatch } from '@renderer/store'
+import { useAppDispatch, useAppSelector } from '@renderer/store'
 import type { AssistantIconType } from '@renderer/store/settings'
 import {
   setAssistantIconType,
@@ -21,7 +19,7 @@ import {
 } from '@renderer/store/settings'
 import { ThemeMode } from '@renderer/types'
 import { Button, ColorPicker, Segmented, Select, Switch, Tooltip } from 'antd'
-import { Image, Minus, Monitor, Moon, Palette, Plus, Settings2, Sun } from 'lucide-react'
+import { Image, Minus, Monitor, Moon, Plus, Settings2, Sun } from 'lucide-react'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -88,10 +86,8 @@ const DisplaySettings: FC = () => {
   // 预设模态框状态
   const [presetModalOpen, setPresetModalOpen] = useState(false)
 
-  // 获取当前预设信息
-  const { activePresetId: activeThemePresetId } = useThemePreset()
-  const { settings: wallpaperSettings, isEnabled: isWallpaperEnabled } = useWallpaper()
-  const activeWallpaperPresetId = wallpaperSettings.activePresetId
+  // 获取当前壁纸预设ID（壁纸预设 = 主题预设）
+  const activePresetId = useAppSelector((state) => state.settings.wallpaper?.activePresetId)
 
   const handleWindowStyleChange = useCallback(
     (checked: boolean) => {
@@ -273,43 +269,26 @@ const DisplaySettings: FC = () => {
           </>
         )}
       </SettingGroup>
-      {/* 主题与壁纸预设（合并） */}
+      {/* 壁纸预设（= 主题预设） */}
       <SettingGroup theme={theme}>
         <SettingTitle style={{ justifyContent: 'flex-start', gap: 5 }}>
           {t('settings.display.presets.title', '预设主题')} <TextBadge text="New" />
         </SettingTitle>
         <SettingDivider />
         <PresetSummaryContainer>
-          <PresetSummaryRow>
-            <PresetSummaryItem>
-              <PresetIcon>
-                <Palette size={16} />
-              </PresetIcon>
-              <PresetInfo>
-                <PresetLabel>{t('settings.theme.presets.title', '主题预设')}</PresetLabel>
-                <PresetValue>
-                  {activeThemePresetId
-                    ? t(`settings.theme.preset.${activeThemePresetId.replace(/-/g, '_')}.name`, activeThemePresetId)
-                    : t('settings.theme.presets.none', '自定义颜色')}
-                </PresetValue>
-              </PresetInfo>
-            </PresetSummaryItem>
-            <PresetSummaryItem>
-              <PresetIcon>
-                <Image size={16} />
-              </PresetIcon>
-              <PresetInfo>
-                <PresetLabel>{t('settings.wallpaper.presets.title', '壁纸预设')}</PresetLabel>
-                <PresetValue>
-                  {activeWallpaperPresetId
-                    ? t(`wallpaper.preset.${activeWallpaperPresetId.replace('preset-', '').replace(/-/g, '_')}`, activeWallpaperPresetId)
-                    : isWallpaperEnabled
-                      ? t('settings.wallpaper.custom', '自定义壁纸')
-                      : t('settings.wallpaper.presets.none', '未启用')}
-                </PresetValue>
-              </PresetInfo>
-            </PresetSummaryItem>
-          </PresetSummaryRow>
+          <PresetSummaryItem style={{ flex: 'none', width: '100%' }}>
+            <PresetIcon>
+              <Image size={16} />
+            </PresetIcon>
+            <PresetInfo>
+              <PresetLabel>{t('settings.display.presets.current', '当前预设')}</PresetLabel>
+              <PresetValue>
+                {activePresetId
+                  ? t(`wallpaper.preset.${activePresetId.replace('preset-', '').replace(/-/g, '_')}`, activePresetId)
+                  : t('settings.wallpaper.presets.none', '未启用')}
+              </PresetValue>
+            </PresetInfo>
+          </PresetSummaryItem>
           <Button type="primary" icon={<Settings2 size={14} />} onClick={() => setPresetModalOpen(true)}>
             {t('settings.display.presets.manage', '管理预设')}
           </Button>
@@ -568,12 +547,6 @@ const PresetSummaryContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-`
-
-const PresetSummaryRow = styled.div`
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
 `
 
 const PresetSummaryItem = styled.div`

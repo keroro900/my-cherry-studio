@@ -1,0 +1,276 @@
+/**
+ * AutoContinueIndicator.css - 自动续写指示器样式
+ *
+ * 实现 VCPChat 的心流锁发光效果
+ */
+
+/* 发光动画 - 激活状态 */
+@keyframes auto-continue-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 5px var(--color-primary),
+      0 0 10px var(--color-primary),
+      0 0 15px var(--color-primary);
+    filter: brightness(1.2);
+  }
+  50% {
+    text-shadow:
+      0 0 10px var(--color-primary),
+      0 0 20px var(--color-primary),
+      0 0 30px var(--color-primary);
+    filter: brightness(1.4);
+  }
+}
+
+/* 文字波动动画 */
+@keyframes auto-continue-wave {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-1px) rotate(0.5deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(1deg);
+  }
+  75% {
+    transform: translateY(1px) rotate(0.5deg);
+  }
+}
+
+/* 心跳膨胀动画 - 续写触发时 */
+@keyframes auto-continue-heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.08);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.08);
+  }
+  70%, 100% {
+    transform: scale(1);
+  }
+}
+
+/* 背景脉冲动画 */
+@keyframes auto-continue-bg-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
+  }
+}
+
+/* 指示器闪烁动画 */
+@keyframes auto-continue-indicator-blink {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 5px var(--color-primary);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 10px var(--color-primary);
+  }
+}
+
+/* 处理中旋转动画 */
+@keyframes auto-continue-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 容器样式 */
+.auto-continue-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+/* 激活状态按钮 */
+.auto-continue-button-active {
+  animation: auto-continue-glow 2s ease-in-out infinite, auto-continue-wave 3s ease-in-out infinite;
+  position: relative;
+}
+
+/* 激活状态背景发光 */
+.auto-continue-button-active::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -6px;
+  right: -6px;
+  bottom: -3px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb, 22, 119, 255), 0.1),
+    rgba(var(--color-primary-rgb, 22, 119, 255), 0.2),
+    rgba(var(--color-primary-rgb, 22, 119, 255), 0.1)
+  );
+  border-radius: 16px;
+  z-index: -1;
+  animation: auto-continue-bg-pulse 2s ease-in-out infinite;
+}
+
+/* 心跳效果 - 续写触发时添加 */
+.auto-continue-heartbeat {
+  animation: auto-continue-heartbeat 0.8s ease-in-out !important;
+}
+
+/* 状态指示点 */
+.auto-continue-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.auto-continue-dot-active {
+  background-color: var(--color-success, #52c41a);
+  animation: auto-continue-indicator-blink 1s ease-in-out infinite;
+}
+
+.auto-continue-dot-paused {
+  background-color: var(--color-warning, #faad14);
+}
+
+.auto-continue-dot-processing {
+  background-color: var(--color-primary, #1677ff);
+  animation: auto-continue-spin 1s linear infinite;
+  border: 2px solid transparent;
+  border-top-color: var(--color-primary, #1677ff);
+  background-color: transparent;
+}
+
+.auto-continue-dot-idle {
+  background-color: var(--color-text-tertiary, #999);
+}
+
+/* 续写计数徽章 */
+.auto-continue-count {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 0 4px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 8px;
+  background: var(--color-primary, #1677ff);
+  color: white;
+}
+
+/* 播放 emoji 动画 */
+.auto-continue-emoji {
+  display: inline-block;
+  animation: auto-continue-wave 2s ease-in-out infinite;
+}
+
+/* 暗色主题优化 */
+.dark .auto-continue-button-active {
+  color: var(--color-primary-light, #69b1ff);
+}
+
+/* 弹出框样式 */
+.auto-continue-popover {
+  width: 260px;
+}
+
+.auto-continue-popover-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.auto-continue-popover-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary-bg, #e6f4ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary, #1677ff);
+  font-size: 16px;
+}
+
+.auto-continue-popover-info {
+  flex: 1;
+}
+
+.auto-continue-popover-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.auto-continue-popover-subtitle {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.auto-continue-popover-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auto-continue-popover-stat {
+  background: var(--color-background-soft);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+}
+
+.auto-continue-popover-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.auto-continue-popover-stat-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.auto-continue-popover-prompt {
+  margin-bottom: 12px;
+}
+
+.auto-continue-popover-prompt-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.auto-continue-popover-prompt-text {
+  font-size: 12px;
+  color: var(--color-text);
+  background: var(--color-background-soft);
+  border-radius: 4px;
+  padding: 6px 8px;
+  word-break: break-word;
+}
+
+.auto-continue-popover-actions {
+  display: flex;
+  gap: 8px;
+}

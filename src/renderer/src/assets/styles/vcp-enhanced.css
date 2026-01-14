@@ -1,0 +1,1029 @@
+/**
+ * VCP Enhanced Styles
+ *
+ * 高级 VCP 风格样式，匹配 VCPChat 的视觉效果
+ * - 动画渐变效果
+ * - 毛玻璃效果
+ * - 青色/蓝绿色强调色
+ * - 档案馆/日记风格
+ */
+
+/* ============ VCP 颜色变量 ============ */
+:root {
+  /* VCP 主题色 - 青色/蓝绿色系 */
+  --vcp-primary: #00d2ff;
+  --vcp-primary-soft: rgba(0, 210, 255, 0.15);
+  --vcp-primary-mute: rgba(0, 210, 255, 0.08);
+  --vcp-accent: #3a7bd5;
+  --vcp-gold: #e8b95a;
+  --vcp-gold-soft: rgba(232, 185, 90, 0.15);
+
+  /* 工具结果 */
+  --vcp-tool-result-bg: linear-gradient(145deg, rgba(43, 58, 66, 0.9), rgba(63, 81, 89, 0.9));
+  --vcp-tool-result-border: rgba(0, 210, 255, 0.3);
+  --vcp-tool-result-name-color: #81d4fa;
+  --vcp-tool-result-name-bg: rgba(129, 212, 250, 0.15);
+  --vcp-tool-success: #4caf50;
+  --vcp-tool-error: #ff5252;
+
+  /* 日记/档案馆 */
+  --vcp-archive-bg: linear-gradient(135deg, rgba(10, 25, 33, 0.95), rgba(13, 42, 56, 0.95));
+  --vcp-archive-border: rgba(0, 210, 255, 0.4);
+  --vcp-archive-header-bg: rgba(0, 210, 255, 0.1);
+  --vcp-archive-accent: #00d2ff;
+
+  /* 毛玻璃效果 */
+  --vcp-glass-bg: rgba(13, 42, 56, 0.7);
+  --vcp-glass-blur: 12px;
+  --vcp-glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* 浅色主题覆盖 */
+body[theme='light'] {
+  --vcp-tool-result-bg: linear-gradient(145deg, rgba(247, 248, 250, 0.95), rgba(236, 239, 241, 0.95));
+  --vcp-tool-result-border: rgba(74, 144, 226, 0.3);
+  --vcp-tool-result-name-color: #0277bd;
+  --vcp-tool-result-name-bg: rgba(2, 119, 189, 0.1);
+
+  --vcp-archive-bg: linear-gradient(135deg, rgba(253, 250, 246, 0.98), rgba(247, 248, 250, 0.98));
+  --vcp-archive-border: rgba(74, 144, 226, 0.3);
+  --vcp-archive-accent: #4a90e2;
+}
+
+/* ============ VCP 工具结果气泡 ============ */
+.vcp-tool-result-enhanced {
+  background: var(--vcp-tool-result-bg);
+  border: 1px solid var(--vcp-tool-result-border);
+  border-radius: 12px;
+  margin: 12px 0;
+  overflow: hidden;
+  backdrop-filter: blur(var(--vcp-glass-blur));
+  -webkit-backdrop-filter: blur(var(--vcp-glass-blur));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.vcp-tool-result-enhanced:hover {
+  border-color: var(--vcp-primary);
+  box-shadow: 0 6px 24px rgba(0, 210, 255, 0.2);
+}
+
+.vcp-tool-result-header-enhanced {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--vcp-glass-border);
+}
+
+.vcp-tool-result-icon {
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+.vcp-tool-result-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.vcp-tool-result-name-enhanced {
+  font-weight: 600;
+  color: var(--vcp-tool-result-name-color);
+  background: var(--vcp-tool-result-name-bg);
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.vcp-tool-result-status-enhanced {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.vcp-tool-result-status-enhanced.success {
+  color: var(--vcp-tool-success);
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.vcp-tool-result-status-enhanced.error {
+  color: var(--vcp-tool-error);
+  background: rgba(255, 82, 82, 0.15);
+}
+
+.vcp-tool-result-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-left: auto;
+}
+
+.vcp-tool-result-meta .by-text {
+  opacity: 0.7;
+}
+
+.vcp-tool-result-meta .agent-name {
+  color: var(--vcp-primary);
+  font-weight: 500;
+}
+
+.vcp-tool-result-meta .timestamp {
+  opacity: 0.6;
+}
+
+.vcp-tool-result-content-enhanced {
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.vcp-tool-result-content-enhanced pre {
+  margin: 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+/* ============ VCP 档案馆/日记样式 ============ */
+.vcp-archive-bubble {
+  background: var(--vcp-archive-bg);
+  border: 1px solid var(--vcp-archive-border);
+  border-radius: 12px;
+  margin: 16px 0;
+  overflow: hidden;
+  backdrop-filter: blur(var(--vcp-glass-blur));
+  -webkit-backdrop-filter: blur(var(--vcp-glass-blur));
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.vcp-archive-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--vcp-archive-header-bg);
+  border-bottom: 1px solid var(--vcp-glass-border);
+}
+
+.vcp-archive-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--vcp-archive-accent);
+  background: rgba(0, 210, 255, 0.15);
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--vcp-archive-accent);
+}
+
+.vcp-archive-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  font-family: 'Consolas', 'Monaco', monospace;
+  letter-spacing: 1px;
+}
+
+.vcp-archive-metadata {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid var(--vcp-glass-border);
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+}
+
+.vcp-archive-metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-2);
+}
+
+.vcp-archive-metadata-item .label {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
+
+.vcp-archive-metadata-item .value {
+  color: var(--vcp-primary);
+  font-weight: 500;
+}
+
+.vcp-archive-metadata-item .separator {
+  color: var(--color-text-3);
+  margin: 0 4px;
+}
+
+.vcp-archive-content {
+  padding: 18px;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+.vcp-archive-section {
+  margin-bottom: 16px;
+}
+
+.vcp-archive-section:last-child {
+  margin-bottom: 0;
+}
+
+.vcp-archive-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--vcp-glass-border);
+}
+
+.vcp-archive-section-badge {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--vcp-gold);
+  background: var(--vcp-gold-soft);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+.vcp-archive-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vcp-gold);
+}
+
+.vcp-archive-quote {
+  border-left: 3px solid var(--vcp-primary);
+  padding-left: 14px;
+  margin: 12px 0;
+  color: var(--color-text-2);
+  font-style: italic;
+  background: rgba(0, 210, 255, 0.05);
+  padding: 12px 14px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* ============ VCP 动画效果 ============ */
+@keyframes vcp-glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 5px var(--vcp-primary),
+      0 0 10px rgba(0, 210, 255, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 10px var(--vcp-primary),
+      0 0 20px rgba(0, 210, 255, 0.5);
+  }
+}
+
+@keyframes vcp-border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
+
+@keyframes vcp-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vcp-animate-in {
+  animation: vcp-fade-in 0.3s ease-out;
+}
+
+.vcp-glow {
+  animation: vcp-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ============ 群聊消息增强样式 ============ */
+.group-message-enhanced {
+  background: var(--vcp-glass-bg);
+  backdrop-filter: blur(var(--vcp-glass-blur));
+  -webkit-backdrop-filter: blur(var(--vcp-glass-blur));
+  border: 1px solid var(--vcp-glass-border);
+  border-radius: 12px;
+  margin: 8px 0;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.group-message-enhanced:hover {
+  border-color: rgba(0, 210, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.group-message-enhanced .message-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--vcp-glass-border);
+}
+
+.group-message-enhanced .agent-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.group-message-enhanced .agent-badge.host {
+  background: rgba(255, 82, 82, 0.15);
+  color: #ff5252;
+}
+
+.group-message-enhanced .agent-badge.participant {
+  background: rgba(0, 210, 255, 0.15);
+  color: #00d2ff;
+}
+
+.group-message-enhanced .agent-badge.expert {
+  background: rgba(114, 46, 209, 0.15);
+  color: #722ed1;
+}
+
+.group-message-enhanced .message-content {
+  padding: 16px;
+}
+
+/* ============ 滚动条样式 ============ */
+.vcp-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.vcp-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vcp-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--vcp-primary-soft);
+  border-radius: 3px;
+}
+
+.vcp-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--vcp-primary);
+}
+
+/* ============ 复选框完成标记 ============ */
+.vcp-check-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--vcp-tool-success);
+  color: white;
+}
+
+.vcp-check-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============ 流式显示动画 ============ */
+/* 流式元素淡入动画 */
+@keyframes vcp-stream-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 内容脉冲动画 (新内容到达时的闪烁效果) */
+@keyframes vcp-content-pulse {
+  0% {
+    background-color: rgba(0, 210, 255, 0.1);
+  }
+  50% {
+    background-color: rgba(0, 210, 255, 0.05);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Canvas 边框脉冲动画 */
+@keyframes vcp-canvas-border-pulse {
+  0%,
+  100% {
+    border-color: rgba(0, 210, 255, 0.3);
+  }
+  50% {
+    border-color: rgba(0, 210, 255, 0.6);
+  }
+}
+
+.vcp-stream-element-fade-in {
+  animation: vcp-stream-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.vcp-stream-content-pulse {
+  animation: vcp-content-pulse 0.3s ease-out;
+}
+
+.vcp-canvas-border-pulse {
+  animation: vcp-canvas-border-pulse 4s infinite;
+}
+
+/* 流式消息中的表情包尺寸稳定 */
+.message-streaming .markdown-content img[alt*='表情'],
+.message-streaming .markdown-content img[alt*='emoticon'] {
+  max-width: 100px !important;
+  max-height: 100px !important;
+  transition: none !important;
+}
+
+/* ============ 日记气泡样式 ============ */
+.vcp-diary-bubble {
+  background: #fdfaf6;
+  border: 1px solid #eaddd0;
+  border-radius: 8px;
+  padding: 12px 18px 15px 48px;
+  color: #5d4037;
+  position: relative;
+  margin: 12px 0;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* 日记装饰图标 (羽毛笔) */
+.vcp-diary-bubble::before {
+  content: '✒️';
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  font-size: 22px;
+  opacity: 0.8;
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
+  transform: rotate(-15deg);
+}
+
+/* 日记头部区域 */
+.vcp-diary-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #e0d5c8;
+}
+
+.vcp-diary-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #6d4c41;
+  font-family: 'Maven Pro', 'Georgia', serif;
+  letter-spacing: 0.5px;
+}
+
+.vcp-diary-date {
+  font-size: 12px;
+  color: #a1887f;
+  font-style: italic;
+}
+
+/* 日记内容区域 */
+.vcp-diary-content {
+  font-size: 14px;
+  color: #5d4037;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 日记深色主题 */
+body[theme='dark'] .vcp-diary-bubble,
+.dark .vcp-diary-bubble {
+  background: #2c2a3a;
+  border-color: #4a485f;
+  color: #d8d2c9;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+body[theme='dark'] .vcp-diary-title,
+.dark .vcp-diary-title {
+  color: #e8d5b7;
+}
+
+body[theme='dark'] .vcp-diary-date,
+.dark .vcp-diary-date {
+  color: #9e9e9e;
+}
+
+body[theme='dark'] .vcp-diary-header,
+.dark .vcp-diary-header {
+  border-color: #4a485f;
+}
+
+body[theme='dark'] .vcp-diary-content,
+.dark .vcp-diary-content {
+  color: #c5bfb3;
+}
+
+/* ============ 群聊邀请发言按钮 ============ */
+.vcp-invite-buttons-container {
+  display: none;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  background: var(--vcp-glass-bg);
+  backdrop-filter: blur(var(--vcp-glass-blur));
+  -webkit-backdrop-filter: blur(var(--vcp-glass-blur));
+  border: 1px solid var(--vcp-glass-border);
+  border-radius: 12px;
+  margin: 8px 0;
+}
+
+.vcp-invite-buttons-container.visible {
+  display: grid;
+}
+
+.vcp-invite-agent-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--vcp-glass-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vcp-invite-agent-button:hover {
+  background: var(--vcp-primary-soft);
+  border-color: var(--vcp-primary);
+  transform: translateY(-1px);
+}
+
+.vcp-invite-agent-button:active {
+  transform: translateY(0);
+}
+
+.vcp-invite-agent-button .agent-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--vcp-glass-border);
+}
+
+.vcp-invite-agent-button .agent-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============ 助手层样式 ============ */
+/* 选择助手工具栏 */
+.vcp-selection-bar {
+  position: fixed;
+  background: var(--vcp-glass-bg);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid var(--vcp-glass-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2147483647;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition:
+    opacity 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.vcp-selection-bar.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.vcp-selection-bar .assistant-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--vcp-primary-soft);
+}
+
+.vcp-selection-bar .assistant-button {
+  background: transparent;
+  border: 1px solid var(--vcp-glass-border);
+  color: var(--color-text-2);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.vcp-selection-bar .assistant-button:hover {
+  background: var(--vcp-primary-soft);
+  border-color: var(--vcp-primary);
+  color: var(--color-text);
+}
+
+/* ============ 话题时间戳气泡 ============ */
+.vcp-topic-timestamp {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.vcp-topic-timestamp-bubble {
+  background: var(--vcp-primary-mute);
+  border: 1px solid var(--vcp-primary-soft);
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--vcp-primary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ============ 思考/加载状态样式 ============ */
+@keyframes vcp-thinking-dots {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.vcp-thinking-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--vcp-primary-mute);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--color-text-2);
+}
+
+.vcp-thinking-indicator .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--vcp-primary);
+  border-radius: 50%;
+  animation: vcp-thinking-dots 1.4s infinite;
+}
+
+.vcp-thinking-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.vcp-thinking-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ============ 错误/警告样式 ============ */
+.vcp-error-bubble {
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.vcp-error-bubble .error-icon {
+  color: #ff5252;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.vcp-error-bubble .error-content {
+  flex: 1;
+  font-size: 13px;
+  color: #ff5252;
+  line-height: 1.5;
+}
+
+.vcp-warning-bubble {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.vcp-warning-bubble .warning-icon {
+  color: #ffc107;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.vcp-warning-bubble .warning-content {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* ============ VCP 特殊文字样式 ============ */
+/* AI 可以使用这些类来输出特殊效果的文字 */
+/* 例如: <span class="vcp-gradient-text">渐变文字</span> */
+
+/* 渐变文字动画 */
+@keyframes vcp-text-gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 流光渐变文字 - 彩虹色 */
+.vcp-gradient-text {
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5, #f1c40f, #e74c3c, #9b59b6, #00d2ff);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: vcp-text-gradient-flow 4s linear infinite;
+}
+
+/* 青蓝渐变文字 */
+.vcp-gradient-cyan {
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00bcd4, #00d2ff);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: vcp-text-gradient-flow 4s linear infinite;
+}
+
+/* 金色渐变文字 */
+.vcp-gradient-gold {
+  background: linear-gradient(90deg, #e8b95a, #f5d78e, #d4a14a, #e8b95a);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: vcp-text-gradient-flow 4s linear infinite;
+}
+
+/* 紫粉渐变文字 */
+.vcp-gradient-purple {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899, #a855f7, #8b5cf6);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: vcp-text-gradient-flow 4s linear infinite;
+}
+
+/* 霓虹发光文字 - 青色 */
+.vcp-neon-text,
+.vcp-glow-cyan {
+  color: #00d2ff;
+  text-shadow:
+    0 0 5px #00d2ff,
+    0 0 10px rgba(0, 210, 255, 0.7),
+    0 0 20px rgba(0, 210, 255, 0.4);
+}
+
+/* 霓虹发光文字 - 粉色 */
+.vcp-glow-pink {
+  color: #ff6b9d;
+  text-shadow:
+    0 0 5px #ff6b9d,
+    0 0 10px rgba(255, 107, 157, 0.7),
+    0 0 20px rgba(255, 107, 157, 0.4);
+}
+
+/* 霓虹发光文字 - 绿色 */
+.vcp-glow-green {
+  color: #4caf50;
+  text-shadow:
+    0 0 5px #4caf50,
+    0 0 10px rgba(76, 175, 80, 0.7),
+    0 0 20px rgba(76, 175, 80, 0.4);
+}
+
+/* 金色高亮文字 */
+.vcp-gold-text {
+  color: #e8b95a;
+  text-shadow: 0 0 8px rgba(232, 185, 90, 0.4);
+}
+
+/* 红色高亮文字 */
+.vcp-red-text,
+.vcp-highlight-red {
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+/* 红色背景高亮 */
+.vcp-bg-red {
+  background: rgba(255, 107, 107, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #ff6b6b;
+}
+
+/* 青色背景高亮 */
+.vcp-bg-cyan {
+  background: rgba(0, 210, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #00d2ff;
+}
+
+/* 金色背景高亮 */
+.vcp-bg-gold {
+  background: rgba(232, 185, 90, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #e8b95a;
+}
+
+/* 重要标记文字 */
+.vcp-important {
+  color: #ff5252;
+  font-weight: 600;
+  text-shadow: 0 0 4px rgba(255, 82, 82, 0.3);
+}
+
+/* 成功标记文字 */
+.vcp-success {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+/* 警告标记文字 */
+.vcp-warning {
+  color: #ffc107;
+  font-weight: 500;
+}
+
+/* 代码风格文字 */
+.vcp-code {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* 打字机动画 */
+@keyframes vcp-typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes vcp-blink-caret {
+  50% {
+    border-color: transparent;
+  }
+}
+
+/* 闪烁高亮动画 */
+@keyframes vcp-text-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.vcp-blink {
+  animation: vcp-text-blink 1.5s ease-in-out infinite;
+}
+
+/* 脉冲缩放动画 */
+@keyframes vcp-text-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.vcp-pulse {
+  display: inline-block;
+  animation: vcp-text-pulse 2s ease-in-out infinite;
+}
+
+/* 彩虹边框文字 */
+.vcp-rainbow-border {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background:
+    linear-gradient(var(--color-background), var(--color-background)) padding-box,
+    linear-gradient(90deg, #ff6b6b, #ffc107, #4caf50, #00d2ff, #9b59b6, #ff6b6b) border-box;
+  background-size:
+    100% 100%,
+    300% 100%;
+  animation: vcp-text-gradient-flow 4s linear infinite;
+}
+
+/* Deep Memory 样式类 */
+.vcp-deep-memory-title {
+  color: #8b5cf6;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.vcp-deep-memory-section {
+  background: linear-gradient(
+    145deg,
+    rgba(139, 92, 246, 0.15) 0%,
+    rgba(168, 85, 247, 0.08) 100%
+  );
+  border-left: 3px solid #8b5cf6;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin: 8px 0;
+}
+
+.vcp-deep-memory-date {
+  display: inline-block;
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: 'Consolas', 'Monaco', monospace;
+}

@@ -147,6 +147,14 @@ const initialState: ShortcutsState = {
       editable: true,
       enabled: true,
       system: false
+    },
+    {
+      // Toggle auto-continue / flow lock mode
+      key: 'toggle_auto_continue',
+      shortcut: ['CommandOrControl', 'G'],
+      editable: true,
+      enabled: true,
+      system: false
     }
   ]
 }

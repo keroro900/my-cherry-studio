@@ -223,6 +223,15 @@ export enum IpcChannel {
   FileService_Delete = 'file-service:delete',
   FileService_Retrieve = 'file-service:retrieve',
 
+  // Sticker
+  Sticker_GetAll = 'sticker:getAll',
+  Sticker_GetPacks = 'sticker:getPacks',
+  Sticker_ImportPack = 'sticker:importPack',
+  Sticker_DeletePack = 'sticker:deletePack',
+  Sticker_GetListForPrompt = 'sticker:getListForPrompt',
+  Sticker_GetDirPath = 'sticker:getDirPath',
+  Sticker_GetPackFiles = 'sticker:getPackFiles',
+
   Export_Word = 'export:word',
 
   Shortcuts_Update = 'shortcuts:update',
@@ -334,6 +343,10 @@ export enum IpcChannel {
   Memory_MigrateMemoryDb = 'memory:migrate-memory-db',
   Memory_TestFeatures = 'memory:test-features',
   Memory_GetStats = 'memory:get-stats',
+  // VCP Agent Memory Isolation (角色记忆隔离)
+  Memory_DeleteAllMemoriesForAgent = 'memory:delete-all-memories-for-agent',
+  Memory_GetAgentsList = 'memory:get-agents-list',
+  Memory_SearchAllAgents = 'memory:search-all-agents',
 
   // TRACE
   TRACE_SAVE_DATA = 'trace:saveData',
@@ -386,6 +399,7 @@ export enum IpcChannel {
   Ovms_GetStatus = 'ovms:get-status',
   Ovms_RunOVMS = 'ovms:run-ovms',
   Ovms_StopOVMS = 'ovms:stop-ovms',
+  Ovms_IsSupported = 'ovms:is-supported',
 
   // CherryAI
   Cherryai_GetSignature = 'cherryai:get-signature',
@@ -441,6 +455,11 @@ export enum IpcChannel {
   VCP_Agent_Activate = 'vcp:agent:activate',
   VCP_Agent_Import = 'vcp:agent:import',
   VCP_Agent_ResolveTemplateVariables = 'vcp:agent:resolveTemplateVariables',
+  // VCP Agent 协作功能
+  VCP_Agent_SendMessage = 'vcp:agent:sendMessage',
+  VCP_Agent_DelegateTask = 'vcp:agent:delegateTask',
+  VCP_Agent_CreateTask = 'vcp:agent:createTask',
+  VCP_Agent_GetPendingTasks = 'vcp:agent:getPendingTasks',
 
   // VCP Variable
   VCP_Variable_List = 'vcp:variable:list',
@@ -487,6 +506,18 @@ export enum IpcChannel {
   VCP_Search_Enhanced = 'vcp:search:enhanced',
   VCP_Knowledge_List = 'vcp:knowledge:list',
 
+  // VCP Memory (统一记忆层接口)
+  VCP_Memory_IntelligentSearch = 'vcp:memory:intelligent-search',
+  VCP_Memory_DeepSearch = 'vcp:memory:deep-search',
+  VCP_Memory_WaveRAGSearch = 'vcp:memory:waverag-search',
+  VCP_Memory_Create = 'vcp:memory:create',
+  VCP_Memory_Feedback = 'vcp:memory:feedback',
+  VCP_Memory_TagSuggestions = 'vcp:memory:tag-suggestions',
+  VCP_Memory_Stats = 'vcp:memory:stats',
+  VCP_Memory_LearningProgress = 'vcp:memory:learning-progress',
+  VCP_Memory_GetConfig = 'vcp:memory:get-config',
+  VCP_Memory_UpdateConfig = 'vcp:memory:update-config',
+
   // VCP Async Results
   VCP_Async_CreateTask = 'vcp:async:createTask',
   VCP_Async_StoreResult = 'vcp:async:storeResult',
@@ -498,11 +529,23 @@ export enum IpcChannel {
   VCP_Async_CleanupExpired = 'vcp:async:cleanupExpired',
   VCP_Async_Callback = 'vcp:async:callback',
 
+  // VCP Unified Placeholder Resolution (统一占位符解析)
+  VCP_Placeholder_Resolve = 'vcp:placeholder:resolve',
+  VCP_Placeholder_ResolveBasic = 'vcp:placeholder:resolveBasic',
+
   // VCP Callback Server (异步插件回调HTTP端点)
   VCP_Callback_GetStatus = 'vcp:callback:getStatus',
   VCP_Callback_Start = 'vcp:callback:start',
   VCP_Callback_Stop = 'vcp:callback:stop',
   VCP_Callback_GetUrl = 'vcp:callback:getUrl',
+
+  // VCP Notification Service (系统级通知)
+  VCP_Notification_GetConfig = 'vcp:notification:getConfig',
+  VCP_Notification_SetConfig = 'vcp:notification:setConfig',
+  VCP_Notification_GetList = 'vcp:notification:getList',
+  VCP_Notification_MarkRead = 'vcp:notification:markRead',
+  VCP_Notification_Clear = 'vcp:notification:clear',
+  VCP_Notification_Test = 'vcp:notification:test',
 
   // ShowVCP Debug
   ShowVCP_Enable = 'showvcp:enable',
@@ -603,67 +646,6 @@ export enum IpcChannel {
   BehaviorCtrl_ProcessSystemPrompt = 'behavior:processSystemPrompt',
   BehaviorCtrl_ProcessAIOutput = 'behavior:processAIOutput',
 
-  // Advanced Memory Search (LightMemo / DeepMemo / MeshMemo)
-  AdvancedMemory_LightMemoSearch = 'advanced-memory:lightmemo:search',
-  AdvancedMemory_DeepMemoSearch = 'advanced-memory:deepmemo:search',
-  AdvancedMemory_MeshMemoSearch = 'advanced-memory:meshmemo:search',
-  AdvancedMemory_AddDocument = 'advanced-memory:add-document',
-  AdvancedMemory_AddDocuments = 'advanced-memory:add-documents',
-  AdvancedMemory_Clear = 'advanced-memory:clear',
-  AdvancedMemory_GetDocumentCount = 'advanced-memory:get-document-count',
-
-  // Unified Memory Manager (统一记忆/知识管理)
-  UnifiedMemory_Search = 'unified-memory:search',
-  UnifiedMemory_GetStats = 'unified-memory:get-stats',
-  UnifiedMemory_ClearBackend = 'unified-memory:clear-backend',
-  UnifiedMemory_GetBackends = 'unified-memory:get-backends',
-
-  // AIMemo (AI军团并发检索)
-  AIMemo_Search = 'aimemo:search',
-  AIMemo_QuickSearch = 'aimemo:quick-search',
-  AIMemo_DeepSearch = 'aimemo:deep-search',
-  AIMemo_GetAgents = 'aimemo:get-agents',
-  AIMemo_RegisterAgent = 'aimemo:register-agent',
-  // AIMemo Synthesis (AI 记忆综合 - VCPToolBox 完整功能)
-  AIMemo_SearchWithSynthesis = 'aimemo:search-with-synthesis',
-  AIMemo_QuickSearchWithSynthesis = 'aimemo:quick-search-with-synthesis',
-  // Unified Memory Synthesis
-  UnifiedMemory_SearchWithSynthesis = 'unified-memory:search-with-synthesis',
-  UnifiedMemory_QuickSearchWithSynthesis = 'unified-memory:quick-search-with-synthesis',
-
-  // Self-Learning System (三大自学习系统)
-  SelfLearning_RecordQuery = 'self-learning:record-query',
-  SelfLearning_RecordPositiveFeedback = 'self-learning:record-positive-feedback',
-  SelfLearning_RecordNegativeFeedback = 'self-learning:record-negative-feedback',
-  SelfLearning_GetLearnedWeight = 'self-learning:get-learned-weight',
-  SelfLearning_DiscoverAssociations = 'self-learning:discover-associations',
-  SelfLearning_ConfirmSuggestion = 'self-learning:confirm-suggestion',
-  SelfLearning_GetPendingSuggestions = 'self-learning:get-pending-suggestions',
-  SelfLearning_GetStats = 'self-learning:get-stats',
-  SelfLearning_GetTagStats = 'self-learning:get-tag-stats',
-  SelfLearning_Reset = 'self-learning:reset',
-
-  // Knowledge File Watcher (知识库文件监控)
-  KnowledgeWatcher_AddPath = 'knowledge-watcher:add-path',
-  KnowledgeWatcher_RemovePath = 'knowledge-watcher:remove-path',
-  KnowledgeWatcher_GetStatus = 'knowledge-watcher:get-status',
-  KnowledgeWatcher_GetWatchedPaths = 'knowledge-watcher:get-watched-paths',
-  KnowledgeWatcher_StopAll = 'knowledge-watcher:stop-all',
-
-  // Memory Master (记忆大师)
-  MemoryMaster_AutoTag = 'memory-master:auto-tag',
-  MemoryMaster_ValidateTags = 'memory-master:validate-tags',
-  MemoryMaster_DetectAndSuggest = 'memory-master:detect-and-suggest',
-  MemoryMaster_BatchOrganize = 'memory-master:batch-organize',
-  MemoryMaster_MergeContents = 'memory-master:merge-contents',
-  MemoryMaster_Deduplicate = 'memory-master:deduplicate',
-  MemoryMaster_GetTagPool = 'memory-master:get-tag-pool',
-  MemoryMaster_GetTagStats = 'memory-master:get-tag-stats',
-  MemoryMaster_GetTopTags = 'memory-master:get-top-tags',
-  MemoryMaster_AddTagsToPool = 'memory-master:add-tags-to-pool',
-  MemoryMaster_GetConfig = 'memory-master:get-config',
-  MemoryMaster_UpdateConfig = 'memory-master:update-config',
-
   // ==================== Integrated Memory Coordinator (统一记忆协调器) ====================
 
   // 创建
@@ -689,6 +671,14 @@ export enum IpcChannel {
   // 配置
   IntegratedMemory_GetConfig = 'integrated-memory:get-config',
   IntegratedMemory_UpdateConfig = 'integrated-memory:update-config',
+
+  // 新增方法 (替代废弃API)
+  IntegratedMemory_GetTagStats = 'integrated-memory:get-tag-stats',
+  IntegratedMemory_ConfirmSuggestion = 'integrated-memory:confirm-suggestion',
+  IntegratedMemory_GetPendingSuggestions = 'integrated-memory:get-pending-suggestions',
+  IntegratedMemory_ClearBackend = 'integrated-memory:clear-backend',
+  IntegratedMemory_AddDocument = 'integrated-memory:add-document',
+  IntegratedMemory_GetDocumentCount = 'integrated-memory:get-document-count',
 
   // MemoryBrain (统一记忆大脑)
   MemoryBrain_Search = 'memory-brain:search',

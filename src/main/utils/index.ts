@@ -1,15 +1,32 @@
 import fs from 'node:fs'
 import fsAsync from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 
-import { app } from 'electron'
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electronApp = require('electron').app
+} catch {
+  // electron 未就绪
+}
 
 export function getResourcePath() {
-  return path.join(app.getAppPath(), 'resources')
+  if (!electronApp) {
+    return path.join(process.cwd(), 'resources')
+  }
+  return path.join(electronApp.getAppPath(), 'resources')
 }
 
 export function getDataPath() {
-  const dataPath = path.join(app.getPath('userData'), 'Data')
+  let dataPath: string
+  if (electronApp) {
+    dataPath = path.join(electronApp.getPath('userData'), 'Data')
+  } else {
+    // Fallback for pre-electron initialization
+    dataPath = path.join(os.tmpdir(), 'cherry-studio-data')
+  }
   if (!fs.existsSync(dataPath)) {
     fs.mkdirSync(dataPath, { recursive: true })
   }

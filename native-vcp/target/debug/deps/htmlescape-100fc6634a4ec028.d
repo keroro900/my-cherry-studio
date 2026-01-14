@@ -1,0 +1,9 @@
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\debug\deps\htmlescape-100fc6634a4ec028.d: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\encode.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\decode.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\entities.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\io_support.rs
+
+E:\1\cherry\ai-workflow\cherry-studio\native-vcp\target\debug\deps\libhtmlescape-100fc6634a4ec028.rmeta: C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\lib.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\encode.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\decode.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\entities.rs C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\io_support.rs
+
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\lib.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\encode.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\decode.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\entities.rs:
+C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\htmlescape-0.3.1\src\io_support.rs:

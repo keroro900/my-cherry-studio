@@ -16,10 +16,18 @@
  */
 import { loggerService } from '@logger'
 import { IpcChannel } from '@shared/IpcChannel'
-import { ipcMain } from 'electron'
 import { EventEmitter } from 'events'
 
 import { windowService } from './WindowService'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronIpcMain: typeof import('electron').ipcMain | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electronIpcMain = require('electron').ipcMain
+} catch {
+  // electron 未就绪
+}
 
 type StoreValue = any
 type Unsubscribe = () => void
@@ -38,14 +46,19 @@ export class ReduxService extends EventEmitter {
   }
 
   private setupIpcHandlers() {
+    if (!electronIpcMain) {
+      logger.warn('electronIpcMain not available, skipping IPC handlers setup')
+      return
+    }
+
     // 监听 store 就绪事件
-    ipcMain.handle(IpcChannel.ReduxStoreReady, () => {
+    electronIpcMain.handle(IpcChannel.ReduxStoreReady, () => {
       this.isReady = true
       this.emit('ready')
     })
 
     // 监听 store 状态变化
-    ipcMain.on(IpcChannel.ReduxStateChange, (_, newState) => {
+    electronIpcMain.on(IpcChannel.ReduxStateChange, (_, newState) => {
       this.stateCache = newState
       this.emit(this.STATUS_CHANGE_EVENT, newState)
     })

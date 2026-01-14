@@ -8,13 +8,10 @@ import BraveSearchServer from './brave-search'
 import BrowserServer from './browser'
 import DiaryServer from './diary-server'
 import DiDiMcpServer from './didi-mcp'
-import NowledgeMemServer from './nowledge-mem'
 import DifyKnowledgeServer from './dify-knowledge'
-import FashionServer from './fashion'
-import FashionScraperServer from './fashion-scraper'
 import FetchServer from './fetch'
-import FileSystemServer from './filesystem'
 import MemoryServer from './memory'
+import NowledgeMemServer from './nowledge-mem'
 import PythonServer from './python'
 import ThinkingServer from './sequentialthinking'
 import VCPRAGServer from './vcp-rag'
@@ -42,9 +39,6 @@ export function createInMemoryMCPServer(
     case BuiltinMCPServerNames.fetch: {
       return new FetchServer().server
     }
-    case BuiltinMCPServerNames.filesystem: {
-      return new FileSystemServer(envs.WORKSPACE_ROOT).server
-    }
     case BuiltinMCPServerNames.difyKnowledge: {
       const difyKey = envs.DIFY_KEY
       return new DifyKnowledgeServer(difyKey, args).server
@@ -62,14 +56,8 @@ export function createInMemoryMCPServer(
     case BuiltinMCPServerNames.workflow: {
       return new WorkflowServer().server
     }
-    case BuiltinMCPServerNames.fashion: {
-      return new FashionServer().server
-    }
     case BuiltinMCPServerNames.vcpRag: {
       return new VCPRAGServer().server
-    }
-    case BuiltinMCPServerNames.fashionScraper: {
-      return new FashionScraperServer().server
     }
     case BuiltinMCPServerNames.agentCollab: {
       return new AgentCollabServer().server

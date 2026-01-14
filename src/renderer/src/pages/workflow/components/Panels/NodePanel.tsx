@@ -10,8 +10,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { NodeRegistryAdapter } from '../../nodes/base/NodeRegistryAdapter'
 import type { NodeDefinition } from '../../types'
-// NODE_REGISTRY 已废弃，仅作为初始化前的回退
-import { NODE_REGISTRY } from '../../types'
 import { CustomNodeBuilder } from '../CustomNodeBuilder'
 
 interface NodePanelProps {
@@ -30,7 +28,6 @@ const CATEGORY_COLORS: Record<NodeDefinition['category'], string> = {
   external: 'var(--ant-color-orange, #fa8c16)',
   custom: 'var(--workflow-theme-geekblue, #2f54eb)',
   text: 'var(--ant-color-cyan, #13c2c2)',
-  fashion: 'var(--ant-color-pink, #eb2f96)',
   quality: 'var(--ant-color-lime, #a0d911)'
 }
 
@@ -45,7 +42,6 @@ const CATEGORY_NAMES: Record<NodeDefinition['category'], string> = {
   external: '外部服务',
   custom: '自定义节点',
   text: '文本/内容',
-  fashion: '时尚分析',
   quality: '质量优化'
 }
 
@@ -65,7 +61,8 @@ const styles = {
     borderRight: '1px solid var(--ant-color-border)',
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)'
   } as React.CSSProperties,
   header: {
     padding: '16px',
@@ -73,7 +70,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    backgroundColor: 'var(--ant-color-bg-elevated)'
+    background: 'linear-gradient(180deg, var(--ant-color-bg-elevated) 0%, var(--ant-color-bg-container) 100%)'
   } as React.CSSProperties,
   headerIcon: {
     width: '32px',
@@ -81,9 +78,10 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'var(--ant-color-primary-bg)',
-    borderRadius: '8px',
-    color: 'var(--ant-color-primary)'
+    background: 'linear-gradient(135deg, var(--ant-color-primary-bg) 0%, var(--ant-color-primary-bg-hover) 100%)',
+    borderRadius: '10px',
+    color: 'var(--ant-color-primary)',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.06)'
   } as React.CSSProperties,
   headerTitle: {
     fontWeight: 700,
@@ -105,13 +103,13 @@ const styles = {
   searchInput: {
     width: '100%',
     padding: '10px 12px 10px 36px',
-    borderRadius: '8px',
+    borderRadius: '10px',
     border: '1px solid var(--ant-color-border)',
     backgroundColor: 'var(--ant-color-bg-elevated)',
     color: 'var(--ant-color-text)',
     fontSize: '13px',
     outline: 'none',
-    transition: 'border-color 0.2s, box-shadow 0.2s'
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
   } as React.CSSProperties,
   list: {
     flex: 1,
@@ -130,35 +128,37 @@ const styles = {
     fontWeight: 600,
     color: 'var(--ant-color-text-secondary)',
     cursor: 'pointer',
-    borderRadius: '6px',
-    transition: 'background-color 0.2s',
+    borderRadius: '8px',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     userSelect: 'none'
   } as React.CSSProperties,
   categoryDot: {
     width: '10px',
     height: '10px',
-    borderRadius: '3px'
+    borderRadius: '4px',
+    boxShadow: '0 0 4px currentColor'
   } as React.CSSProperties,
   nodeItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     padding: '10px 12px',
-    borderRadius: '8px',
+    borderRadius: '10px',
     cursor: 'grab',
-    transition: 'all 0.2s',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     marginBottom: '4px',
     backgroundColor: 'var(--ant-color-bg-elevated)',
     border: '1px solid transparent'
   } as React.CSSProperties,
   nodeIcon: {
     fontSize: '18px',
-    width: '28px',
-    height: '28px',
+    width: '32px',
+    height: '32px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '6px'
+    borderRadius: '8px',
+    transition: 'transform 0.2s ease'
   } as React.CSSProperties,
   nodeInfo: {
     flex: 1,
@@ -178,17 +178,18 @@ const styles = {
     whiteSpace: 'nowrap'
   } as React.CSSProperties,
   backendBadge: {
-    padding: '2px 6px',
-    borderRadius: '4px',
+    padding: '2px 8px',
+    borderRadius: '6px',
     fontSize: '9px',
     backgroundColor: 'var(--ant-color-primary-bg)',
     color: 'var(--ant-color-primary)',
-    fontWeight: 500
+    fontWeight: 600,
+    letterSpacing: '0.3px'
   } as React.CSSProperties,
   addIcon: {
     opacity: 0,
     color: 'var(--ant-color-text-tertiary)',
-    transition: 'opacity 0.2s'
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
   } as React.CSSProperties,
   emptyState: {
     padding: '32px 16px',
@@ -200,7 +201,8 @@ const styles = {
     padding: '12px',
     backgroundColor: 'var(--ant-color-primary-bg)',
     border: '1px solid var(--ant-color-primary-border)',
-    borderRadius: '8px'
+    borderRadius: '10px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
   } as React.CSSProperties,
   tipHeader: {
     display: 'flex',
@@ -233,7 +235,6 @@ const CATEGORIES: NodeCategory[] = [
   'text',
   'image',
   'video',
-  'fashion',
   'flow',
   'output',
   'external',
@@ -282,30 +283,14 @@ function NodePanel({ onCollapse }: NodePanelProps) {
       external: [],
       custom: [],
       text: [],
-      fashion: [],
       quality: []
     }
 
-    // 优先使用适配器获取所有节点，回退到旧系统
-    let allNodeDefs: NodeDefinition[]
-    try {
-      // 尝试从适配器获取（包含现代注册系统的所有节点）
-      const adapterNodes = NodeRegistryAdapter.getAllNodeTypes()
-        .map((type) => NodeRegistryAdapter.getNodeDefinition(type))
-        .filter(Boolean) as NodeDefinition[]
+    // 从现代注册系统获取所有节点
+    const allNodeDefs = NodeRegistryAdapter.getAllNodeTypes()
+      .map((type) => NodeRegistryAdapter.getNodeDefinition(type))
+      .filter(Boolean) as NodeDefinition[]
 
-      if (adapterNodes.length > 0) {
-        allNodeDefs = adapterNodes
-      } else {
-        // 仅在适配器未初始化时回退到旧系统
-        // @deprecated NODE_REGISTRY 将在未来版本移除
-        allNodeDefs = Object.values(NODE_REGISTRY)
-      }
-    } catch {
-      // 初始化失败时的安全回退
-      // @deprecated NODE_REGISTRY 将在未来版本移除
-      allNodeDefs = Object.values(NODE_REGISTRY)
-    }
     allNodeDefs.forEach((node) => {
       // 兼容新旧节点定义格式
       // 新格式: { metadata: { category, label, ... }, ... }

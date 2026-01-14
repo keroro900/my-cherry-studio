@@ -319,3 +319,33 @@ export const selectMessagesForTopic = createSelector(
     return topicMessageIds.map((id) => messageEntities[id]).filter((m): m is Message => !!m) // Filter out undefined/null in case of inconsistencies
   }
 )
+
+// Custom Selector: Selects messages for a specific group chat session
+// Note: Group chat messages use groupChatSessionId field to associate with sessions
+// They are stored using sessionId as topicId for compatibility with existing infrastructure
+export const selectMessagesForGroupChat = createSelector(
+  [
+    selectMessageEntities,
+    (state: RootState, sessionId: string) => state.messages.messageIdsByTopic[sessionId]
+  ],
+  (messageEntities, sessionMessageIds) => {
+    if (!sessionMessageIds) {
+      return []
+    }
+    // Filter to only return messages that have groupChatSessionId set
+    return sessionMessageIds
+      .map((id) => messageEntities[id])
+      .filter((m): m is Message => !!m && !!m.groupChatSessionId)
+  }
+)
+
+// Custom Selector: Check if a topic/session has messages loaded
+export const selectIsTopicMessagesLoaded = (state: RootState, topicId: string): boolean => {
+  return !!state.messages.messageIdsByTopic[topicId]
+}
+
+// Custom Selector: Get messages count for a topic/session
+export const selectMessagesCountForTopic = createSelector(
+  [(state: RootState, topicId: string) => state.messages.messageIdsByTopic[topicId]],
+  (topicMessageIds) => topicMessageIds?.length ?? 0
+)

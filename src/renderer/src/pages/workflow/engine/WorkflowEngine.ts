@@ -545,6 +545,126 @@ export class WorkflowEngine {
   }
 
   /**
+   * 执行单个节点
+   * 用于调试或单步执行场景
+   *
+   * @param nodeId 要执行的节点 ID
+   * @param nodes 所有节点
+   * @param edges 所有边
+   * @param existingOutputs 已有的上游节点输出（可选，用于获取输入数据）
+   * @param callbacks 回调函数
+   * @returns 执行结果
+   */
+  async executeSingleNode(
+    nodeId: string,
+    nodes: WorkflowNode[],
+    edges: WorkflowEdge[],
+    existingOutputs?: Map<string, Record<string, any>>,
+    callbacks?: {
+      onNodeStart?: (nodeId: string) => void
+      onNodeComplete?: (result: NodeExecutionResult) => void | Promise<void>
+      onProgress?: (progress: number, message: string) => void
+    }
+  ): Promise<NodeExecutionResult> {
+    // 查找目标节点
+    const node = nodes.find((n) => n.id === nodeId)
+    if (!node) {
+      logger.error('Node not found', { nodeId })
+      return {
+        nodeId,
+        status: 'error',
+        outputs: {},
+        errorMessage: `节点不存在: ${nodeId}`,
+        duration: 0
+      }
+    }
+
+    logger.info('Executing single node', {
+      nodeId,
+      nodeLabel: node.data.label,
+      nodeType: node.data.nodeType
+    })
+
+    // 创建临时执行上下文
+    const context: WorkflowExecutionContext = {
+      workflowId: `single-node-${Date.now()}`,
+      startTime: Date.now(),
+      nodeOutputs: existingOutputs || new Map(),
+      nodeResults: new Map(),
+      status: 'running',
+      abortController: new AbortController(),
+      maxRetries: 3
+    }
+
+    // 预编译边映射
+    const dataFlowMapper = new DataFlowMapper(edges)
+
+    // 通知开始执行
+    callbacks?.onNodeStart?.(nodeId)
+    callbacks?.onProgress?.(0, `执行节点: ${node.data.label}`)
+
+    try {
+      // 执行节点
+      const result = await this.executeNode(node, nodes, edges, context, dataFlowMapper)
+
+      // 存储结果
+      context.nodeResults.set(nodeId, result)
+
+      // 通知完成
+      try {
+        await callbacks?.onNodeComplete?.(result)
+      } catch (callbackError) {
+        logger.error('onNodeComplete callback error', {
+          nodeId,
+          error: callbackError instanceof Error ? callbackError.message : String(callbackError)
+        })
+      }
+
+      callbacks?.onProgress?.(100, result.status === 'success' ? '节点执行成功' : '节点执行失败')
+
+      logger.info('Single node execution completed', {
+        nodeId,
+        nodeLabel: node.data.label,
+        status: result.status,
+        duration: result.duration
+      })
+
+      return result
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const duration = Date.now() - context.startTime
+
+      logger.error('Single node execution error', {
+        nodeId,
+        nodeLabel: node.data.label,
+        error: errorMessage
+      })
+
+      const result: NodeExecutionResult = {
+        nodeId,
+        status: 'error',
+        outputs: {},
+        errorMessage,
+        duration
+      }
+
+      // 通知完成（带错误）
+      try {
+        await callbacks?.onNodeComplete?.(result)
+      } catch (callbackError) {
+        logger.error('onNodeComplete callback error', {
+          nodeId,
+          error: callbackError instanceof Error ? callbackError.message : String(callbackError)
+        })
+      }
+
+      callbacks?.onProgress?.(100, '节点执行失败')
+
+      return result
+    }
+  }
+
+  /**
    * 执行工作流（带回调接口）
    * 为 WorkflowToolbar 等组件提供更友好的接口
    */

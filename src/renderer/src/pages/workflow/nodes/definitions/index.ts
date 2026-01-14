@@ -330,7 +330,6 @@ export interface NodeDefinition {
     | 'external'
     | 'custom'
     | 'text'
-    | 'fashion'
     | 'quality'
   description: string
   defaultInputs: NodeHandle[]

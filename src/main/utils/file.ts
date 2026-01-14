@@ -9,9 +9,17 @@ import { audioExts, documentExts, HOME_CHERRY_DIR, imageExts, MB, textExts, vide
 import type { FileMetadata, NotesTreeNode } from '@types'
 import { FileTypes } from '@types'
 import chardet from 'chardet'
-import { app } from 'electron'
 import iconv from 'iconv-lite'
 import { v4 as uuidv4 } from 'uuid'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  electronApp = require('electron').app
+} catch {
+  // electron 未就绪
+}
 
 const logger = loggerService.withContext('Utils:File')
 
@@ -143,15 +151,26 @@ export function getAllFiles(dirPath: string, arrayOfFiles: FileMetadata[] = []):
 }
 
 export function getTempDir() {
-  return path.join(app.getPath('temp'), 'CherryStudio')
+  if (electronApp) {
+    return path.join(electronApp.getPath('temp'), 'CherryStudio')
+  }
+  return path.join(os.tmpdir(), 'CherryStudio')
 }
 
 export function getFilesDir() {
-  return path.join(app.getPath('userData'), 'Data', 'Files')
+  if (electronApp) {
+    return path.join(electronApp.getPath('userData'), 'Data', 'Files')
+  }
+  return path.join(os.tmpdir(), 'cherry-studio-data', 'Files')
 }
 
 export function getNotesDir() {
-  const notesDir = path.join(app.getPath('userData'), 'Data', 'Notes')
+  let notesDir: string
+  if (electronApp) {
+    notesDir = path.join(electronApp.getPath('userData'), 'Data', 'Notes')
+  } else {
+    notesDir = path.join(os.tmpdir(), 'cherry-studio-data', 'Notes')
+  }
   if (!fs.existsSync(notesDir)) {
     fs.mkdirSync(notesDir, { recursive: true })
     logger.info(`Notes directory created at: ${notesDir}`)
@@ -164,7 +183,10 @@ export function getConfigDir() {
 }
 
 export function getCacheDir() {
-  return path.join(app.getPath('userData'), 'Cache')
+  if (electronApp) {
+    return path.join(electronApp.getPath('userData'), 'Cache')
+  }
+  return path.join(os.tmpdir(), 'cherry-studio-cache')
 }
 
 export function getAppConfigDir(name: string) {

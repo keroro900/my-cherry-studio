@@ -1,4 +1,4 @@
-import { is } from '@electron-toolkit/utils'
+import { isDev } from '@main/constant'
 import { loggerService } from '@logger'
 import { BrowserWindow } from 'electron'
 
@@ -22,7 +22,7 @@ export class SearchService {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
-        devTools: is.dev
+        devTools: isDev
       }
     })
 

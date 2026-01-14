@@ -1,9 +1,23 @@
 import { loggerService } from '@logger'
-import { app, net, safeStorage } from 'electron'
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 
 import { getConfigDir } from '../utils/file'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+let electronNet: typeof import('electron').net | undefined
+let electronSafeStorage: typeof import('electron').safeStorage | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const electron = require('electron')
+  electronApp = electron.app
+  electronNet = electron.net
+  electronSafeStorage = electron.safeStorage
+} catch {
+  // electron 未就绪
+}
 
 const logger = loggerService.withContext('CopilotService')
 
@@ -78,7 +92,8 @@ class CopilotService {
   }
 
   private getTokenFilePath = (): string => {
-    const oldTokenFilePath = path.join(app.getPath('userData'), CONFIG.TOKEN_FILE_NAME)
+    const userDataPath = electronApp ? electronApp.getPath('userData') : path.join(os.tmpdir(), 'cherry-studio-data')
+    const oldTokenFilePath = path.join(userDataPath, CONFIG.TOKEN_FILE_NAME)
     if (fs.existsSync(oldTokenFilePath)) {
       return oldTokenFilePath
     }
@@ -98,8 +113,9 @@ class CopilotService {
    * 获取GitHub登录信息
    */
   public getUser = async (_: Electron.IpcMainInvokeEvent, token: string): Promise<UserResponse> => {
+    if (!electronNet) throw new CopilotServiceError('Electron net module not available')
     try {
-      const response = await net.fetch(CONFIG.API_URLS.GITHUB_USER, {
+      const response = await electronNet.fetch(CONFIG.API_URLS.GITHUB_USER, {
         method: 'GET',
         headers: {
           Connection: 'keep-alive',
@@ -134,10 +150,11 @@ class CopilotService {
     _: Electron.IpcMainInvokeEvent,
     headers?: Record<string, string>
   ): Promise<AuthResponse> => {
+    if (!electronNet) throw new CopilotServiceError('Electron net module not available')
     try {
       this.updateHeaders(headers)
 
-      const response = await net.fetch(CONFIG.API_URLS.GITHUB_DEVICE_CODE, {
+      const response = await electronNet.fetch(CONFIG.API_URLS.GITHUB_DEVICE_CODE, {
         method: 'POST',
         headers: {
           ...this.headers,
@@ -168,6 +185,7 @@ class CopilotService {
     device_code: string,
     headers?: Record<string, string>
   ): Promise<TokenResponse> => {
+    if (!electronNet) throw new CopilotServiceError('Electron net module not available')
     this.updateHeaders(headers)
 
     let currentDelay = CONFIG.POLLING.INITIAL_DELAY_MS
@@ -176,7 +194,7 @@ class CopilotService {
       await this.delay(currentDelay)
 
       try {
-        const response = await net.fetch(CONFIG.API_URLS.GITHUB_ACCESS_TOKEN, {
+        const response = await electronNet.fetch(CONFIG.API_URLS.GITHUB_ACCESS_TOKEN, {
           method: 'POST',
           headers: {
             ...this.headers,
@@ -217,8 +235,9 @@ class CopilotService {
    * 保存Copilot令牌到本地文件
    */
   public saveCopilotToken = async (_: Electron.IpcMainInvokeEvent, token: string): Promise<void> => {
+    if (!electronSafeStorage) throw new CopilotServiceError('Electron safeStorage module not available')
     try {
-      const encryptedToken = safeStorage.encryptString(token)
+      const encryptedToken = electronSafeStorage.encryptString(token)
       // 确保目录存在
       const dir = path.dirname(this.tokenFilePath)
       if (!fs.existsSync(dir)) {
@@ -239,13 +258,16 @@ class CopilotService {
     _: Electron.IpcMainInvokeEvent,
     headers?: Record<string, string>
   ): Promise<CopilotTokenResponse> => {
+    if (!electronSafeStorage || !electronNet) {
+      throw new CopilotServiceError('Electron modules not available')
+    }
     try {
       this.updateHeaders(headers)
 
       const encryptedToken = await fs.promises.readFile(this.tokenFilePath)
-      const access_token = safeStorage.decryptString(Buffer.from(encryptedToken))
+      const access_token = electronSafeStorage.decryptString(Buffer.from(encryptedToken))
 
-      const response = await net.fetch(CONFIG.API_URLS.COPILOT_TOKEN, {
+      const response = await electronNet.fetch(CONFIG.API_URLS.COPILOT_TOKEN, {
         method: 'GET',
         headers: {
           ...this.headers,

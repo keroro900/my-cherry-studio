@@ -5,7 +5,7 @@ import { useTimer } from '@renderer/hooks/useTimer'
 import { useSystemAssistantPresets } from '@renderer/pages/store/assistants/presets'
 import { createAssistantFromAgent } from '@renderer/services/AssistantService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
-import type { Assistant, AssistantPreset } from '@renderer/types'
+import { createDefaultCollaboration, type Assistant, type AssistantPreset } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 import type { InputRef } from 'antd'
 import { Divider, Input, Modal, Tag } from 'antd'
@@ -77,7 +77,11 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
       let assistant: Assistant
 
       if (preset.id === 'default') {
-        assistant = { ...preset, id: uuid() }
+        assistant = {
+          ...preset,
+          id: uuid(),
+          collaboration: preset.collaboration || createDefaultCollaboration() // 确保协作配置存在
+        }
         addAssistant(assistant)
       } else {
         assistant = await createAssistantFromAgent(preset)

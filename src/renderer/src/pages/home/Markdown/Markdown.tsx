@@ -15,8 +15,9 @@ import type {
 } from '@renderer/types/newMessage'
 import { removeSvgEmptyLines } from '@renderer/utils/formats'
 import { processLatexBrackets } from '@renderer/utils/markdown'
+import { mayContainVCPMarkers, parseVCPContentCached } from '@renderer/utils/vcpParser'
 import { isEmpty } from 'lodash'
-import { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type FC, lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown, { type Components, defaultUrlTransform } from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
@@ -29,9 +30,12 @@ import remarkAlert from 'remark-github-blockquote-alert'
 import remarkMath from 'remark-math'
 import type { Pluggable } from 'unified'
 
-import VCPDailyNote, { extractDailyNotes } from '../Messages/Tools/VCPDailyNote'
-import VCPToolResult, { extractVCPToolResults } from '../Messages/Tools/VCPToolResult'
-import VCPToolUse, { extractVCPToolRequests } from '../Messages/Tools/VCPToolUse'
+// Lazy load VCP components for better initial load performance
+const VCPDailyNote = lazy(() => import('../Messages/Tools/VCPDailyNote'))
+const VCPDeepMemory = lazy(() => import('../Messages/Tools/VCPDeepMemory'))
+const VCPToolResult = lazy(() => import('../Messages/Tools/VCPToolResult'))
+const VCPToolUse = lazy(() => import('../Messages/Tools/VCPToolUse'))
+
 import CodeBlock from './CodeBlock'
 import Link from './Link'
 import MarkdownSvgRenderer from './MarkdownSvgRenderer'
@@ -164,103 +168,19 @@ const Markdown: FC<Props> = ({ block, postProcess }) => {
     return defaultUrlTransform(value)
   }, [])
 
-  // 快速检查是否可能包含 VCP 标记（避免在流式输出时频繁执行正则）
-  const mayHaveVCPMarkers = useMemo(() => {
-    // 使用简单字符串检查代替正则
-    return (
-      messageContent.includes('<<<[TOOL_') ||
-      messageContent.includes('<<<DailyNoteStart>>>') ||
-      messageContent.includes('[[VCP调用结果')
-    )
-  }, [messageContent])
-
-  // Check if content contains VCP tool markers and split accordingly
-  // 只有在可能包含 VCP 标记且流已结束时才执行完整解析
-  const vcpToolResults = useMemo(
-    () => (mayHaveVCPMarkers && isStreamDone ? extractVCPToolResults(messageContent) : []),
-    [messageContent, mayHaveVCPMarkers, isStreamDone]
-  )
-  const vcpToolRequests = useMemo(
-    () => (mayHaveVCPMarkers && isStreamDone ? extractVCPToolRequests(messageContent) : []),
-    [messageContent, mayHaveVCPMarkers, isStreamDone]
-  )
-  const vcpDailyNotes = useMemo(
-    () => (mayHaveVCPMarkers && isStreamDone ? extractDailyNotes(messageContent) : []),
-    [messageContent, mayHaveVCPMarkers, isStreamDone]
-  )
-  const hasVCPTools = vcpToolResults.length > 0 || vcpToolRequests.length > 0 || vcpDailyNotes.length > 0
-
-  // Split content around VCP tool markers for inline rendering
-  const contentParts = useMemo(() => {
-    if (!hasVCPTools) {
-      return [{ type: 'markdown' as const, content: messageContent }]
+  // Optimized VCP parsing: single-pass with caching
+  // Only parse when stream is done and content might contain VCP markers
+  const vcpParseResult = useMemo(() => {
+    // Fast check first - avoid parsing during streaming or when no markers present
+    if (!isStreamDone || !mayContainVCPMarkers(messageContent)) {
+      return null
     }
+    // Use cached parser for performance (LRU cache with 100 entries)
+    return parseVCPContentCached(messageContent)
+  }, [messageContent, isStreamDone])
 
-    const parts: Array<
-      | { type: 'markdown'; content: string }
-      | { type: 'vcp-result'; resultType: 'result' | 'error'; content: string }
-      | { type: 'vcp-request'; content: string }
-      | { type: 'vcp-diary'; content: string }
-    > = []
-
-    // Create a combined pattern to find all markers in order
-    // Includes: TOOL_RESULT, TOOL_ERROR, TOOL_REQUEST, DailyNote, and VCPChat legacy format
-    const combinedPattern =
-      /<<<\[(TOOL_RESULT|TOOL_ERROR)\]>>>([\s\S]*?)<<<\[\/\1\]>>>|<<<\[TOOL_REQUEST\]>>>([\s\S]*?)<<<\[END_TOOL_REQUEST\]>>>|<<<DailyNoteStart>>>([\s\S]*?)<<<DailyNoteEnd>>>|\[\[VCP调用结果信息汇总:([\s\S]*?)VCP调用结果结束\]\]/g
-    let lastIndex = 0
-    let match
-
-    while ((match = combinedPattern.exec(messageContent)) !== null) {
-      // Add markdown content before this match
-      if (match.index > lastIndex) {
-        const beforeContent = messageContent.slice(lastIndex, match.index).trim()
-        if (beforeContent) {
-          parts.push({ type: 'markdown', content: beforeContent })
-        }
-      }
-
-      // Check which pattern matched
-      if (match[4] !== undefined) {
-        // DailyNote match (group 4)
-        parts.push({
-          type: 'vcp-diary',
-          content: match[4].trim()
-        })
-      } else if (match[5] !== undefined) {
-        // VCPChat legacy tool result format (group 5)
-        parts.push({
-          type: 'vcp-result',
-          resultType: 'result',
-          content: match[5].trim()
-        })
-      } else if (match[3] !== undefined) {
-        // TOOL_REQUEST match (group 3)
-        parts.push({
-          type: 'vcp-request',
-          content: match[3].trim()
-        })
-      } else {
-        // TOOL_RESULT or TOOL_ERROR match (groups 1 and 2)
-        parts.push({
-          type: 'vcp-result',
-          resultType: match[1] === 'TOOL_RESULT' ? 'result' : 'error',
-          content: match[2].trim()
-        })
-      }
-
-      lastIndex = match.index + match[0].length
-    }
-
-    // Add remaining markdown content after last match
-    if (lastIndex < messageContent.length) {
-      const afterContent = messageContent.slice(lastIndex).trim()
-      if (afterContent) {
-        parts.push({ type: 'markdown', content: afterContent })
-      }
-    }
-
-    return parts.length > 0 ? parts : [{ type: 'markdown' as const, content: messageContent }]
-  }, [messageContent, hasVCPTools])
+  const hasVCPTools = vcpParseResult?.hasVCPMarkers ?? false
+  const contentParts = vcpParseResult?.parts ?? [{ type: 'markdown' as const, content: messageContent }]
 
   // Render a single markdown part
   const renderMarkdownPart = (content: string, key: string) => (
@@ -283,17 +203,21 @@ const Markdown: FC<Props> = ({ block, postProcess }) => {
   return (
     <div className="markdown">
       {hasVCPTools ? (
-        contentParts.map((part, index) => {
-          if (part.type === 'markdown') {
-            return renderMarkdownPart(part.content, `md-${index}`)
-          } else if (part.type === 'vcp-result') {
-            return <VCPToolResult key={`vcp-result-${index}`} content={part.content} type={part.resultType} />
-          } else if (part.type === 'vcp-diary') {
-            return <VCPDailyNote key={`vcp-diary-${index}`} content={part.content} />
-          } else {
-            return <VCPToolUse key={`vcp-request-${index}`} content={part.content} />
-          }
-        })
+        <Suspense fallback={null}>
+          {contentParts.map((part, index) => {
+            if (part.type === 'markdown') {
+              return renderMarkdownPart(part.content, `md-${index}`)
+            } else if (part.type === 'vcp-result') {
+              return <VCPToolResult key={`vcp-result-${index}`} content={part.content} type={part.resultType} />
+            } else if (part.type === 'vcp-diary') {
+              return <VCPDailyNote key={`vcp-diary-${index}`} content={part.content} />
+            } else if (part.type === 'vcp-deep-memory') {
+              return <VCPDeepMemory key={`vcp-deep-memory-${index}`} content={part.content} />
+            } else {
+              return <VCPToolUse key={`vcp-request-${index}`} content={part.content} />
+            }
+          })}
+        </Suspense>
       ) : (
         <ReactMarkdown
           rehypePlugins={rehypePlugins}

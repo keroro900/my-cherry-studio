@@ -11,13 +11,18 @@
  */
 
 import { type NodeProps, NodeResizer } from '@xyflow/react'
-import { memo, useMemo } from 'react'
+import { Play, Settings } from 'lucide-react'
+import { memo, useCallback, useMemo } from 'react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import { NodeRegistryAdapter } from '../../nodes/base/NodeRegistryAdapter'
 import type { NodeHandle, WorkflowNodeData } from '../../types'
 import DynamicHandles from './DynamicHandles'
+import InlinePromptEditor from './InlinePromptEditor'
+import NodeConfigPreview from './NodeConfigPreview'
+import NodeImageDropZone from './NodeImageDropZone'
+import NodeResultPreview from './NodeResultPreview'
 import { normalizeOutputPreviewData } from './OutputNode'
 
 // ==================== 节点图标映射 ====================
@@ -125,6 +130,42 @@ const DYNAMIC_IMAGE_INPUT_NODES = [
   'product_description'
 ]
 
+// ==================== 支持内嵌 Prompt 编辑的节点类型 ====================
+// 这些节点会在节点内部显示提示词编辑器
+const INLINE_PROMPT_NODES = [
+  // AI 提示词节点
+  'unified_prompt',
+  'video_prompt',
+  // Gemini 图片生成/编辑
+  'gemini_generate',
+  'gemini_edit',
+  'gemini_edit_custom',
+  'gemini_ecom',
+  'gemini_pattern',
+  'gemini_generate_model',
+  'gemini_model_from_clothes',
+  // 行业摄影
+  'jewelry_photo',
+  'food_photo',
+  'product_scene',
+  'jewelry_tryon',
+  // 内容生成
+  'aplus_content',
+  'product_description'
+]
+
+// ==================== 支持节点内图片上传的节点类型 ====================
+// 这些节点会在节点内部显示图片拖放上传区域
+const IMAGE_UPLOAD_NODES = [
+  'image_input',
+  'gemini_generate',
+  'gemini_edit',
+  'gemini_edit_custom',
+  'gemini_ecom',
+  'gemini_pattern',
+  'compare_image'
+]
+
 // ==================== 生成动态图片输入端口 ====================
 
 function generateDynamicImageInputs(imageInputCount: number): NodeHandle[] {
@@ -142,7 +183,7 @@ function generateDynamicImageInputs(imageInputCount: number): NodeHandle[] {
 
 // ==================== Cherry 风格节点组件 ====================
 
-function CherryWorkflowNode({ data, selected }: NodeProps) {
+function CherryWorkflowNode({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as WorkflowNodeData
   const status = nodeData.status || 'idle'
   const statusInfo = STATUS_CONFIG[status]
@@ -276,6 +317,44 @@ function CherryWorkflowNode({ data, selected }: NodeProps) {
     return staticInputs
   }, [nodeData.inputs, imageInputCount, customImageInputPorts, supportsDynamicImageInputs, nodeType])
 
+  // 运行单个节点
+  const handleRunNode = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      // 触发自定义事件，由 WorkflowCanvas 或 WorkflowPage 监听处理
+      const event = new CustomEvent('workflow:run-node', {
+        detail: { nodeId: id }
+      })
+      window.dispatchEvent(event)
+    },
+    [id]
+  )
+
+  // 打开设置面板
+  const handleOpenSettings = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      // 触发自定义事件，由 WorkflowPage 监听处理
+      const event = new CustomEvent('workflow:open-config', {
+        detail: { nodeId: id }
+      })
+      window.dispatchEvent(event)
+    },
+    [id]
+  )
+
+  // 节点内快速修改配置（从配置标签点击）
+  const handleQuickConfigChange = useCallback(
+    (key: string, value: any) => {
+      // 触发自定义事件，由 WorkflowCanvas 监听处理
+      const event = new CustomEvent('workflow:update-node-config', {
+        detail: { nodeId: id, key, value }
+      })
+      window.dispatchEvent(event)
+    },
+    [id]
+  )
+
   // 输出节点使用简化显示
   if (isOutputNode) {
     return (
@@ -366,6 +445,11 @@ function CherryWorkflowNode({ data, selected }: NodeProps) {
       {/* 动态 Handles */}
       <DynamicHandles inputs={effectiveInputs} outputs={nodeData.outputs || []} showLabels={selected} />
 
+      {/* 顶部生成结果预览 - 节点有输出时向上扩展显示 */}
+      {nodeData.result && (status === 'success' || status === 'completed') && (
+        <NodeResultPreview result={nodeData.result} defaultExpanded={true} nodeType={nodeType} />
+      )}
+
       {/* 节点头部 */}
       <NodeHeader>
         <NodeIcon>{icon}</NodeIcon>
@@ -415,10 +499,51 @@ function CherryWorkflowNode({ data, selected }: NodeProps) {
         )}
       </NodeContent>
 
-      {/* 状态栏 */}
-      <NodeFooter data-status={status}>
-        <StatusText>{statusInfo.text}</StatusText>
-      </NodeFooter>
+      {/* 内嵌 Prompt 编辑器 - 仅支持的节点显示 */}
+      {INLINE_PROMPT_NODES.includes(nodeType) && (
+        <InlinePromptEditor
+          nodeId={id}
+          value={nodeData.config?.prompt || ''}
+          placeholder="输入提示词..."
+          disabled={status === 'running'}
+          configKey="prompt"
+          minRows={2}
+          maxRows={4}
+        />
+      )}
+
+      {/* 节点内图片上传区域 - 仅支持的节点显示 */}
+      {IMAGE_UPLOAD_NODES.includes(nodeType) && (
+        <NodeImageDropZone nodeId={id} maxImages={nodeType === 'image_input' ? 1 : 4} configKey="uploadedImages" />
+      )}
+
+      {/* 配置预览标签 - 显示关键配置项，可点击快速修改 */}
+      {nodeData.config && Object.keys(nodeData.config).length > 0 && (
+        <NodeConfigPreview
+          config={nodeData.config}
+          nodeType={nodeType}
+          maxItems={3}
+          onConfigChange={handleQuickConfigChange}
+        />
+      )}
+
+      {/* 操作栏 - 运行按钮、状态、设置按钮 */}
+      <NodeActionBar data-status={status}>
+        <RunButton
+          onClick={handleRunNode}
+          disabled={status === 'running'}
+          title="运行此节点"
+          className="nodrag">
+          <Play size={14} />
+        </RunButton>
+        <StatusText data-status={status}>
+          {status === 'running' && <SpinIcon>⟳</SpinIcon>}
+          {statusInfo.text}
+        </StatusText>
+        <SettingsButton onClick={handleOpenSettings} title="打开设置" className="nodrag">
+          <Settings size={14} />
+        </SettingsButton>
+      </NodeActionBar>
 
       {/* 错误信息 */}
       {(nodeData.error || nodeData.errorMessage) && (
@@ -434,66 +559,87 @@ function CherryWorkflowNode({ data, selected }: NodeProps) {
 // ==================== Cherry 风格样式 ====================
 
 const NodeContainer = styled.div`
-  min-width: 180px;
+  min-width: 220px;
   min-height: 100px;
   width: 100%;
   height: 100%;
   background: var(--color-background);
   border: 1px solid var(--color-border);
-  border-radius: var(--list-item-border-radius);
+  border-radius: 12px;
   cursor: grab;
-  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   &:hover {
     background: var(--color-background-soft);
     border-color: var(--color-border-soft);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    transform: translateY(-1px);
   }
 
   &.selected {
     background: var(--color-background-soft);
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 1px var(--color-primary-mute);
+    box-shadow: 0 0 0 2px var(--color-primary-mute), 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
   &:active {
     cursor: grabbing;
+    transform: scale(0.99);
   }
 
-  /* 运行中状态 */
+  /* 运行中状态 - 脉冲边框动画 */
   &[data-status='running'] {
     border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-mute), 0 0 20px rgba(24, 144, 255, 0.15);
+    animation: node-running-pulse 2s ease-in-out infinite;
   }
 
-  /* 完成状态 */
+  /* 完成状态 - 短暂高亮 */
   &[data-status='success'],
   &[data-status='completed'] {
     border-color: var(--color-status-success);
+    box-shadow: 0 2px 8px rgba(82, 196, 26, 0.15);
   }
 
   /* 错误状态 */
   &[data-status='error'] {
     border-color: var(--color-status-error);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.15);
+  }
+
+  @keyframes node-running-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 2px var(--color-primary-mute), 0 0 20px rgba(24, 144, 255, 0.15);
+    }
+    50% {
+      box-shadow: 0 0 0 4px var(--color-primary-mute), 0 0 30px rgba(24, 144, 255, 0.25);
+    }
   }
 `
 
 const NodeHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--color-border-mute);
+  background: linear-gradient(180deg, var(--color-background-soft) 0%, var(--color-background) 100%);
 `
 
 const NodeIcon = styled.span`
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 `
 
 const NodeTitle = styled.div`
   flex: 1;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -501,7 +647,7 @@ const NodeTitle = styled.div`
 `
 
 const StatusIndicator = styled.span`
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-text-3);
 
   &[data-status='running'] {
@@ -533,7 +679,7 @@ const SpinIcon = styled.span`
 `
 
 const NodeContent = styled.div`
-  padding: 10px 12px;
+  padding: 10px 14px;
   font-size: 12px;
   color: var(--color-text-2);
   display: flex;
@@ -544,8 +690,8 @@ const NodeContent = styled.div`
 const NodeTypeBadge = styled.div`
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
   background: var(--color-background-soft);
   border: 1px solid var(--color-border-mute);
   font-size: 11px;
@@ -556,8 +702,8 @@ const NodeTypeBadge = styled.div`
 const ConfigBadge = styled.div`
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
   background: var(--color-primary-mute);
   font-size: 11px;
   color: var(--color-text);
@@ -594,8 +740,8 @@ const ModelSubtext = styled.div`
 const ImageInputInfo = styled.div`
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
   background: rgba(82, 196, 26, 0.1);
   border: 1px solid rgba(82, 196, 26, 0.3);
   font-size: 11px;
@@ -603,12 +749,86 @@ const ImageInputInfo = styled.div`
   align-self: flex-start;
 `
 
-const NodeFooter = styled.div`
-  padding: 6px 12px;
+// 操作栏 - 替代原来的 NodeFooter
+const NodeActionBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
   border-top: 1px solid var(--color-border-mute);
+  background: var(--color-background-soft);
+  border-radius: 0 0 12px 12px;
+  gap: 8px;
+`
+
+const RunButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, var(--color-status-success, #52c41a) 0%, #73d13d 100%);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(82, 196, 26, 0.3);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #73d13d 0%, #95de64 100%);
+    transform: scale(1.08);
+    box-shadow: 0 4px 8px rgba(82, 196, 26, 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(82, 196, 26, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+`
+
+const SettingsButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-mute);
+    transform: rotate(15deg);
+  }
+
+  &:active {
+    transform: rotate(15deg) scale(0.95);
+  }
+`
+
+const StatusText = styled.span`
+  flex: 1;
+  text-align: center;
   font-size: 11px;
   color: var(--color-text-3);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 
   &[data-status='running'] {
     color: var(--color-primary);
@@ -624,8 +844,6 @@ const NodeFooter = styled.div`
     color: var(--color-status-error);
   }
 `
-
-const StatusText = styled.span``
 
 const ErrorBox = styled.div`
   margin: 8px 12px 12px;
@@ -660,45 +878,56 @@ const OutputNodeContainer = styled.div`
   border: 2px solid var(--color-primary);
   border-radius: 12px;
   cursor: grab;
-  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
 
   &:hover {
     background: var(--color-background-soft);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);
+    transform: translateY(-1px);
   }
 
   &.selected {
     background: var(--color-background-soft);
-    box-shadow: 0 0 0 2px var(--color-primary-mute);
+    box-shadow: 0 0 0 2px var(--color-primary-mute), 0 8px 24px rgba(24, 144, 255, 0.2);
   }
 
   &:active {
     cursor: grabbing;
+    transform: scale(0.99);
   }
 
   /* 运行中状态 */
   &[data-status='running'] {
     border-color: var(--color-primary);
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: output-pulse 1.5s ease-in-out infinite;
   }
 
   /* 完成状态 */
   &[data-status='success'],
   &[data-status='completed'] {
     border-color: var(--color-status-success);
+    box-shadow: 0 2px 8px rgba(82, 196, 26, 0.2);
   }
 
   /* 错误状态 */
   &[data-status='error'] {
     border-color: var(--color-status-error);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.2);
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+  @keyframes output-pulse {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+    }
+    50% {
+      opacity: 0.85;
+      box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+    }
   }
 `
 

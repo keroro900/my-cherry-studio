@@ -212,6 +212,94 @@ class WorkflowExecutionServiceClass {
   }
 
   /**
+   * 执行单个节点
+   * 用于调试或单步执行场景
+   *
+   * @param nodeId 要执行的节点 ID
+   * @param nodes 所有节点
+   * @param edges 所有边
+   * @param existingOutputs 已有的上游节点输出
+   * @param callbacks 回调函数
+   * @returns 执行结果
+   */
+  async executeSingleNode(
+    nodeId: string,
+    nodes: WorkflowNode[],
+    edges: WorkflowEdge[],
+    existingOutputs?: Map<string, Record<string, any>>,
+    callbacks?: {
+      onNodeStatusChange?: (nodeId: string, status: string, errorMessage?: string) => void
+      onNodeOutput?: (nodeId: string, outputs: Record<string, any>) => Promise<void> | void
+      onProgress?: (progress: number, message: string) => void
+    }
+  ): Promise<{
+    nodeId: string
+    status: 'success' | 'error' | 'skipped'
+    outputs: Record<string, any>
+    errorMessage?: string
+    duration: number
+  }> {
+    logger.info('Executing single node', { nodeId })
+
+    // 确保 Providers 已设置
+    this.engine.setProviders(this.providers)
+    if (this.defaultModel) {
+      this.engine.setDefaultModel(this.defaultModel)
+    }
+
+    try {
+      const result = await this.engine.executeSingleNode(nodeId, nodes, edges, existingOutputs, {
+        onNodeStart: (id) => {
+          callbacks?.onNodeStatusChange?.(id, 'running')
+        },
+        onNodeComplete: async (nodeResult) => {
+          if (nodeResult.status === 'success') {
+            callbacks?.onNodeStatusChange?.(nodeResult.nodeId!, 'completed')
+            try {
+              await callbacks?.onNodeOutput?.(nodeResult.nodeId!, nodeResult.outputs)
+            } catch (callbackError) {
+              logger.error('onNodeOutput callback error', {
+                nodeId: nodeResult.nodeId,
+                error: callbackError instanceof Error ? callbackError.message : String(callbackError)
+              })
+            }
+          } else if (nodeResult.status === 'error') {
+            callbacks?.onNodeStatusChange?.(nodeResult.nodeId!, 'error', nodeResult.errorMessage)
+          }
+        },
+        onProgress: callbacks?.onProgress
+      })
+
+      logger.info('Single node execution completed', {
+        nodeId,
+        status: result.status,
+        duration: result.duration
+      })
+
+      return {
+        nodeId: result.nodeId!,
+        status: result.status,
+        outputs: result.outputs,
+        errorMessage: result.errorMessage,
+        duration: result.duration ?? 0
+      }
+    } catch (error) {
+      logger.error('Single node execution error', {
+        nodeId,
+        error: error instanceof Error ? error.message : String(error)
+      })
+
+      return {
+        nodeId,
+        status: 'error',
+        outputs: {},
+        errorMessage: error instanceof Error ? error.message : String(error),
+        duration: 0
+      }
+    }
+  }
+
+  /**
    * 获取引擎实例（仅用于兼容性，不推荐直接使用）
    * @deprecated 请使用 execute() 方法
    */

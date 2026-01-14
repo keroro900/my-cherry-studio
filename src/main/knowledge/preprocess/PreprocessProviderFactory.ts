@@ -3,7 +3,6 @@ import type { PreprocessProvider } from '@types'
 import type BasePreprocessProvider from './BasePreprocessProvider'
 import DefaultPreprocessProvider from './DefaultPreprocessProvider'
 import Doc2xPreprocessProvider from './Doc2xPreprocessProvider'
-import FashionPreprocessProvider from './FashionPreprocessProvider'
 import MineruPreprocessProvider from './MineruPreprocessProvider'
 import MistralPreprocessProvider from './MistralPreprocessProvider'
 import OpenMineruPreprocessProvider from './OpenMineruPreprocessProvider'
@@ -18,8 +17,6 @@ export default class PreprocessProviderFactory {
         return new MineruPreprocessProvider(provider, userId)
       case 'open-mineru':
         return new OpenMineruPreprocessProvider(provider, userId)
-      case 'fashion':
-        return new FashionPreprocessProvider(provider)
       default:
         return new DefaultPreprocessProvider(provider)
     }

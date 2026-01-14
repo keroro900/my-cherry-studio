@@ -24,11 +24,24 @@ import { CopyIcon } from './Icons'
 
 interface ImageViewerProps extends AntImageProps {
   src: string
+  /** Maximum zoom scale (default: 10 = 1000%) */
+  maxScale?: number
+  /** Minimum zoom scale (default: 0.1 = 10%) */
+  minScale?: number
+  /** Zoom step size (default: 0.5) */
+  scaleStep?: number
 }
 
 const logger = loggerService.withContext('ImageViewer')
 
-const ImageViewer: React.FC<ImageViewerProps> = ({ src, style, ...props }) => {
+const ImageViewer: React.FC<ImageViewerProps> = ({
+  src,
+  style,
+  maxScale = 10,
+  minScale = 0.1,
+  scaleStep = 0.5,
+  ...props
+}) => {
   const { t } = useTranslation()
 
   // 复制图片到剪贴板
@@ -106,6 +119,9 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ src, style, ...props }) => {
         preview={{
           mask: typeof props.preview === 'object' ? props.preview.mask : false,
           ...(typeof props.preview === 'object' ? props.preview : {}),
+          minScale,
+          maxScale,
+          scaleStep,
           toolbarRender: (
             _,
             {
@@ -114,12 +130,13 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ src, style, ...props }) => {
             }
           ) => (
             <ToolbarWrapper size={12} className="toolbar-wrapper">
+              <ZoomIndicator>{Math.round(scale * 100)}%</ZoomIndicator>
               <SwapOutlined rotate={90} onClick={onFlipY} />
               <SwapOutlined onClick={onFlipX} />
               <RotateLeftOutlined onClick={onRotateLeft} />
               <RotateRightOutlined onClick={onRotateRight} />
-              <ZoomOutOutlined disabled={scale === 1} onClick={onZoomOut} />
-              <ZoomInOutlined disabled={scale === 50} onClick={onZoomIn} />
+              <ZoomOutOutlined disabled={scale <= minScale} onClick={onZoomOut} />
+              <ZoomInOutlined disabled={scale >= maxScale} onClick={onZoomIn} />
               <UndoOutlined onClick={onReset} />
               <CopyOutlined onClick={() => handleCopyImage(src)} />
               <DownloadOutlined onClick={() => download(src)} />
@@ -144,6 +161,22 @@ const ToolbarWrapper = styled(Space)`
   .anticon:hover {
     opacity: 0.3;
   }
+  .anticon[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+`
+
+const ZoomIndicator = styled.span`
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  letter-spacing: 0.5px;
 `
 
 export default ImageViewer

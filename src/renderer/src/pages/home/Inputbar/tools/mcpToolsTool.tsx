@@ -7,7 +7,6 @@
  * - 执行由 VCPToolExecutorMiddleware 统一处理
  *
  * @see src/renderer/src/aiCore/legacy/middleware/VCPToolExecutorMiddleware.ts
- * @see src/main/knowledge/vcp/MCPOBridge.ts
  */
 import { defineTool, registerTool, TopicType } from '@renderer/pages/home/Inputbar/types'
 import { isPromptToolUse, isSupportedToolUse } from '@renderer/utils/mcp-tools'

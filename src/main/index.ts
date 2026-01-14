@@ -6,11 +6,20 @@ import './bootstrap'
 import '@main/config'
 
 import { loggerService } from '@logger'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { replaceDevtoolsFont } from '@main/utils/windowUtil'
-import { app, crashReporter } from 'electron'
-import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 import { isDev, isLinux, isWin } from './constant'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+let electronCrashReporter: typeof import('electron').crashReporter | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const electron = require('electron')
+  electronApp = electron.app
+  electronCrashReporter = electron.crashReporter
+} catch {
+  // electron 未就绪
+}
 
 import process from 'node:process'
 
@@ -39,23 +48,26 @@ import { initWebviewHotkeys } from './services/WebviewService'
 import { getUnifiedStorage } from './storage'
 import { runAsyncFunction } from './utils'
 import { isOvmsSupported } from './services/OvmsManager'
+import { preloadNativeModules } from './knowledge/native'
 
 const logger = loggerService.withContext('MainEntry')
 
 // enable local crash reports
-crashReporter.start({
-  companyName: 'CherryHQ',
-  productName: 'CherryStudio',
-  submitURL: '',
-  uploadToServer: false
-})
+if (electronCrashReporter) {
+  electronCrashReporter.start({
+    companyName: 'CherryHQ',
+    productName: 'CherryStudio',
+    submitURL: '',
+    uploadToServer: false
+  })
+}
 
 /**
  * Disable hardware acceleration if setting is enabled
  */
 const disableHardwareAcceleration = configManager.getDisableHardwareAcceleration()
-if (disableHardwareAcceleration) {
-  app.disableHardwareAcceleration()
+if (disableHardwareAcceleration && electronApp) {
+  electronApp.disableHardwareAcceleration()
 }
 
 /**
@@ -64,43 +76,45 @@ if (disableHardwareAcceleration) {
  * (especially on Windows for SelectionAssistant Toolbar)
  * Know Issue: https://github.com/electron/electron/issues/12130#issuecomment-627198990
  */
-if (isWin) {
-  app.commandLine.appendSwitch('wm-window-animations-disabled')
+if (isWin && electronApp) {
+  electronApp.commandLine.appendSwitch('wm-window-animations-disabled')
 }
 
 /**
  * Enable GlobalShortcutsPortal for Linux Wayland Protocol
  * see: https://www.electronjs.org/docs/latest/api/global-shortcut
  */
-if (isLinux && process.env.XDG_SESSION_TYPE === 'wayland') {
-  app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
+if (isLinux && process.env.XDG_SESSION_TYPE === 'wayland' && electronApp) {
+  electronApp.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
 }
 
 // DocumentPolicyIncludeJSCallStacksInCrashReports: Enable features for unresponsive renderer js call stacks
 // EarlyEstablishGpuChannel,EstablishGpuChannelAsync: Enable features for early establish gpu channel
 // speed up the startup time
 // https://github.com/microsoft/vscode/pull/241640/files
-app.commandLine.appendSwitch(
-  'enable-features',
-  'DocumentPolicyIncludeJSCallStacksInCrashReports,EarlyEstablishGpuChannel,EstablishGpuChannelAsync'
-)
-app.on('web-contents-created', (_, webContents) => {
-  webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Document-Policy': ['include-js-call-stacks-in-crash-reports']
-      }
+if (electronApp) {
+  electronApp.commandLine.appendSwitch(
+    'enable-features',
+    'DocumentPolicyIncludeJSCallStacksInCrashReports,EarlyEstablishGpuChannel,EstablishGpuChannelAsync'
+  )
+  electronApp.on('web-contents-created', (_, webContents) => {
+    webContents.session.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Document-Policy': ['include-js-call-stacks-in-crash-reports']
+        }
+      })
+    })
+
+    webContents.on('unresponsive', async () => {
+      // Interrupt execution and collect call stack from unresponsive renderer
+      logger.error('Renderer unresponsive start')
+      const callStack = await webContents.mainFrame.collectJavaScriptCallStack()
+      logger.error(`Renderer unresponsive js call stack\n ${callStack}`)
     })
   })
-
-  webContents.on('unresponsive', async () => {
-    // Interrupt execution and collect call stack from unresponsive renderer
-    logger.error('Renderer unresponsive start')
-    const callStack = await webContents.mainFrame.collectJavaScriptCallStack()
-    logger.error(`Renderer unresponsive js call stack\n ${callStack}`)
-  })
-})
+}
 
 // in production mode, handle uncaught exception and unhandled rejection globally
 if (!isDev) {
@@ -116,27 +130,27 @@ if (!isDev) {
 }
 
 // Check for single instance lock
-if (!app.requestSingleInstanceLock()) {
-  app.quit()
+if (!electronApp || !electronApp.requestSingleInstanceLock()) {
+  electronApp?.quit()
   process.exit(0)
 } else {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
 
-  app.whenReady().then(async () => {
+  electronApp.whenReady().then(async () => {
     // Record current version for tracking
     // A preparation for v2 data refactoring
     versionService.recordCurrentVersion()
 
     initWebviewHotkeys()
     // Set app user model id for windows
-    electronApp.setAppUserModelId(import.meta.env.VITE_MAIN_BUNDLE_ID || 'com.kangfenmao.CherryStudio')
+    electronApp!.setAppUserModelId(import.meta.env.VITE_MAIN_BUNDLE_ID || 'com.kangfenmao.CherryStudio')
 
     // Mac: Hide dock icon before window creation when launch to tray is set
     const isLaunchToTray = configManager.getLaunchToTray()
     if (isLaunchToTray) {
-      app.dock?.hide()
+      electronApp!.dock?.hide()
     }
 
     const mainWindow = windowService.createMainWindow()
@@ -147,6 +161,25 @@ if (!app.requestSingleInstanceLock()) {
 
     nodeTraceService.init()
     powerMonitorService.init()
+
+    // 🚀 预加载原生模块 (Rust 层)
+    // 确保 TagMemo 等服务使用 Rust 实现而非 TypeScript fallback
+    try {
+      const nativeStatus = await preloadNativeModules()
+      if (nativeStatus.loaded) {
+        logger.info('✅ Native modules preloaded', {
+          features: nativeStatus.features,
+          loadTime: nativeStatus.loadTime + 'ms',
+          version: nativeStatus.version
+        })
+      } else {
+        logger.warn('⚠️ Native modules not available, using TypeScript fallback', {
+          error: nativeStatus.error
+        })
+      }
+    } catch (nativeError: any) {
+      logger.warn('Native module preload failed (non-critical):', nativeError)
+    }
 
     // 初始化统一存储核心 (Phase 6)
     runAsyncFunction(async () => {
@@ -162,7 +195,7 @@ if (!app.requestSingleInstanceLock()) {
       }
     })
 
-    app.on('activate', function () {
+    electronApp!.on('activate', function () {
       const mainWindow = windowService.getMainWindow()
       if (!mainWindow || mainWindow.isDestroyed()) {
         windowService.createMainWindow()
@@ -173,7 +206,7 @@ if (!app.requestSingleInstanceLock()) {
 
     registerShortcuts(mainWindow)
 
-    await registerIpc(mainWindow, app)
+    await registerIpc(mainWindow, electronApp!)
     localTransferService.startDiscovery({ resetList: true })
 
     replaceDevtoolsFont(mainWindow)
@@ -182,9 +215,14 @@ if (!app.requestSingleInstanceLock()) {
     await setupAppImageDeepLink()
 
     if (isDev) {
-      installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-        .then((name) => logger.info(`Added Extension:  ${name}`))
-        .catch((err) => logger.error('An error occurred: ', err))
+      // 延迟导入 electron-devtools-installer 以避免模块加载时 electron 未初始化
+      import('electron-devtools-installer')
+        .then(({ default: installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS }) => {
+          installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+            .then((name) => logger.info(`Added Extension:  ${name}`))
+            .catch((err) => logger.error('An error occurred: ', err))
+        })
+        .catch((err) => logger.warn('Failed to load devtools installer:', err))
     }
 
     //start selection assistant service
@@ -219,11 +257,11 @@ if (!app.requestSingleInstanceLock()) {
     })
   })
 
-  registerProtocolClient(app)
+  registerProtocolClient(electronApp!)
 
   // macOS specific: handle protocol when app is already running
 
-  app.on('open-url', (event, url) => {
+  electronApp!.on('open-url', (event, url) => {
     event.preventDefault()
     handleProtocolUrl(url)
   })
@@ -237,7 +275,7 @@ if (!app.requestSingleInstanceLock()) {
   handleOpenUrl(process.argv)
 
   // Listen for second instance
-  app.on('second-instance', (_event, argv) => {
+  electronApp!.on('second-instance', (_event, argv) => {
     windowService.showMainWindow()
 
     // Protocol handler for Windows/Linux
@@ -245,12 +283,14 @@ if (!app.requestSingleInstanceLock()) {
     handleOpenUrl(argv)
   })
 
-  app.on('browser-window-created', (_, window) => {
+  electronApp!.on('browser-window-created', async (_, window) => {
+    // 延迟导入以避免模块加载时 electron.app 未定义的问题
+    const { optimizer } = await import('@electron-toolkit/utils')
     optimizer.watchWindowShortcuts(window)
   })
 
-  app.on('before-quit', () => {
-    app.isQuitting = true
+  electronApp!.on('before-quit', () => {
+    ;(electronApp as any).isQuitting = true
 
     // quit selection service
     if (selectionService) {
@@ -261,7 +301,7 @@ if (!app.requestSingleInstanceLock()) {
     localTransferService.dispose()
   })
 
-  app.on('will-quit', async () => {
+  electronApp!.on('will-quit', async () => {
     // 简单的资源清理，不阻塞退出流程
     if (isOvmsSupported) {
       const { ovmsManager } = await import('./services/OvmsManager')

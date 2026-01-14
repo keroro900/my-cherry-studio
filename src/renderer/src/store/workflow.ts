@@ -99,7 +99,7 @@ const initialState: WorkflowState = {
   selectedNodeIds: [],
   selectedEdgeIds: [],
   showNodePanel: true,
-  showConfigPanel: true,
+  showConfigPanel: false,  // 默认隐藏固定面板，使用悬浮模式
   showStatusPanel: true,
   history: [],
   historyIndex: -1,

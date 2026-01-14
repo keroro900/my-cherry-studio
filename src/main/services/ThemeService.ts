@@ -1,36 +1,56 @@
 import { IpcChannel } from '@shared/IpcChannel'
 import { ThemeMode } from '@types'
-import { BrowserWindow, nativeTheme } from 'electron'
 
 import { titleBarOverlayDark, titleBarOverlayLight } from '../config'
 import { configManager } from './ConfigManager'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronNativeTheme: typeof import('electron').nativeTheme | undefined
+let electronBrowserWindow: typeof import('electron').BrowserWindow | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const electron = require('electron')
+  electronNativeTheme = electron.nativeTheme
+  electronBrowserWindow = electron.BrowserWindow
+} catch {
+  // electron 未就绪
+}
 
 class ThemeService {
   private theme: ThemeMode = ThemeMode.system
   constructor() {
     this.theme = configManager.getTheme()
 
+    if (!electronNativeTheme) {
+      return
+    }
+
     if (this.theme === ThemeMode.dark || this.theme === ThemeMode.light || this.theme === ThemeMode.system) {
-      nativeTheme.themeSource = this.theme
+      electronNativeTheme.themeSource = this.theme
     } else {
       // 兼容旧版本
       configManager.setTheme(ThemeMode.system)
-      nativeTheme.themeSource = ThemeMode.system
+      electronNativeTheme.themeSource = ThemeMode.system
     }
-    nativeTheme.on('updated', this.themeUpdatadHandler.bind(this))
+    electronNativeTheme.on('updated', this.themeUpdatadHandler.bind(this))
   }
 
   themeUpdatadHandler() {
-    BrowserWindow.getAllWindows().forEach((win) => {
+    if (!electronBrowserWindow || !electronNativeTheme) return
+
+    electronBrowserWindow.getAllWindows().forEach((win) => {
       if (win && !win.isDestroyed() && win.setTitleBarOverlay) {
         try {
-          win.setTitleBarOverlay(nativeTheme.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight)
+          win.setTitleBarOverlay(electronNativeTheme!.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight)
         } catch (error) {
           // don't throw error if setTitleBarOverlay failed
           // Because it may be called with some windows have some title bar
         }
       }
-      win.webContents.send(IpcChannel.ThemeUpdated, nativeTheme.shouldUseDarkColors ? ThemeMode.dark : ThemeMode.light)
+      win.webContents.send(
+        IpcChannel.ThemeUpdated,
+        electronNativeTheme!.shouldUseDarkColors ? ThemeMode.dark : ThemeMode.light
+      )
     })
   }
 
@@ -40,7 +60,9 @@ class ThemeService {
     }
 
     this.theme = theme
-    nativeTheme.themeSource = theme
+    if (electronNativeTheme) {
+      electronNativeTheme.themeSource = theme
+    }
     configManager.setTheme(theme)
   }
 }

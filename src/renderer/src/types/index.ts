@@ -500,6 +500,7 @@ const ThinkModelTypes = [
   'gpt5_2',
   'gpt5pro',
   'gpt52pro',
+  'gpt_oss',
   'grok',
   'grok4_fast',
   'gemini2_flash',
@@ -629,7 +630,8 @@ export type Metrics = {
 
 export enum TopicType {
   Chat = 'chat',
-  Session = 'session'
+  Session = 'session',
+  GroupChat = 'groupchat'
 }
 
 export type Topic = {
@@ -1001,6 +1003,7 @@ export type LanguageVarious =
   | 'fr-FR'
   | 'ja-JP'
   | 'pt-PT'
+  | 'ro-RO'
   | 'ru-RU'
 
 export type CodeStyleVarious = 'auto' | string
@@ -1284,16 +1287,13 @@ export const BuiltinMCPServerNames = {
   sequentialThinking: '@cherry/sequentialthinking',
   braveSearch: '@cherry/brave-search',
   fetch: '@cherry/fetch',
-  filesystem: '@cherry/filesystem',
   difyKnowledge: '@cherry/dify-knowledge',
   python: '@cherry/python',
   didiMCP: '@cherry/didi-mcp',
   browser: '@cherry/browser',
   nowledgeMem: '@cherry/nowledge-mem',
   workflow: '@cherry/workflow',
-  fashion: '@cherry/fashion',
   vcpRag: '@cherry/vcp-rag',
-  fashionScraper: '@cherry/fashion-scraper',
   agentCollab: '@cherry/agent-collab',
   diary: '@cherry/diary'
 } as const
@@ -1487,6 +1487,8 @@ export interface MemoryItem {
   updatedAt?: string
   score?: number
   metadata?: Record<string, any>
+  /** Agent ID (VCP 角色记忆隔离) */
+  agentId?: string
 }
 
 export interface MemorySearchResult {

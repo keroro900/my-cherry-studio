@@ -440,38 +440,19 @@ const blockUpdateThrottlers = new LRUCache<string, ReturnType<typeof throttle>>(
 })
 
 /**
- * 消息块 RAF 缓存。
- * 用于管理 RAF 请求创建和取消。
+ * 消息块 RAF 批量更新缓存。
+ * 存储待更新的数据，在下一帧批量处理。
  */
-const blockUpdateRafs = new LRUCache<string, number>({
-  max: 100,
-  ttl: 1000 * 60 * 5,
-  updateAgeOnGet: true
-})
+const pendingBlockUpdates = new Map<string, { rafId: number; update: any }>()
 
 /**
  * 获取或创建消息块专用的节流函数。
- *
- * 优化说明:
- * - 节流间隔从 150ms 增加到 200ms，减少更新频率
- * - Redux dispatch 优先执行，保证 UI 响应
- * - DB 写入异步执行，不阻塞 UI
+ * 节流器仅负责异步写入数据库。
  */
 const getBlockThrottler = (id: string) => {
   if (!blockUpdateThrottlers.has(id)) {
     const throttler = throttle(async (blockUpdate: any) => {
-      const existingRAF = blockUpdateRafs.get(id)
-      if (existingRAF) {
-        cancelAnimationFrame(existingRAF)
-      }
-
-      // 优先更新 UI（通过 RAF）
-      const rafId = requestAnimationFrame(() => {
-        store.dispatch(updateOneBlock({ id, changes: blockUpdate }))
-        blockUpdateRafs.delete(id)
-      })
-
-      blockUpdateRafs.set(id, rafId)
+      // 仅异步写入数据库，减少 DB I/O 频率
       await updateSingleBlock(id, blockUpdate)
     }, 150)
 
@@ -483,21 +464,41 @@ const getBlockThrottler = (id: string) => {
 
 /**
  * 更新单个消息块。
+ * 使用 RAF 批量更新 Redux（每帧最多一次），同时通过节流器异步写入数据库。
  */
 export const throttledBlockUpdate = (id: string, blockUpdate: any) => {
   const throttler = getBlockThrottler(id)
-  // store.dispatch(updateOneBlock({ id, changes: blockUpdate }))
+
+  // 使用 RAF 批量更新 Redux，避免过于频繁的更新导致卡顿
+  const pending = pendingBlockUpdates.get(id)
+  if (pending) {
+    // 如果已有待处理的更新，只更新数据，不重新调度 RAF
+    pending.update = blockUpdate
+  } else {
+    // 调度新的 RAF
+    const rafId = requestAnimationFrame(() => {
+      const pendingUpdate = pendingBlockUpdates.get(id)
+      if (pendingUpdate) {
+        store.dispatch(updateOneBlock({ id, changes: pendingUpdate.update }))
+        pendingBlockUpdates.delete(id)
+      }
+    })
+    pendingBlockUpdates.set(id, { rafId, update: blockUpdate })
+  }
+
+  // 节流写入数据库
   throttler(blockUpdate)
 }
 
 /**
- * 取消单个块的节流更新，移除节流器和 RAF。
+ * 取消单个块的节流更新。
  */
 export const cancelThrottledBlockUpdate = (id: string) => {
-  const rafId = blockUpdateRafs.get(id)
-  if (rafId) {
-    cancelAnimationFrame(rafId)
-    blockUpdateRafs.delete(id)
+  // 取消待处理的 RAF
+  const pending = pendingBlockUpdates.get(id)
+  if (pending) {
+    cancelAnimationFrame(pending.rafId)
+    pendingBlockUpdates.delete(id)
   }
 
   const throttler = blockUpdateThrottlers.get(id)
@@ -711,7 +712,7 @@ const fetchAndProcessAgentResponseImpl = async (
     const adapter = new AiSdkToChunkAdapter(
       streamProcessorCallbacks,
       [],
-      false,
+      true,
       false,
       (sessionId) => {
         persistAgentSessionId(sessionId)

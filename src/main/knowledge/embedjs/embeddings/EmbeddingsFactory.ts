@@ -28,12 +28,20 @@ export default class EmbeddingsFactory {
         }
       })
     }
+
+    // 检查是否为 Jina 模型（包括通过 302ai 等代理使用的 Jina 模型）
+    // Jina CLIP 模型不支持 dimensions 参数，因为它们有固定的输出维度
+    const isJinaModel = model.toLowerCase().includes('jina')
+    const effectiveDimensions = isJinaModel ? undefined : dimensions
+
     // NOTE: Azure OpenAI 也走 OpenAIEmbeddings, baseURL是https://xxxx.openai.azure.com/openai/v1
     return new OpenAiEmbeddings({
       model,
       apiKey,
-      dimensions,
+      dimensions: effectiveDimensions,
       batchSize,
+      maxRetries: 2, // 减少重试次数，避免长时间等待
+      timeout: 30000, // 30秒超时
       configuration: { baseURL, fetch: net.fetch as typeof fetch }
     })
   }

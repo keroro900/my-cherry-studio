@@ -31,6 +31,7 @@ interface SearchResult {
 class MemoryService {
   private static instance: MemoryService | null = null
   private currentUserId: string = 'default-user'
+  private currentAgentId: string | undefined = undefined
 
   constructor() {
     this.init()
@@ -74,18 +75,36 @@ class MemoryService {
   }
 
   /**
+   * Sets the current agent context for memory operations (分助手记忆)
+   * @param agentId - The agent/assistant ID to set as current context
+   */
+  public setCurrentAgent(agentId: string | undefined): void {
+    this.currentAgentId = agentId
+  }
+
+  /**
+   * Gets the current agent context
+   * @returns The current agent ID or undefined
+   */
+  public getCurrentAgent(): string | undefined {
+    return this.currentAgentId
+  }
+
+  /**
    * Lists all stored memories
    * @param config - Optional configuration for filtering memories
    * @returns Promise resolving to search results containing all memories
    */
   public async list(config?: MemoryListOptions): Promise<MemorySearchResult> {
-    const configWithUser = {
+    // 合并配置：config 中的 userId/agentId 优先，否则使用当前上下文
+    const configWithContext = {
       ...config,
-      userId: this.currentUserId
+      userId: config?.userId || this.currentUserId,
+      agentId: config?.agentId ?? this.currentAgentId
     }
 
     try {
-      const result: SearchResult = await window.api.memory.list(configWithUser)
+      const result: SearchResult = await window.api.memory.list(configWithContext)
 
       // Handle error responses from main process
       if (result.error) {
@@ -115,8 +134,13 @@ class MemoryService {
    * @returns Promise resolving to search results of added memories
    */
   public async add(messages: string | AssistantMessage[], options: AddMemoryOptions): Promise<MemorySearchResult> {
-    options.userId = this.currentUserId
-    const result: SearchResult = await window.api.memory.add(messages, options)
+    // 合并上下文：options 中的值优先
+    const optionsWithContext = {
+      ...options,
+      userId: options.userId || this.currentUserId,
+      agentId: options.agentId ?? this.currentAgentId
+    }
+    const result: SearchResult = await window.api.memory.add(messages, optionsWithContext)
     // Convert SearchResult to MemorySearchResult for consistency
     return {
       results: result.memories,
@@ -131,8 +155,13 @@ class MemoryService {
    * @returns Promise resolving to search results matching the query
    */
   public async search(query: string, options: MemorySearchOptions): Promise<MemorySearchResult> {
-    options.userId = this.currentUserId
-    const result: SearchResult = await window.api.memory.search(query, options)
+    // 合并上下文：options 中的值优先
+    const optionsWithContext = {
+      ...options,
+      userId: options.userId || this.currentUserId,
+      agentId: options.agentId ?? this.currentAgentId
+    }
+    const result: SearchResult = await window.api.memory.search(query, optionsWithContext)
     // Convert SearchResult to MemorySearchResult for consistency
     return {
       results: result.memories,

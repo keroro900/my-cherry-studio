@@ -146,17 +146,6 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
   },
   {
     id: nanoid(),
-    name: BuiltinMCPServerNames.filesystem,
-    type: 'inMemory',
-    args: ['/Users/username/Desktop', '/path/to/other/allowed/dir'],
-    shouldConfig: true,
-    isActive: false,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
     name: BuiltinMCPServerNames.difyKnowledge,
     type: 'inMemory',
     isActive: false,
@@ -222,30 +211,10 @@ export const builtinMCPServers: BuiltinMCPServer[] = [
   },
   {
     id: nanoid(),
-    name: BuiltinMCPServerNames.fashion,
-    description: '时尚 AI 服务 - 提供时尚趋势分析、服装属性提取、知识库搜索',
-    type: 'inMemory',
-    isActive: false,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
     name: BuiltinMCPServerNames.vcpRag,
     description: 'VCP 风格知识库搜索 - 4 种检索模式、时间感知、语义组、TagMemo',
     type: 'inMemory',
     isActive: true,
-    provider: 'CherryAI',
-    installSource: 'builtin',
-    isTrusted: true
-  },
-  {
-    id: nanoid(),
-    name: BuiltinMCPServerNames.fashionScraper,
-    description: '时尚数据采集 - 产品抓取、趋势文章、品牌监控',
-    type: 'inMemory',
-    isActive: false,
     provider: 'CherryAI',
     installSource: 'builtin',
     isTrusted: true

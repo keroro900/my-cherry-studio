@@ -1,10 +1,31 @@
-import type { Client } from '@libsql/client'
-import { createClient } from '@libsql/client'
+/**
+ * MemoryService - 全局记忆服务 (VCP 底层实现)
+ *
+ * 重构说明:
+ * - 移除独立的 LibSQL 数据库，改用 UnifiedStorageCore 统一存储
+ * - 记忆存储为 chunks (source='memory')，与知识库、日记共用存储层
+ * - 自动获得 TagMemo 增强、VexusAdapter 向量索引
+ * - 保持原有 API 签名以兼容 UI 和 IPC 层
+ *
+ * 架构关系:
+ * ```
+ * MemoryService (本文件)
+ *       │
+ *       ▼
+ * UnifiedStorageCore
+ *       │
+ *  ┌────┼────┬────────────┐
+ *  ▼    ▼    ▼            ▼
+ * SQLite VexusAdapter TagMemo Embeddings
+ * (chunks)  (向量索引)  (共现矩阵)
+ * ```
+ *
+ * @author Cherry Studio Team
+ */
+
 import { loggerService } from '@logger'
-import { DATA_PATH } from '@main/config'
-import Embeddings from '@main/knowledge/embedjs/embeddings/Embeddings'
-import { getTagMemoService, type TagMemoService } from '@main/knowledge/tagmemo'
-import { makeSureDirExists } from '@main/utils'
+import { getUnifiedStorage } from '@main/storage'
+import type { UnifiedStorageCore } from '@main/storage/UnifiedStorageCore'
 import type {
   AddMemoryOptions,
   AssistantMessage,
@@ -15,11 +36,6 @@ import type {
   MemorySearchOptions
 } from '@types'
 import crypto from 'crypto'
-import { app } from 'electron'
-import fs from 'fs'
-import path from 'path'
-
-import { MemoryQueries } from './queries'
 
 const logger = loggerService.withContext('MemoryService')
 
@@ -49,22 +65,12 @@ export interface SearchResult {
 
 export class MemoryService {
   private static instance: MemoryService | null = null
-  private db: Client | null = null
   private isInitialized = false
-  private embeddings: Embeddings | null = null
   private config: MemoryConfig | null = null
-  private static readonly UNIFIED_DIMENSION = 1536
-  private static readonly SIMILARITY_THRESHOLD = 0.85
-
-  /** TagMemo 服务 (单例) - 用于搜索增强 */
-  private tagMemo: TagMemoService | null = null
-
-  /** 是否启用 TagMemo 增强 */
-  private enableTagMemoEnhancement = true
+  private storage: UnifiedStorageCore | null = null
 
   private constructor() {
     // Private constructor to enforce singleton pattern
-    // TagMemo 延迟初始化，避免循环依赖
   }
 
   public static getInstance(): MemoryService {
@@ -83,215 +89,100 @@ export class MemoryService {
   }
 
   /**
-   * Migrate the memory database from the old path to the new path
-   * If the old memory database exists, rename it to the new path
+   * 数据库迁移方法 (兼容性保留，不执行实际操作)
+   * 旧版使用独立的 memories.db，现在使用 UnifiedStorageCore
    */
   public migrateMemoryDb(): void {
-    const oldMemoryDbPath = path.join(app.getPath('userData'), 'memories.db')
-    const memoryDbPath = path.join(DATA_PATH, 'Memory', 'memories.db')
-
-    makeSureDirExists(path.dirname(memoryDbPath))
-
-    if (fs.existsSync(oldMemoryDbPath)) {
-      fs.renameSync(oldMemoryDbPath, memoryDbPath)
-    }
+    logger.debug('migrateMemoryDb called - using UnifiedStorageCore, no migration needed')
   }
 
   /**
-   * Initialize the database connection and create tables
+   * 初始化服务
    */
   private async init(): Promise<void> {
-    if (this.isInitialized && this.db) {
+    if (this.isInitialized && this.storage) {
       return
     }
 
     try {
-      const memoryDbPath = path.join(DATA_PATH, 'Memory', 'memories.db')
+      this.storage = getUnifiedStorage()
+      await this.storage.initialize()
 
-      makeSureDirExists(path.dirname(memoryDbPath))
+      // 如果配置了 embedding，设置到 UnifiedStorageCore
+      if (this.config?.embeddingApiClient) {
+        await this.storage.setEmbeddingConfig(
+          this.config.embeddingApiClient,
+          this.config.embeddingDimensions
+        )
+      }
 
-      this.db = createClient({
-        url: `file:${memoryDbPath}`,
-        intMode: 'number'
-      })
-
-      // Create tables
-      await this.createTables()
       this.isInitialized = true
-      logger.debug('Memory database initialized successfully')
+      logger.debug('MemoryService initialized with UnifiedStorageCore')
     } catch (error) {
-      logger.error('Failed to initialize memory database:', error as Error)
+      logger.error('Failed to initialize MemoryService:', error as Error)
       throw new Error(
-        `Memory database initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `MemoryService initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
 
-  private async createTables(): Promise<void> {
-    if (!this.db) throw new Error('Database not initialized')
-
-    // Create memories table with native vector support
-    await this.db.execute(MemoryQueries.createTables.memories)
-
-    // Create memory history table
-    await this.db.execute(MemoryQueries.createTables.memoryHistory)
-
-    // Create indexes
-    await this.db.execute(MemoryQueries.createIndexes.userId)
-    await this.db.execute(MemoryQueries.createIndexes.agentId)
-    await this.db.execute(MemoryQueries.createIndexes.createdAt)
-    await this.db.execute(MemoryQueries.createIndexes.hash)
-    await this.db.execute(MemoryQueries.createIndexes.memoryHistory)
-
-    // Create vector index for similarity search
-    try {
-      await this.db.execute(MemoryQueries.createIndexes.vector)
-    } catch (error) {
-      // Vector index might not be supported in all versions
-      logger.warn('Failed to create vector index, falling back to non-indexed search:', error as Error)
-    }
-  }
-
   /**
-   * Add new memories from messages
+   * 添加新记忆
    */
   public async add(messages: string | AssistantMessage[], options: AddMemoryOptions): Promise<SearchResult> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
-    const { userId, agentId, runId, metadata } = options
+    const { userId, agentId, metadata } = options
 
     try {
-      // Convert messages to memory strings
+      // 将消息转换为字符串
       const memoryStrings = Array.isArray(messages)
         ? messages.map((m) => (typeof m === 'string' ? m : m.content))
         : [messages]
+
       const addedMemories: MemoryItem[] = []
 
       for (const memory of memoryStrings) {
         const trimmedMemory = memory.trim()
         if (!trimmedMemory) continue
 
-        // Generate hash for deduplication
+        // 生成哈希用于去重
         const hash = crypto.createHash('sha256').update(trimmedMemory).digest('hex')
 
-        // Check if memory already exists
-        const existing = await this.db.execute({
-          sql: MemoryQueries.memory.checkExistsIncludeDeleted,
-          args: [hash]
-        })
+        // 检查是否已存在相似记忆 (通过搜索)
+        try {
+          const similarResults = await this.storage.searchChunks(trimmedMemory, {
+            source: 'memory',
+            userId,
+            topK: 5,
+            threshold: 0.85
+          })
 
-        if (existing.rows.length > 0) {
-          const existingRecord = existing.rows[0] as any
-          const isDeleted = existingRecord.is_deleted === 1
-
-          if (!isDeleted) {
-            // Active record exists, skip insertion
-            logger.debug(`Memory already exists with hash: ${hash}`)
-            continue
-          } else {
-            // Deleted record exists, restore it instead of inserting new one
-            logger.debug(`Restoring deleted memory with hash: ${hash}`)
-
-            // Generate embedding if model is configured
-            let embedding: number[] | null = null
-            const embeddingModel = this.config?.embeddingModel
-
-            if (embeddingModel) {
-              try {
-                embedding = await this.generateEmbedding(trimmedMemory)
-                logger.debug(
-                  `Generated embedding for restored memory with dimension: ${embedding.length} (target: ${this.config?.embeddingDimensions || MemoryService.UNIFIED_DIMENSION})`
-                )
-              } catch (error) {
-                logger.error('Failed to generate embedding for restored memory:', error as Error)
-              }
-            }
-
-            const now = new Date().toISOString()
-
-            // Restore the deleted record
-            await this.db.execute({
-              sql: MemoryQueries.memory.restoreDeleted,
-              args: [
-                trimmedMemory,
-                embedding ? this.embeddingToVector(embedding) : null,
-                metadata ? JSON.stringify(metadata) : null,
-                now,
-                existingRecord.id
-              ]
-            })
-
-            // Add to history
-            await this.addHistory(existingRecord.id, null, trimmedMemory, 'ADD')
-
-            addedMemories.push({
-              id: existingRecord.id,
-              memory: trimmedMemory,
-              hash,
-              createdAt: now,
-              updatedAt: now,
-              metadata
-            })
+          if (similarResults.length > 0 && similarResults[0].score >= 0.85) {
+            logger.debug(`Skipping duplicate memory, similarity: ${similarResults[0].score.toFixed(3)}`)
             continue
           }
+        } catch (searchError) {
+          // 搜索失败不阻止添加
+          logger.warn('Similarity check failed, continuing with add', searchError as Error)
         }
 
-        // Generate embedding if model is configured
-        let embedding: number[] | null = null
-        if (this.config?.embeddingModel) {
-          try {
-            embedding = await this.generateEmbedding(trimmedMemory)
-            logger.debug(
-              `Generated embedding with dimension: ${embedding.length} (target: ${this.config?.embeddingDimensions || MemoryService.UNIFIED_DIMENSION})`
-            )
-
-            // Check for similar memories using vector similarity
-            const similarMemories = await this.hybridSearch(trimmedMemory, embedding, {
-              limit: 5,
-              threshold: 0.1, // Lower threshold to get more candidates
-              userId,
-              agentId
-            })
-
-            // Check if any similar memory exceeds the similarity threshold
-            if (similarMemories.memories.length > 0) {
-              const highestSimilarity = Math.max(...similarMemories.memories.map((m) => m.score || 0))
-              if (highestSimilarity >= MemoryService.SIMILARITY_THRESHOLD) {
-                logger.debug(
-                  `Skipping memory addition due to high similarity: ${highestSimilarity.toFixed(3)} >= ${MemoryService.SIMILARITY_THRESHOLD}`
-                )
-                logger.debug(`Similar memory found: "${similarMemories.memories[0].memory}"`)
-                continue
-              }
-            }
-          } catch (error) {
-            logger.error('Failed to generate embedding:', error as Error)
-          }
-        }
-
-        // Insert new memory
-        const id = crypto.randomUUID()
-        const now = new Date().toISOString()
-
-        await this.db.execute({
-          sql: MemoryQueries.memory.insert,
-          args: [
-            id,
-            trimmedMemory,
+        // 使用 UnifiedStorageCore 插入记忆
+        const id = await this.storage.insertChunk({
+          content: trimmedMemory,
+          source: 'memory',
+          userId: userId || 'default-user',
+          agentId,
+          tags: metadata?.tags as string[] | undefined,
+          metadata: {
+            ...metadata,
             hash,
-            embedding ? this.embeddingToVector(embedding) : null,
-            metadata ? JSON.stringify(metadata) : null,
-            userId || null,
-            agentId || null,
-            runId || null,
-            now,
-            now
-          ]
+            type: 'global_memory'
+          }
         })
 
-        // Add to history
-        await this.addHistory(id, null, trimmedMemory, 'ADD')
+        const now = new Date().toISOString()
 
         addedMemories.push({
           id,
@@ -299,9 +190,11 @@ export class MemoryService {
           hash,
           createdAt: now,
           updatedAt: now,
-          metadata
+          metadata: { ...metadata, userId }
         })
       }
+
+      logger.debug('Memories added', { count: addedMemories.length })
 
       return {
         memories: addedMemories,
@@ -318,80 +211,37 @@ export class MemoryService {
   }
 
   /**
-   * Search memories using text or vector similarity
+   * 搜索记忆
+   * 支持按 userId 和 agentId 双重隔离 (VCP 角色记忆)
    */
   public async search(query: string, options: MemorySearchOptions = {}): Promise<SearchResult> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
-    const { limit = 10, userId, agentId, filters = {} } = options
+    const { limit = 10, userId, agentId } = options
 
     try {
-      let memories: MemoryItem[] = []
+      // 使用 UnifiedStorageCore 搜索，自动获得 TagMemo 增强
+      // 支持 agentId 过滤实现 VCP 角色记忆隔离
+      const results = await this.storage.searchChunks(query, {
+        source: 'memory',
+        userId,
+        agentId,
+        topK: limit,
+        threshold: 0.3,
+        enableTagBoost: true
+      })
 
-      // If we have an embedder model configured, use vector search
-      if (this.config?.embeddingModel) {
-        try {
-          const queryEmbedding = await this.generateEmbedding(query)
-          const result = await this.hybridSearch(query, queryEmbedding, { limit, userId, agentId, filters })
-          memories = result.memories
-        } catch (error) {
-          logger.error('Vector search failed, falling back to text search:', error as Error)
-        }
-      }
-
-      // Fallback to text search if vector search didn't produce results
-      if (memories.length === 0) {
-        const conditions: string[] = ['m.is_deleted = 0']
-        const params: any[] = []
-
-        // Add search conditions
-        conditions.push('(m.memory LIKE ? OR m.memory LIKE ?)')
-        params.push(`%${query}%`, `%${query.split(' ').join('%')}%`)
-
-        if (userId) {
-          conditions.push('m.user_id = ?')
-          params.push(userId)
-        }
-
-        if (agentId) {
-          conditions.push('m.agent_id = ?')
-          params.push(agentId)
-        }
-
-        // Add custom filters
-        for (const [key, value] of Object.entries(filters)) {
-          if (value !== undefined && value !== null) {
-            conditions.push(`json_extract(m.metadata, '$.${key}') = ?`)
-            params.push(value)
-          }
-        }
-
-        const whereClause = conditions.join(' AND ')
-        params.push(limit)
-
-        const result = await this.db.execute({
-          sql: `${MemoryQueries.memory.list} ${whereClause}
-            ORDER BY m.created_at DESC
-            LIMIT ?
-          `,
-          args: params
-        })
-
-        memories = result.rows.map((row: any) => ({
-          id: row.id as string,
-          memory: row.memory as string,
-          hash: (row.hash as string) || undefined,
-          metadata: row.metadata ? JSON.parse(row.metadata as string) : undefined,
-          createdAt: row.created_at as string,
-          updatedAt: row.updated_at as string
-        }))
-      }
-
-      // 应用 TagMemo 增强 (如果启用)
-      if (this.enableTagMemoEnhancement && memories.length > 0) {
-        memories = await this.applyTagMemoEnhancement(query, memories)
-      }
+      const memories: MemoryItem[] = results.map((r) => ({
+        id: r.id,
+        memory: r.content,
+        hash: (r.metadata?.hash as string) || undefined,
+        metadata: r.metadata,
+        createdAt: (r.metadata?.createdAt as string) || new Date().toISOString(),
+        updatedAt: (r.metadata?.updatedAt as string) || new Date().toISOString(),
+        score: r.score,
+        agentId: r.agentId
+      }))
 
       return {
         memories,
@@ -408,100 +258,39 @@ export class MemoryService {
   }
 
   /**
-   * 应用 TagMemo 增强
-   */
-  private async applyTagMemoEnhancement(query: string, memories: MemoryItem[]): Promise<MemoryItem[]> {
-    try {
-      // 延迟初始化 TagMemo
-      if (!this.tagMemo) {
-        this.tagMemo = getTagMemoService()
-      }
-
-      // 转换为 KnowledgeSearchResult 格式
-      const searchResults = memories.map((m) => ({
-        pageContent: m.memory,
-        score: m.score || 0.5,
-        metadata: m.metadata || {}
-      }))
-
-      // 1. 从搜索结果初始化共现矩阵 (增量学习)
-      await this.tagMemo.initializeFromSearchResults(searchResults)
-
-      // 2. 从查询中提取标签
-      const queryTags = this.tagMemo.extractTagsFromQuery(query)
-
-      // 3. 应用 TagMemo 增强
-      if (queryTags.length > 0) {
-        const boostedResults = await this.tagMemo.applyTagBoost(query, queryTags, searchResults)
-
-        // 合并回 MemoryItem
-        return memories.map((memory, i) => ({
-          ...memory,
-          score: boostedResults[i]?.score || memory.score
-        }))
-      }
-
-      return memories
-    } catch (error) {
-      logger.warn('TagMemo enhancement failed, returning original memories', error as Error)
-      return memories
-    }
-  }
-
-  /**
-   * List all memories with optional filters
+   * 列出所有记忆
+   * 支持按 userId 和 agentId 双重隔离 (VCP 角色记忆)
    */
   public async list(options: MemoryListOptions = {}): Promise<SearchResult> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
     const { userId, agentId, limit = 100, offset = 0 } = options
 
     try {
-      const conditions: string[] = ['m.is_deleted = 0']
-      const params: any[] = []
-
-      if (userId) {
-        conditions.push('m.user_id = ?')
-        params.push(userId)
-      }
-
-      if (agentId) {
-        conditions.push('m.agent_id = ?')
-        params.push(agentId)
-      }
-
-      const whereClause = conditions.join(' AND ')
-
-      // Get total count
-      const countResult = await this.db.execute({
-        sql: `${MemoryQueries.memory.count} ${whereClause}`,
-        args: params
-      })
-      const totalCount = (countResult.rows[0] as any).total as number
-
-      // Get paginated results
-      params.push(limit, offset)
-      const result = await this.db.execute({
-        sql: `${MemoryQueries.memory.list} ${whereClause}
-          ORDER BY m.created_at DESC
-          LIMIT ? OFFSET ?
-        `,
-        args: params
+      // 使用 listChunks 直接查询数据库，不需要向量搜索
+      const results = await this.storage.listChunks({
+        source: 'memory',
+        userId,
+        agentId,
+        limit,
+        offset
       })
 
-      const memories: MemoryItem[] = result.rows.map((row: any) => ({
-        id: row.id as string,
-        memory: row.memory as string,
-        hash: (row.hash as string) || undefined,
-        metadata: row.metadata ? JSON.parse(row.metadata as string) : undefined,
-        createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string
+      const memories: MemoryItem[] = results.map((r) => ({
+        id: r.id,
+        memory: r.content,
+        hash: (r.metadata?.hash as string) || undefined,
+        metadata: r.metadata,
+        createdAt: (r.metadata?.createdAt as string) || new Date().toISOString(),
+        updatedAt: (r.metadata?.updatedAt as string) || new Date().toISOString(),
+        score: r.score,
+        agentId: r.agentId
       }))
 
       return {
         memories,
-        count: totalCount
+        count: memories.length
       }
     } catch (error) {
       logger.error('List failed:', error as Error)
@@ -514,34 +303,14 @@ export class MemoryService {
   }
 
   /**
-   * Delete a memory (soft delete)
+   * 删除记忆
    */
   public async delete(id: string): Promise<void> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
     try {
-      // Get current memory value for history
-      const current = await this.db.execute({
-        sql: MemoryQueries.memory.getForDelete,
-        args: [id]
-      })
-
-      if (current.rows.length === 0) {
-        throw new Error('Memory not found')
-      }
-
-      const currentMemory = (current.rows[0] as any).memory as string
-
-      // Soft delete
-      await this.db.execute({
-        sql: MemoryQueries.memory.softDelete,
-        args: [new Date().toISOString(), id]
-      })
-
-      // Add to history
-      await this.addHistory(id, currentMemory, null, 'DELETE')
-
+      await this.storage.deleteChunk(id)
       logger.debug(`Memory deleted: ${id}`)
     } catch (error) {
       logger.error('Delete failed:', error as Error)
@@ -550,61 +319,24 @@ export class MemoryService {
   }
 
   /**
-   * Update a memory
+   * 更新记忆
    */
   public async update(id: string, memory: string, metadata?: Record<string, any>): Promise<void> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
     try {
-      // Get current memory
-      const current = await this.db.execute({
-        sql: MemoryQueries.memory.getForUpdate,
-        args: [id]
-      })
-
-      if (current.rows.length === 0) {
-        throw new Error('Memory not found')
-      }
-
-      const row = current.rows[0] as any
-      const previousMemory = row.memory as string
-      const previousMetadata = row.metadata ? JSON.parse(row.metadata as string) : {}
-
-      // Generate new hash
+      // UnifiedStorageCore 的 updateChunk 方法
       const hash = crypto.createHash('sha256').update(memory.trim()).digest('hex')
 
-      // Generate new embedding if model is configured
-      let embedding: number[] | null = null
-      if (this.config?.embeddingModel) {
-        try {
-          embedding = await this.generateEmbedding(memory)
-          logger.debug(
-            `Updated embedding with dimension: ${embedding.length} (target: ${this.config?.embeddingDimensions || MemoryService.UNIFIED_DIMENSION})`
-          )
-        } catch (error) {
-          logger.error('Failed to generate embedding for update:', error as Error)
-        }
-      }
-
-      // Merge metadata
-      const mergedMetadata = { ...previousMetadata, ...metadata }
-
-      // Update memory
-      await this.db.execute({
-        sql: MemoryQueries.memory.update,
-        args: [
-          memory.trim(),
+      await this.storage.updateChunk(id, {
+        content: memory.trim(),
+        metadata: {
+          ...metadata,
           hash,
-          embedding ? this.embeddingToVector(embedding) : null,
-          JSON.stringify(mergedMetadata),
-          new Date().toISOString(),
-          id
-        ]
+          updatedAt: new Date().toISOString()
+        }
       })
-
-      // Add to history
-      await this.addHistory(id, previousMemory, memory, 'UPDATE')
 
       logger.debug(`Memory updated: ${id}`)
     } catch (error) {
@@ -614,66 +346,33 @@ export class MemoryService {
   }
 
   /**
-   * Get memory history
+   * 获取记忆历史
+   * 注意: VCP 统一存储不维护历史记录，返回空数组
    */
-  public async get(memoryId: string): Promise<MemoryHistoryItem[]> {
+  public async get(_memoryId: string): Promise<MemoryHistoryItem[]> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
-
-    try {
-      const result = await this.db.execute({
-        sql: MemoryQueries.history.getByMemoryId,
-        args: [memoryId]
-      })
-
-      return result.rows.map((row: any) => ({
-        id: row.id as number,
-        memoryId: row.memory_id as string,
-        previousValue: row.previous_value as string | undefined,
-        newValue: row.new_value as string,
-        action: row.action as 'ADD' | 'UPDATE' | 'DELETE',
-        createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string,
-        isDeleted: row.is_deleted === 1
-      }))
-    } catch (error) {
-      logger.error('Get history failed:', error as Error)
-      throw new Error(`Failed to get memory history: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+    logger.debug('Memory history requested - not supported in VCP mode')
+    return []
   }
 
   /**
-   * Delete all memories for a user without deleting the user (hard delete)
+   * 删除用户的所有记忆
    */
   public async deleteAllMemoriesForUser(userId: string): Promise<void> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
     if (!userId) {
       throw new Error('User ID is required')
     }
 
     try {
-      // Get count of memories to be deleted
-      const countResult = await this.db.execute({
-        sql: MemoryQueries.users.countMemoriesForUser,
-        args: [userId]
-      })
-      const totalCount = (countResult.rows[0] as any).total as number
-
-      // Delete history entries for this user's memories
-      await this.db.execute({
-        sql: MemoryQueries.users.deleteHistoryForUser,
-        args: [userId]
+      await this.storage.deleteChunksByFilter({
+        source: 'memory',
+        userId
       })
 
-      // Hard delete all memories for this user
-      await this.db.execute({
-        sql: MemoryQueries.users.deleteAllMemoriesForUser,
-        args: [userId]
-      })
-
-      logger.debug(`Reset all memories for user ${userId} (${totalCount} memories deleted)`)
+      logger.debug(`Reset all memories for user ${userId}`)
     } catch (error) {
       logger.error('Reset user memories failed:', error as Error)
       throw new Error(`Failed to reset user memories: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -681,11 +380,10 @@ export class MemoryService {
   }
 
   /**
-   * Delete a user and all their memories (hard delete)
+   * 删除用户及其所有记忆
    */
   public async deleteUser(userId: string): Promise<void> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
 
     if (!userId) {
       throw new Error('User ID is required')
@@ -695,247 +393,156 @@ export class MemoryService {
       throw new Error('Cannot delete the default user')
     }
 
+    // 删除用户的所有记忆
+    await this.deleteAllMemoriesForUser(userId)
+    logger.debug(`Deleted user ${userId}`)
+  }
+
+  // ==================== VCP 角色记忆隔离 (Agent Memory Isolation) ====================
+
+  /**
+   * 删除指定 Agent 的所有记忆
+   * VCP 角色记忆功能：每个 Agent 有独立的记忆空间
+   */
+  public async deleteAllMemoriesForAgent(agentId: string, userId?: string): Promise<void> {
+    await this.init()
+    if (!this.storage) throw new Error('Storage not initialized')
+
+    if (!agentId) {
+      throw new Error('Agent ID is required')
+    }
+
     try {
-      // Get count of memories to be deleted
-      const countResult = await this.db.execute({
-        sql: `SELECT COUNT(*) as total FROM memories WHERE user_id = ?`,
-        args: [userId]
-      })
-      const totalCount = (countResult.rows[0] as any).total as number
+      const filter: { source: 'memory'; agentId: string; userId?: string } = {
+        source: 'memory',
+        agentId
+      }
+      if (userId) {
+        filter.userId = userId
+      }
 
-      // Delete history entries for this user's memories
-      await this.db.execute({
-        sql: `DELETE FROM memory_history WHERE memory_id IN (SELECT id FROM memories WHERE user_id = ?)`,
-        args: [userId]
-      })
-
-      // Delete all memories for this user (hard delete)
-      await this.db.execute({
-        sql: `DELETE FROM memories WHERE user_id = ?`,
-        args: [userId]
-      })
-
-      logger.debug(`Deleted user ${userId} and ${totalCount} memories`)
+      await this.storage.deleteChunksByFilter(filter)
+      logger.debug(`Reset all memories for agent ${agentId}`, { userId })
     } catch (error) {
-      logger.error('Delete user failed:', error as Error)
-      throw new Error(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      logger.error('Reset agent memories failed:', error as Error)
+      throw new Error(`Failed to reset agent memories: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
   /**
-   * Get list of unique user IDs with their memory counts
+   * 获取 Agent 记忆统计列表
+   * VCP 角色记忆功能：列出所有有记忆的 Agent
+   */
+  public async getAgentsList(userId?: string): Promise<Array<{
+    agentId: string
+    memoryCount: number
+    lastMemoryDate: string
+  }>> {
+    await this.init()
+    if (!this.storage) throw new Error('Storage not initialized')
+
+    try {
+      const stats = await this.storage.getMemoryAgentStats(userId)
+      return stats
+    } catch (error) {
+      logger.error('Get agents list failed:', error as Error)
+      return []
+    }
+  }
+
+  /**
+   * 搜索所有 Agent 的记忆 (跨 Agent 搜索)
+   * VCP 统一记忆功能：类似于 search_all_knowledge_bases
+   */
+  public async searchAllAgents(query: string, options: Omit<MemorySearchOptions, 'agentId'> = {}): Promise<SearchResult> {
+    // 不传 agentId 即可搜索所有 Agent 的记忆
+    return this.search(query, options)
+  }
+
+  /**
+   * 获取用户列表
    */
   public async getUsersList(): Promise<{ userId: string; memoryCount: number; lastMemoryDate: string }[]> {
     await this.init()
-    if (!this.db) throw new Error('Database not initialized')
+    if (!this.storage) throw new Error('Storage not initialized')
 
     try {
-      const result = await this.db.execute({
-        sql: MemoryQueries.users.getUniqueUsers,
-        args: []
-      })
-
-      return result.rows.map((row: any) => ({
-        userId: row.user_id as string,
-        memoryCount: row.memory_count as number,
-        lastMemoryDate: row.last_memory_date as string
-      }))
+      const users = await this.storage.getMemoryUserStats()
+      return users
     } catch (error) {
       logger.error('Get users list failed:', error as Error)
-      throw new Error(`Failed to get users list: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // 返回默认用户
+      return [{
+        userId: 'default-user',
+        memoryCount: 0,
+        lastMemoryDate: new Date().toISOString()
+      }]
     }
   }
 
   /**
-   * Update configuration
+   * 更新配置
    */
   public setConfig(config: MemoryConfig): void {
     this.config = config
-    // Reset embeddings instance when config changes
-    this.embeddings = null
+
+    // 如果已初始化，更新 embedding 配置
+    if (this.storage && config.embeddingApiClient) {
+      this.storage.setEmbeddingConfig(
+        config.embeddingApiClient,
+        config.embeddingDimensions
+      ).catch((error) => {
+        logger.error('Failed to update embedding config:', error as Error)
+      })
+    }
+
+    logger.debug('MemoryService config updated')
   }
 
   /**
-   * Close database connection
+   * 关闭服务
    */
   public async close(): Promise<void> {
-    if (this.db) {
-      await this.db.close()
-      this.db = null
-      this.isInitialized = false
-    }
+    // UnifiedStorageCore 是单例，不需要关闭
+    this.isInitialized = false
+    this.storage = null
+    logger.debug('MemoryService closed')
   }
 
-  // ========== EMBEDDING OPERATIONS (Previously EmbeddingService) ==========
-
-  /**
-   * Normalize embedding dimensions to unified size
-   */
-  private normalizeEmbedding(embedding: number[]): number[] {
-    if (embedding.length === MemoryService.UNIFIED_DIMENSION) {
-      return embedding
-    }
-
-    if (embedding.length < MemoryService.UNIFIED_DIMENSION) {
-      // Pad with zeros
-      return [...embedding, ...new Array(MemoryService.UNIFIED_DIMENSION - embedding.length).fill(0)]
-    } else {
-      // Truncate
-      return embedding.slice(0, MemoryService.UNIFIED_DIMENSION)
-    }
-  }
-
-  /**
-   * Generate embedding for text
-   */
-  private async generateEmbedding(text: string): Promise<number[]> {
-    if (!this.config?.embeddingModel) {
-      throw new Error('Embedder model not configured')
-    }
-
-    try {
-      // Initialize embeddings instance if needed
-      if (!this.embeddings) {
-        if (!this.config.embeddingApiClient) {
-          throw new Error('Embedder provider not configured')
-        }
-
-        this.embeddings = new Embeddings({
-          embedApiClient: this.config.embeddingApiClient,
-          dimensions: this.config.embeddingDimensions
-        })
-
-        await this.embeddings.init()
-      }
-
-      const embedding = await this.embeddings.embedQuery(text)
-
-      // Normalize to unified dimension
-      return this.normalizeEmbedding(embedding)
-    } catch (error) {
-      logger.error('Embedding generation failed:', error as Error)
-      throw new Error(`Failed to generate embedding: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
-
-  // ========== VECTOR SEARCH OPERATIONS (Previously VectorSearch) ==========
-
-  /**
-   * Convert embedding array to libsql vector format
-   */
-  private embeddingToVector(embedding: number[]): string {
-    return `[${embedding.join(',')}]`
-  }
-
-  /**
-   * Hybrid search combining text and vector similarity (currently vector-only)
-   */
-  private async hybridSearch(
-    _: string,
-    queryEmbedding: number[],
-    options: VectorSearchOptions = {}
-  ): Promise<SearchResult> {
-    if (!this.db) throw new Error('Database not initialized')
-
-    const { limit = 10, threshold = 0.5, userId } = options
-
-    try {
-      const queryVector = this.embeddingToVector(queryEmbedding)
-
-      const conditions: string[] = ['m.is_deleted = 0']
-      const params: any[] = []
-
-      // Vector search only - three vector parameters for distance, vector_similarity, and combined_score
-      params.push(queryVector, queryVector, queryVector)
-
-      if (userId) {
-        conditions.push('m.user_id = ?')
-        params.push(userId)
-      }
-
-      const whereClause = conditions.join(' AND ')
-
-      const hybridQuery = `${MemoryQueries.search.hybridSearch} ${whereClause}
-      ) AS results
-      WHERE vector_similarity >= ?
-      ORDER BY vector_similarity DESC
-      LIMIT ?`
-
-      params.push(threshold, limit)
-
-      const result = await this.db.execute({
-        sql: hybridQuery,
-        args: params
-      })
-
-      const memories: MemoryItem[] = result.rows.map((row: any) => ({
-        id: row.id as string,
-        memory: row.memory as string,
-        hash: (row.hash as string) || undefined,
-        metadata: row.metadata ? JSON.parse(row.metadata as string) : undefined,
-        createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string,
-        score: row.vector_similarity as number
-      }))
-
-      return {
-        memories,
-        count: memories.length
-      }
-    } catch (error) {
-      logger.error('Hybrid search failed:', error as Error)
-      throw new Error(`Hybrid search failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
-
-  // ========== HELPER METHODS ==========
-
-  /**
-   * Add entry to memory history
-   */
-  private async addHistory(
-    memoryId: string,
-    previousValue: string | null,
-    newValue: string | null,
-    action: 'ADD' | 'UPDATE' | 'DELETE'
-  ): Promise<void> {
-    if (!this.db) throw new Error('Database not initialized')
-
-    const now = new Date().toISOString()
-    await this.db.execute({
-      sql: MemoryQueries.history.insert,
-      args: [memoryId, previousValue, newValue, action, now, now]
-    })
-  }
-
-  // ==================== TagMemo 配置方法 ====================
+  // ==================== TagMemo 配置方法 (兼容性) ====================
 
   /**
    * 启用/禁用 TagMemo 增强
+   * VCP 模式下自动启用，此方法仅作日志记录
    */
   public setTagMemoEnhancement(enabled: boolean): void {
-    this.enableTagMemoEnhancement = enabled
-    logger.info('TagMemo enhancement', { enabled })
+    logger.info('TagMemo enhancement setting (always enabled in VCP mode)', { enabled })
   }
 
   /**
    * 获取 TagMemo 统计信息
    */
   public getTagMemoStats(): { mode: string; tagCount: number; relationCount: number; documentCount: number } | null {
-    if (!this.tagMemo) {
-      this.tagMemo = getTagMemoService()
+    if (!this.storage) return null
+
+    try {
+      const stats = this.storage.getTagMemoStats()
+      return {
+        mode: 'vcp-unified',
+        tagCount: stats?.totalTags || 0,
+        relationCount: stats?.totalRelations || 0,
+        documentCount: stats?.totalDocuments || 0
+      }
+    } catch {
+      return null
     }
-    return this.tagMemo.getStats()
   }
 
   /**
-   * 获取 TagMemo 服务实例 (用于高级操作)
+   * 获取 TagMemo 服务实例
    */
-  public getTagMemoService(): TagMemoService {
-    if (!this.tagMemo) {
-      this.tagMemo = getTagMemoService()
-    }
-    return this.tagMemo
+  public getTagMemoService() {
+    return this.storage?.getTagMemoService() || null
   }
 }
 

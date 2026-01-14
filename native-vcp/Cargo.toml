@@ -1,0 +1,60 @@
+[package]
+name = "native-vcp"
+version = "1.0.0"
+edition = "2021"
+description = "Native VCP runtime for Cherry Studio - High-performance memory, RAG, and database operations"
+authors = ["Cherry Studio Team"]
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Node.js 绑定
+napi = { version = "2", default-features = false, features = ["napi4", "async", "serde-json"] }
+napi-derive = "2"
+
+# 序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+
+# 数据库
+rusqlite = { version = "0.32", features = ["bundled", "vtab", "functions", "serde_json"] }
+
+# 全文搜索 (tantivy + jieba中文分词)
+tantivy = "0.22"
+jieba-rs = "0.7"
+
+# HNSW 向量索引 (从 VCP rust-vexus-lite 移植)
+usearch = "2.8"
+
+# 向量运算
+ndarray = "0.16"
+simsimd = "5"
+
+# 高性能哈希 (从 VCP 移植)
+hashbrown = "0.14"
+
+# 异步运行时
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time"] }
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+
+# 工具
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+parking_lot = "0.12"
+once_cell = "1.19"
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+strip = true

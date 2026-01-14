@@ -2,7 +2,6 @@
 import type { LogContextData, LogLevel, LogSourceWithContext } from '@shared/config/logger'
 import { LEVEL, LEVEL_MAP } from '@shared/config/logger'
 import { IpcChannel } from '@shared/IpcChannel'
-import { app, ipcMain } from 'electron'
 import os from 'os'
 import path from 'path'
 import winston from 'winston'
@@ -10,6 +9,18 @@ import DailyRotateFile from 'winston-daily-rotate-file'
 import { isMainThread } from 'worker_threads'
 
 import { isDev } from '../constant'
+
+// 延迟导入 electron 以避免模块加载时 electron 未初始化
+let electronApp: typeof import('electron').app | undefined
+let electronIpcMain: typeof import('electron').ipcMain | undefined
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const electron = require('electron')
+  electronApp = electron.app
+  electronIpcMain = electron.ipcMain
+} catch {
+  // electron 未就绪
+}
 
 const ANSICOLORS = {
   RED: '\x1b[31m',
@@ -38,7 +49,7 @@ const SYSTEM_INFO = {
   os: `${os.platform()}-${os.arch()} / ${os.version()}`,
   hw: `${os.cpus()[0]?.model || 'Unknown CPU'} / ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)}GB`
 }
-const APP_VERSION = `${app?.getVersion?.() || 'unknown'}`
+const APP_VERSION = `${electronApp?.getVersion?.() || 'unknown'}`
 
 const DEFAULT_LEVEL = isDev ? LEVEL.SILLY : LEVEL.INFO
 
@@ -67,7 +78,17 @@ class LoggerService {
     }
 
     // Create logs directory path
-    this.logsDir = path.join(app.getPath('userData'), 'logs')
+    // 延迟获取 userData 路径以避免 electron.app 未就绪的问题
+    try {
+      if (electronApp) {
+        this.logsDir = path.join(electronApp.getPath('userData'), 'logs')
+      } else {
+        throw new Error('electronApp not available')
+      }
+    } catch {
+      // Fallback: 在 app ready 前使用临时路径
+      this.logsDir = path.join(os.tmpdir(), 'cherry-studio-logs')
+    }
 
     // env variables, only used in dev mode
     // only affect console output, not affect file output
@@ -379,7 +400,11 @@ class LoggerService {
    * Register IPC handler for renderer process logging
    */
   private registerIpcHandler(): void {
-    ipcMain.handle(
+    if (!electronIpcMain) {
+      // IPC not available yet, skip registration
+      return
+    }
+    electronIpcMain.handle(
       IpcChannel.App_LogToMain,
       (_, source: LogSourceWithContext, level: LogLevel, message: string, data: any[]) => {
         this.processRendererLog(source, level, message, data)

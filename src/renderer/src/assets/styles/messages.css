@@ -1,0 +1,639 @@
+/**
+ * Cherry Studio Message Styles
+ *
+ * 消息系统增强样式 - 灵感来自 VCPChat
+ * - 消息气泡效果
+ * - 用户/助手区分
+ * - 流式消息动画
+ * - 头像和头部样式
+ * - 代码块增强
+ */
+
+/* ============ 消息容器基础样式 ============ */
+.message {
+  position: relative;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  transition:
+    background-color 0.3s ease,
+    backdrop-filter 0.3s ease;
+}
+
+/* 悬停效果 - 毛玻璃融入壁纸 */
+.message:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* 深色主题悬停 */
+body[theme='dark'] .message:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* 浅色主题悬停 */
+body[theme='light'] .message:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 高亮动画 - 透明边框效果 */
+.message.animation-locate-highlight {
+  animation: message-highlight 1.5s ease-out;
+}
+
+@keyframes message-highlight {
+  0% {
+    background-color: rgba(0, 210, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(0, 210, 255, 0.3);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* ============ 消息头部样式 ============ */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.message-header .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* 助手头像动态边框色 */
+.message-assistant .message-header .avatar {
+  border-color: var(--color-primary);
+}
+
+/* 用户头像边框 */
+.message-user .message-header .avatar {
+  border-color: var(--color-border);
+}
+
+.message-header .sender-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.message-header .sender-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.message-assistant .message-header .sender-name {
+  color: var(--color-primary);
+}
+
+.message-header .message-time {
+  font-size: 11px;
+  color: var(--color-text-3);
+  opacity: 0.8;
+}
+
+/* ============ 消息内容容器样式 ============ */
+.message-content-container {
+  position: relative;
+}
+
+/* ============ 聊天气泡装饰样式 ============ */
+/* 壁纸启用时的聊天气泡效果 - 仅在 chat-bubble-decoration-enabled 类存在时生效 */
+body.wallpaper-enabled.chat-bubble-decoration-enabled .bubble:not(.multi-select-mode) .message-user .message-content-container {
+  position: relative;
+  box-shadow: var(--chat-bubble-shadow);
+  transition:
+    background-color var(--transition-duration) var(--transition-easing),
+    box-shadow var(--transition-duration) var(--transition-easing);
+}
+
+/* 装饰性底部强调线 - 仅在 chat-bubble-accent-line-enabled 类存在时生效 */
+body.wallpaper-enabled.chat-bubble-decoration-enabled.chat-bubble-accent-line-enabled .bubble:not(.multi-select-mode) .message-user .message-content-container::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  right: 12px;
+  width: clamp(20px, 15%, 35px);
+  height: 2.5px;
+  background-color: var(--chat-bubble-accent-line-color);
+  border-radius: 2px;
+  opacity: 0.6;
+  transition:
+    background-color var(--transition-duration) var(--transition-easing),
+    opacity var(--transition-duration) var(--transition-easing);
+}
+
+body.wallpaper-enabled.chat-bubble-decoration-enabled.chat-bubble-accent-line-enabled .bubble:not(.multi-select-mode) .message-user .message-content-container:hover::after {
+  opacity: 0.85;
+}
+
+/* 装饰性边框叠加层 */
+body.wallpaper-enabled.chat-bubble-decoration-enabled.chat-bubble-accent-line-enabled .bubble:not(.multi-select-mode) .message-user .message-content-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--chat-bubble-accent-line-color);
+  pointer-events: none;
+  opacity: 0.4;
+  transition: opacity var(--transition-duration) var(--transition-easing);
+}
+
+body.wallpaper-enabled.chat-bubble-decoration-enabled.chat-bubble-accent-line-enabled .bubble:not(.multi-select-mode) .message-user .message-content-container:hover::before {
+  opacity: 0.7;
+}
+
+/* 消息气泡效果 (可选开启) - 毛玻璃效果融入壁纸 */
+.message-bubble-style .message-content-container {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-left: 0;
+}
+
+.message-bubble-style .message-user .message-content-container {
+  background: rgba(0, 120, 212, 0.08);
+  border-color: rgba(0, 120, 212, 0.15);
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble-style .message-assistant .message-content-container {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+  border-bottom-left-radius: 4px;
+}
+
+/* 浅色主题气泡 */
+body[theme='light'] .message-bubble-style .message-content-container {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body[theme='light'] .message-bubble-style .message-user .message-content-container {
+  background: rgba(0, 120, 212, 0.08);
+  border-color: rgba(0, 120, 212, 0.15);
+}
+
+body[theme='light'] .message-bubble-style .message-assistant .message-content-container {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ============ 流式消息样式 ============ */
+.message-streaming .message-content-container {
+  position: relative;
+}
+
+/* 流式消息边框脉冲效果 - 微妙透明 */
+.message-streaming .message-content-container::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  border-radius: 12px;
+  opacity: 0.5;
+  animation: streaming-border-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes streaming-border-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    border-color: rgba(0, 210, 255, 0.15);
+  }
+  50% {
+    opacity: 0.6;
+    border-color: rgba(0, 210, 255, 0.3);
+  }
+}
+
+/* 流式消息内容渐入效果 */
+.message-streaming .markdown > *:last-child {
+  animation: content-fade-in 0.3s ease-out;
+}
+
+@keyframes content-fade-in {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 流式消息思考指示器 - 透明效果 */
+.message-streaming .thinking-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 210, 255, 0.08);
+  border: 1px solid rgba(0, 210, 255, 0.15);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.message-streaming .thinking-indicator .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: thinking-bounce 1.4s ease-in-out infinite;
+}
+
+.message-streaming .thinking-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.message-streaming .thinking-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinking-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============ 消息菜单栏样式 ============ */
+.MessageFooter {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message:hover .MessageFooter {
+  opacity: 1;
+}
+
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.menubar .action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menubar .action-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+}
+
+body[theme='light'] .menubar .action-button:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.menubar .action-button:active {
+  transform: scale(0.95);
+}
+
+/* ============ Markdown 内容增强 ============ */
+/* 代码块增强 - 透明玻璃效果 */
+.markdown pre {
+  position: relative;
+  margin: 1em 0;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown pre::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* 浅色主题代码块 */
+body[theme='light'] .markdown pre {
+  background: rgba(245, 245, 245, 0.7);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body[theme='light'] .markdown pre::before {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
+}
+
+/* 代码块语言标签 */
+.markdown pre[data-language]::after {
+  content: attr(data-language);
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+}
+
+/* 行内代码增强 - 透明玻璃效果 */
+.markdown p code,
+.markdown li code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 浅色主题行内代码 */
+body[theme='light'] .markdown p code,
+body[theme='light'] .markdown li code {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 引用块增强 - 透明渐变 */
+.markdown blockquote {
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 210, 255, 0.05) 0%, transparent 100%);
+  border-left: 3px solid rgba(0, 210, 255, 0.5);
+  padding: 12px 16px;
+  margin: 1em 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.markdown blockquote::before {
+  content: '"';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  font-size: 48px;
+  color: var(--color-primary);
+  opacity: 0.15;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+/* 表格增强 - 透明玻璃效果 */
+.markdown table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1.5em 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.markdown th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.markdown tr:last-child td {
+  border-bottom: none;
+}
+
+.markdown tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* 浅色主题表格 */
+body[theme='light'] .markdown table {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body[theme='light'] .markdown th {
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+body[theme='light'] .markdown td {
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+body[theme='light'] .markdown tr:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* 链接增强 */
+.markdown a {
+  color: var(--color-link);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-link);
+  transition: all 0.2s ease;
+}
+
+.markdown a:hover {
+  border-bottom-style: solid;
+  color: var(--color-primary);
+}
+
+/* 列表增强 */
+.markdown ul,
+.markdown ol {
+  padding-left: 1.5em;
+}
+
+.markdown li {
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.markdown li::marker {
+  color: var(--color-primary);
+}
+
+/* ============ 图片增强 ============ */
+.markdown img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.markdown img:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ============ 分隔线增强 ============ */
+.markdown hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  margin: 2em 0;
+}
+
+/* ============ 新上下文分隔线 ============ */
+.clear-context-divider {
+  margin: 24px 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clear-context-divider:hover {
+  opacity: 0.8;
+}
+
+.clear-context-divider .ant-divider {
+  color: var(--color-text-3);
+  font-size: 12px;
+}
+
+.clear-context-divider .ant-divider::before,
+.clear-context-divider .ant-divider::after {
+  border-color: var(--color-border);
+}
+
+/* ============ 消息选择模式 ============ */
+.message-select-mode .message {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message-select-mode .message:hover {
+  background: rgba(0, 120, 212, 0.08);
+}
+
+.message-select-mode .message.selected {
+  background: rgba(0, 120, 212, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 120, 212, 0.4);
+}
+
+/* ============ 错误消息样式 ============ */
+.message-error {
+  border-left: 3px solid rgba(255, 77, 79, 0.6);
+  padding-left: 12px;
+}
+
+.message-error .message-content-container {
+  background: rgba(255, 77, 79, 0.05);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ============ 系统消息样式 ============ */
+.message-system {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.message-system .message-content-container {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 16px;
+  font-size: 13px;
+  color: var(--color-text-2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body[theme='light'] .message-system .message-content-container {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ============ 响应式调整 ============ */
+@media (max-width: 768px) {
+  .message-content-container {
+    padding-left: 36px !important;
+  }
+
+  .message-header .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .markdown pre {
+    font-size: 13px;
+  }
+}
+
+/* ============ 暗色主题增强 ============ */
+body[theme='dark'] .markdown pre {
+  background: rgba(26, 26, 26, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body[theme='dark'] .markdown blockquote {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+}
+
+body[theme='dark'] .markdown table {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body[theme='dark'] .markdown th {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body[theme='dark'] .markdown img {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ============ 打印样式 ============ */
+@media print {
+  .message {
+    break-inside: avoid;
+  }
+
+  .MessageFooter,
+  .menubar {
+    display: none !important;
+  }
+
+  .markdown pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}

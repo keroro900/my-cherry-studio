@@ -10,21 +10,24 @@ import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import { ErrorBoundary } from '@renderer/components/ErrorBoundary'
 import { useNavbarPosition } from '@renderer/hooks/useSettings'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import { createWorkflow, setEdges, setNodes } from '@renderer/store/workflow'
+import { createWorkflow, setEdges, setNodes, setSelectedNodeId, updateNode } from '@renderer/store/workflow'
 import { message, Modal } from 'antd'
 import { debounce } from 'lodash'
 import { ChevronLeft, ChevronRight, Layers, Settings2 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import WorkflowCanvas from './components/Canvas/WorkflowCanvas'
+import ConfigFloatingPanel from './components/Panels/ConfigFloatingPanel'
 import ConfigPanel from './components/Panels/ConfigPanel'
 import NodePanel from './components/Panels/NodePanel'
 import StatusPanel from './components/Panels/StatusPanel'
+import Toolbar from './components/Panels/Toolbar'
 import WorkflowToolbar from './components/Toolbar/WorkflowToolbar'
 import WorkflowThemeProvider from './components/WorkflowThemeProvider'
 import { useWorkflow } from './hooks/useWorkflow'
 import { useWorkflowTheme } from './hooks/useWorkflowTheme'
+import { workflowExecutionService } from './services/WorkflowExecutionService'
 import { workflowStorage } from './services/WorkflowStorage'
 
 /**
@@ -37,9 +40,20 @@ export default function WorkflowPage() {
   const { currentThemeId } = useWorkflowTheme()
   const [isConfigCollapsed, setIsConfigCollapsed] = useState(false)
   const [isNodePanelCollapsed, setIsNodePanelCollapsed] = useState(false)
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
 
   // 从 Redux store 获取状态
-  const { showNodePanel, showConfigPanel, currentWorkflow, nodes, edges } = useAppSelector((state) => state.workflow)
+  const { showNodePanel, showConfigPanel, currentWorkflow, nodes, edges, selectedNodeId } = useAppSelector(
+    (state) => state.workflow
+  )
+
+  // 取消选中节点时关闭悬浮配置面板
+  // 注意：选中节点时不自动打开，需要点击设置按钮才打开
+  useEffect(() => {
+    if (!selectedNodeId) {
+      setIsConfigModalOpen(false)
+    }
+  }, [selectedNodeId])
 
   // 用于跟踪是否已检查过草稿恢复
   const hasCheckedDraft = useRef(false)
@@ -120,6 +134,114 @@ export default function WorkflowPage() {
       debouncedSaveDraft.cancel()
     }
   }, [nodes, edges, debouncedSaveDraft])
+
+  // 处理打开配置面板事件
+  const handleOpenConfig = useCallback(
+    (e: CustomEvent<{ nodeId: string }>) => {
+      const { nodeId } = e.detail
+      dispatch(setSelectedNodeId(nodeId))
+      if (!showConfigPanel) {
+        setIsConfigModalOpen(true)
+      }
+    },
+    [dispatch, showConfigPanel]
+  )
+
+  // 处理运行单个节点事件
+  const handleRunNode = useCallback(
+    async (e: CustomEvent<{ nodeId: string }>) => {
+      const { nodeId } = e.detail
+      const targetNode = nodes.find((n) => n.id === nodeId)
+
+      if (!targetNode) {
+        message.error('节点不存在')
+        return
+      }
+
+      message.loading({ content: `正在执行节点: ${targetNode.data.label}`, key: 'single-node-exec', duration: 0 })
+
+      try {
+        // 执行单个节点
+        const result = await workflowExecutionService.executeSingleNode(nodeId, nodes, edges, undefined, {
+          onNodeStatusChange: (id, status, errorMessage) => {
+            // 更新节点状态
+            dispatch(
+              updateNode({
+                id,
+                data: {
+                  status: status as 'idle' | 'running' | 'success' | 'error' | 'completed',
+                  errorMessage
+                }
+              })
+            )
+          },
+          onNodeOutput: async (id, outputs) => {
+            // 更新节点输出结果
+            dispatch(
+              updateNode({
+                id,
+                data: {
+                  result: outputs
+                }
+              })
+            )
+          },
+          onProgress: (_progress, progressMessage) => {
+            message.loading({ content: progressMessage, key: 'single-node-exec', duration: 0 })
+          }
+        })
+
+        if (result.status === 'success') {
+          message.success({ content: `节点执行成功 (${result.duration}ms)`, key: 'single-node-exec' })
+        } else {
+          message.error({ content: `节点执行失败: ${result.errorMessage}`, key: 'single-node-exec' })
+        }
+      } catch (error) {
+        message.error({
+          content: `节点执行出错: ${error instanceof Error ? error.message : String(error)}`,
+          key: 'single-node-exec'
+        })
+      }
+    },
+    [dispatch, nodes, edges]
+  )
+
+  // 处理节点配置快速修改事件（从节点上的配置标签触发）
+  const handleUpdateNodeConfig = useCallback(
+    (e: CustomEvent<{ nodeId: string; key: string; value: any }>) => {
+      const { nodeId, key, value } = e.detail
+      // 获取当前节点
+      const node = nodes.find((n) => n.id === nodeId)
+      if (node) {
+        // 更新节点配置
+        dispatch(
+          updateNode({
+            id: nodeId,
+            data: {
+              config: {
+                ...node.data.config,
+                [key]: value
+              }
+            }
+          })
+        )
+      }
+    },
+    [dispatch, nodes]
+  )
+
+  // 监听节点自定义事件
+  useEffect(() => {
+    window.addEventListener('workflow:open-config', handleOpenConfig as EventListener)
+    window.addEventListener('workflow:run-node', handleRunNode as unknown as EventListener)
+    window.addEventListener('workflow:update-node-config', handleUpdateNodeConfig as EventListener)
+
+    return () => {
+      window.removeEventListener('workflow:open-config', handleOpenConfig as EventListener)
+      window.removeEventListener('workflow:run-node', handleRunNode as unknown as EventListener)
+      window.removeEventListener('workflow:update-node-config', handleUpdateNodeConfig as EventListener)
+    }
+  }, [handleOpenConfig, handleRunNode, handleUpdateNodeConfig])
 
   return (
     <ErrorBoundary>
@@ -215,6 +337,10 @@ export default function WorkflowPage() {
                     minHeight: 0
                   }}>
                   <WorkflowCanvas />
+                  {/* 浮动工具栏 - 底部中央 */}
+                  <FloatingToolbarContainer>
+                    <Toolbar />
+                  </FloatingToolbarContainer>
                 </div>
 
                 {/* 底部：状态面板 */}
@@ -280,6 +406,12 @@ export default function WorkflowPage() {
                 </div>
               )}
             </MainContent>
+
+            {/* 悬浮配置面板 - 当右侧边栏隐藏时使用 */}
+            <ConfigFloatingPanel
+              open={isConfigModalOpen && !showConfigPanel}
+              onClose={() => setIsConfigModalOpen(false)}
+            />
           </PageContainer>
         </Container>
       </WorkflowThemeProvider>
@@ -313,4 +445,13 @@ const MainContent = styled.div`
   flex: 1;
   overflow: hidden;
   min-height: 0;
+`
+
+const FloatingToolbarContainer = styled.div`
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: auto;
 `

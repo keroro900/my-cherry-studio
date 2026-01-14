@@ -120,8 +120,7 @@ export const PreprocessProviderIds = {
   doc2x: 'doc2x',
   mistral: 'mistral',
   mineru: 'mineru',
-  'open-mineru': 'open-mineru',
-  fashion: 'fashion'
+  'open-mineru': 'open-mineru'
 } as const
 
 export type PreprocessProviderId = keyof typeof PreprocessProviderIds
